@@ -1,3 +1,4 @@
+# === Unity Geçici ve Kilitlenen Klasörler ===
 /[Tt]emp/
 /[Oo]bj/
 /[Ll]og/
@@ -5,9 +6,18 @@
 /[Cc]leanup/
 /Library/
 /artifacts/
-/Jelly/
-/ProjectSettings/ProjectVersion.txt
 
-# OS generated files
+# === VS Code ve Editör Dosyaları ===
+/.vscode/
+/*.csproj
+/*.sln
+/*.userprefs
+
+# === İşletim Sistemi Çöpleri ===
 .DS_Store
+.DS_Store?
 Thumbs.db
+
+# === ÖNEMLİ NOT ===
+# ProjectSettings klasörünün tamamını engellemiyoruz, 
+# çünkü Unity'nin buraya ihtiyacı var. Sadece Temp ve Library uçuyor.

@@ -133,3 +133,17 @@
 [2026-07-04T20:26:07.635Z] [DEBUG] log Relay->Editor communication is unblocked
 [2026-07-04T20:26:07.635Z] [INFO] log Unity client connected with ID: editor-22116-jk6t4n (relay 1.0.12-build.96)
 [2026-07-04T20:26:07.635Z] [INFO] connection.established clientId=editor-22116-jk6t4n port=9001
+[2026-07-06T17:17:08.313Z] [INFO] relay.startup port=9001 mcpClientPort=9002 editorPid=28244
+[2026-07-06T17:17:08.313Z] [INFO] log === RELAY SERVER STARTED === (unity-ai-relay v1.0.12-build.96)
+[2026-07-06T17:17:08.314Z] [INFO] log Starting relay server...
+[2026-07-06T17:17:08.314Z] [INFO] log Command line arguments: ["bun","B:/~BUN/root/relay_win.exe","--relay","--port","9001","--mcp-client-port","9002","--editor-pid","28244","--shutdown-delay","180","--log-dir","S:\\Tayacknity\\Planet Boom\\Logs"]
+[2026-07-06T17:17:08.314Z] [INFO] log Parsed config: {"port":9001,"mcpClientPort":9002,"editorPid":"28244","shutdownDelaySeconds":180}
+[2026-07-06T17:17:08.314Z] [INFO] log Initializing relay components...
+[2026-07-06T17:17:08.315Z] [INFO] log Creating RelayEditor...
+[2026-07-06T17:17:08.320Z] [INFO] log WebSocket server started
+[2026-07-06T17:17:08.325Z] [INFO] log Relay server initialization completed
+[2026-07-06T17:17:08.325Z] [INFO] log MCP Client initialized at port: 9002
+[2026-07-06T17:17:08.336Z] [WARN] log [shell-env] Shell environment did not contain a PATH variable
+[2026-07-06T17:17:08.360Z] [INFO] log Unity MCP Relay server started | Port: 9002 | Endpoints: /mcp/start-server, /mcp/stop-server, /mcp/server-status, /mcp/call-tool
+[2026-07-06T17:17:08.858Z] [INFO] log Unity client connected with ID: editor-28244-w8chyz (relay 1.0.12-build.96)
+[2026-07-06T17:17:08.858Z] [INFO] connection.established clientId=editor-28244-w8chyz port=9001

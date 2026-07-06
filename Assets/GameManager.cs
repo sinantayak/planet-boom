@@ -8,7 +8,7 @@ using UnityEngine;
 [System.Serializable]
 public class BoomTarget
 {
-    public BubbleColor color;
+    public PlanetColor color;
     public int count = 1;
 }
 
@@ -19,7 +19,7 @@ public class LevelDefinition
 }
 
 // Owns the mission/level state and the Suika-style lose condition. Booms reach
-// it through NotifyBoom (called by BubbleMerge); everything else is self-driven.
+// it through NotifyBoom (called by PlanetMerge); everything else is self-driven.
 public class GameManager : MonoBehaviour
 {
     public enum GameState { Playing, GameOver }
@@ -36,13 +36,13 @@ public class GameManager : MonoBehaviour
     [SerializeField] private List<LevelDefinition> levels = new List<LevelDefinition>();
 
     [Header("Boundary / Lose Condition")]
-    // Defaults to the JellyCore's transform when left unassigned.
-    [SerializeField] private Transform coreCenter;
+    // Defaults to the BlackHole's transform when left unassigned.
+    [SerializeField] private Transform blackHoleCenter;
     [SerializeField] private float maxBoundaryRadius = 6f;
     [SerializeField] private float outsideTimeLimit = 2f;
 
     [Header("UI")]
-    // Countdown readout ("CRITICAL: 1.4s!") shown while at least one bubble is
+    // Countdown readout ("CRITICAL: 1.4s!") shown while at least one planet is
     // outside the boundary; hidden the rest of the time.
     public TextMeshProUGUI countdownText;
 
@@ -56,17 +56,17 @@ public class GameManager : MonoBehaviour
 
     // Read by BoundaryVisualizer so the drawn circle can never drift from the
     // radius the lose check actually enforces.
-    public Transform CoreCenter => coreCenter;
+    public Transform BlackHoleCenter => blackHoleCenter;
     public float MaxBoundaryRadius => maxBoundaryRadius;
 
     // Runtime copy of the current level's targets (see BoomTarget note).
     private readonly List<BoomTarget> remainingTargets = new List<BoomTarget>();
 
-    // Seconds each bubble has spent continuously outside the boundary. Entries
-    // are dropped the moment a bubble comes back inside, so the timer measures
+    // Seconds each planet has spent continuously outside the boundary. Entries
+    // are dropped the moment a planet comes back inside, so the timer measures
     // an unbroken stretch outside, not a lifetime total.
-    private readonly Dictionary<Bubble, float> outsideTimers = new Dictionary<Bubble, float>();
-    private readonly List<Bubble> staleTimerKeys = new List<Bubble>();
+    private readonly Dictionary<Planet, float> outsideTimers = new Dictionary<Planet, float>();
+    private readonly List<Planet> staleTimerKeys = new List<Planet>();
 
     void Awake()
     {
@@ -78,16 +78,16 @@ public class GameManager : MonoBehaviour
         }
         Instance = this;
 
-        if (coreCenter == null)
+        if (blackHoleCenter == null)
         {
-            JellyCore core = FindFirstObjectByType<JellyCore>();
-            if (core != null)
+            BlackHole blackHole = FindFirstObjectByType<BlackHole>();
+            if (blackHole != null)
             {
-                coreCenter = core.transform;
+                blackHoleCenter = blackHole.transform;
             }
             else
             {
-                Debug.LogWarning("GameManager: no CoreCenter assigned and no JellyCore found — boundary check disabled until one exists.");
+                Debug.LogWarning("GameManager: no BlackHoleCenter assigned and no BlackHole found — boundary check disabled until one exists.");
             }
         }
 
@@ -96,7 +96,7 @@ public class GameManager : MonoBehaviour
             BuildDefaultLevels();
         }
 
-        // Start hidden; FixedUpdate re-shows it whenever a bubble is outside.
+        // Start hidden; FixedUpdate re-shows it whenever a planet is outside.
         if (countdownText != null)
         {
             countdownText.gameObject.SetActive(false);
@@ -120,49 +120,49 @@ public class GameManager : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (State != GameState.Playing || coreCenter == null)
+        if (State != GameState.Playing || blackHoleCenter == null)
             return;
 
-        // Destroyed bubbles leave fake-null keys behind; sweep them first so
+        // Destroyed planets leave fake-null keys behind; sweep them first so
         // the dictionary can't grow forever.
         staleTimerKeys.Clear();
-        foreach (Bubble key in outsideTimers.Keys)
+        foreach (Planet key in outsideTimers.Keys)
         {
             if (key == null)
                 staleTimerKeys.Add(key);
         }
-        foreach (Bubble key in staleTimerKeys)
+        foreach (Planet key in staleTimerKeys)
         {
             outsideTimers.Remove(key);
         }
 
-        // The countdown UI shows the single most endangered bubble: the one
+        // The countdown UI shows the single most endangered planet: the one
         // with the longest unbroken stretch outside, i.e. the least time left.
         float worstTimer = -1f;
 
-        foreach (Bubble bubble in FindObjectsByType<Bubble>(FindObjectsSortMode.None))
+        foreach (Planet planet in FindObjectsByType<Planet>(FindObjectsSortMode.None))
         {
-            if (!bubble.gameObject.activeInHierarchy)
+            if (!planet.gameObject.activeInHierarchy)
                 continue;
 
-            // A bubble melting into a merge winner is already on its way out;
+            // A planet melting into a merge winner is already on its way out;
             // it must not be able to lose the game from beyond the line.
-            if (bubble.TryGetComponent(out BubbleMerge merge) && merge.IsBeingAbsorbed)
+            if (planet.TryGetComponent(out PlanetMerge merge) && merge.IsBeingAbsorbed)
             {
-                outsideTimers.Remove(bubble);
+                outsideTimers.Remove(planet);
                 continue;
             }
 
-            float distance = Vector2.Distance(bubble.transform.position, coreCenter.position);
+            float distance = Vector2.Distance(planet.transform.position, blackHoleCenter.position);
             if (distance <= maxBoundaryRadius)
             {
-                outsideTimers.Remove(bubble);
+                outsideTimers.Remove(planet);
                 continue;
             }
 
-            outsideTimers.TryGetValue(bubble, out float timer);
+            outsideTimers.TryGetValue(planet, out float timer);
             timer += Time.fixedDeltaTime;
-            outsideTimers[bubble] = timer;
+            outsideTimers[planet] = timer;
 
             if (timer > worstTimer)
             {
@@ -171,7 +171,7 @@ public class GameManager : MonoBehaviour
 
             if (timer >= outsideTimeLimit)
             {
-                TriggerGameOver(bubble, distance);
+                TriggerGameOver(planet, distance);
                 return;
             }
         }
@@ -179,7 +179,7 @@ public class GameManager : MonoBehaviour
         UpdateCountdownUI(worstTimer);
     }
 
-    // worstTimer < 0 means no bubble is outside this step → hide the readout.
+    // worstTimer < 0 means no planet is outside this step → hide the readout.
     private void UpdateCountdownUI(float worstTimer)
     {
         if (countdownText == null)
@@ -196,8 +196,8 @@ public class GameManager : MonoBehaviour
         countdownText.text = $"CRITICAL: {remaining:F1}s!";
     }
 
-    // Called by BubbleMerge after a max-level BOOM has claimed its victims.
-    public void NotifyBoom(BubbleColor color)
+    // Called by PlanetMerge after a max-level BOOM has claimed its victims.
+    public void NotifyBoom(PlanetColor color)
     {
         if (State != GameState.Playing)
             return;
@@ -271,23 +271,23 @@ public class GameManager : MonoBehaviour
     private void ClearBoard()
     {
         int cleared = 0;
-        foreach (Bubble bubble in FindObjectsByType<Bubble>(FindObjectsSortMode.None))
+        foreach (Planet planet in FindObjectsByType<Planet>(FindObjectsSortMode.None))
         {
             // Same guarantee TriggerBoom gives its victims: out of the merge
             // system first, then the deferred Destroy.
-            if (bubble.TryGetComponent(out BubbleMerge merge))
+            if (planet.TryGetComponent(out PlanetMerge merge))
             {
                 merge.PrepareForDespawn();
             }
-            Destroy(bubble.gameObject);
+            Destroy(planet.gameObject);
             cleared++;
         }
 
         outsideTimers.Clear();
-        Debug.Log($"GameManager: board cleared ({cleared} bubbles removed).");
+        Debug.Log($"GameManager: board cleared ({cleared} planets removed).");
     }
 
-    private void TriggerGameOver(Bubble offender, float distance)
+    private void TriggerGameOver(Planet offender, float distance)
     {
         State = GameState.GameOver;
 
@@ -303,7 +303,7 @@ public class GameManager : MonoBehaviour
         }
 
         Debug.Log($"GameManager: GAME OVER on level {CurrentLevelNumber} — a {offender.CurrentColor} " +
-                  $"bubble stayed {outsideTimeLimit:F1}s outside the boundary " +
+                  $"planet stayed {outsideTimeLimit:F1}s outside the boundary " +
                   $"(distance {distance:F2} > radius {maxBoundaryRadius:F2}).");
     }
 
@@ -335,14 +335,14 @@ public class GameManager : MonoBehaviour
     {
         levels.Add(new LevelDefinition
         {
-            targets = { new BoomTarget { color = BubbleColor.Yellow, count = 3 } }
+            targets = { new BoomTarget { color = PlanetColor.Yellow, count = 3 } }
         });
         levels.Add(new LevelDefinition
         {
             targets =
             {
-                new BoomTarget { color = BubbleColor.Yellow, count = 3 },
-                new BoomTarget { color = BubbleColor.Blue, count = 1 }
+                new BoomTarget { color = PlanetColor.Yellow, count = 3 },
+                new BoomTarget { color = PlanetColor.Blue, count = 1 }
             }
         });
         Debug.Log("GameManager: no levels authored in the Inspector — using built-in defaults.");
@@ -365,7 +365,7 @@ public class GameManager : MonoBehaviour
 
     void OnDrawGizmosSelected()
     {
-        Transform center = coreCenter != null ? coreCenter : transform;
+        Transform center = blackHoleCenter != null ? blackHoleCenter : transform;
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(center.position, maxBoundaryRadius);
     }

@@ -158,9 +158,9 @@ public class BoundaryVisualizer : MonoBehaviour
     private bool TryGetBoundary(out Vector3 center, out float radius)
     {
         GameManager manager = GameManager.Instance;
-        if (manager != null && manager.CoreCenter != null)
+        if (manager != null && manager.BlackHoleCenter != null)
         {
-            center = manager.CoreCenter.position;
+            center = manager.BlackHoleCenter.position;
             radius = manager.MaxBoundaryRadius;
             return true;
         }
