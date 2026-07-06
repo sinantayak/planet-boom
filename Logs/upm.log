@@ -43,3 +43,20 @@ params: {
 }
 [2026-07-06T17:16:54.706Z][INFO] project:list-packages --> 200 (2223 ms)
 [2026-07-06T17:16:54.712Z][INFO] packages:get-packageinfo --> 200 (86 ms)
+[2026-07-06T19:59:44.447Z][INFO] project:list-packages <-- Request received
+params: {}
+[2026-07-06T19:59:44.697Z][INFO] project:list-packages --> 200 (254 ms)
+[2026-07-06T19:59:45.082Z][INFO] project:list-packages <-- Request received
+params: {}
+[2026-07-06T19:59:45.266Z][INFO] project:list-packages --> 200 (184 ms)
+[2026-07-06T19:59:45.570Z][INFO] config:project:get-registries <-- Request received
+params: {}
+[2026-07-06T19:59:45.573Z][INFO] config:project:get-registries --> 200 (3 ms)
+[2026-07-06T19:59:46.837Z][INFO] project:list-packages <-- Request received
+params: {}
+[2026-07-06T19:59:47.695Z][INFO] packages:get-packageinfo <-- Request received
+params: {
+  "packageId": "com.unity.ai.assistant"
+}
+[2026-07-06T19:59:47.715Z][INFO] packages:get-packageinfo --> 200 (20 ms)
+[2026-07-06T19:59:48.958Z][INFO] project:list-packages --> 200 (2122 ms)

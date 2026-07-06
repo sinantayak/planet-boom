@@ -8,6 +8,14 @@ public class PlanetLauncher : MonoBehaviour
     [SerializeField] private float spawnPositionJitter = 0.05f;
     [SerializeField] private float maxSpinTorque = 5f;
 
+    [Header("Spawn Tiers")]
+    // Highest tier the launcher will ever put in the queue: shots are drawn
+    // uniformly from Tier1..highestSpawnTier. Kept low (Suika-style) so the
+    // upper tiers can only be reached by merging; raise it to seed bigger
+    // planets directly. PlanetMerge snaps spawned planets onto the tier
+    // growth curve, so a spawned Tier2 matches a merged-up Tier2 in size.
+    [SerializeField] private PlanetTier highestSpawnTier = PlanetTier.Tier2;
+
     [Header("Aim Dots")]
     [SerializeField] private GameObject dotPrefab;
     [SerializeField] private float dotSpacing = 0.25f;
@@ -24,16 +32,13 @@ public class PlanetLauncher : MonoBehaviour
 
     [Header("Skills")]
     // Skill hook: while true, the next launched planet is a wildcard that adopts
-    // the color of whatever planet it touches first. Consumed on launch.
+    // the tier of whatever planet it touches first. Consumed on launch.
     public bool isRainbowActive;
 
-    // Preview state: CurrentColor is what the next click fires; NextColor is what
+    // Preview state: CurrentTier is what the next click fires; NextTier is what
     // follows it (shown in UI later). Both readable by UI code, set only here.
-    public PlanetColor CurrentColor { get; private set; }
-    public PlanetColor NextColor { get; private set; }
-
-    private static readonly PlanetColor[] AllColors =
-        (PlanetColor[])System.Enum.GetValues(typeof(PlanetColor));
+    public PlanetTier CurrentTier { get; private set; }
+    public PlanetTier NextTier { get; private set; }
 
     private BlackHole blackHole;
 
@@ -57,8 +62,8 @@ public class PlanetLauncher : MonoBehaviour
 
     void Awake()
     {
-        CurrentColor = PickRandomColor();
-        NextColor = PickRandomColor();
+        CurrentTier = PickRandomSpawnTier();
+        NextTier = PickRandomSpawnTier();
         blackHole = FindFirstObjectByType<BlackHole>();
         InitializeDotPool();
     }
@@ -157,16 +162,15 @@ public class PlanetLauncher : MonoBehaviour
             planet = planetObject.AddComponent<Planet>();
         }
 
-        planet.SetColor(CurrentColor);
-
-        // Every shot enters play at tier 1, even if the prefab was saved with a
-        // higher Level baked in; only merging is allowed to raise it.
-        planet.Level = 1;
+        // The queued tier overrides whatever tier was baked into the prefab;
+        // only merging is allowed to raise it beyond this. PlanetMerge.Start
+        // (which runs after this call) sizes the planet for its spawn tier.
+        planet.SetTier(CurrentTier);
 
         if (isRainbowActive)
         {
             // Skill hook: mark the spawned planet as a wildcard here once
-            // Planet/PlanetMerge grow rainbow support (adopt color on first touch).
+            // Planet/PlanetMerge grow rainbow support (adopt tier on first touch).
             isRainbowActive = false;
         }
 
@@ -184,15 +188,15 @@ public class PlanetLauncher : MonoBehaviour
             Debug.LogWarning("PlanetLauncher: planet prefab has no Rigidbody2D.");
         }
 
-        // Advance the queue: the previewed color becomes live, and a fresh one is
+        // Advance the queue: the previewed tier becomes live, and a fresh one is
         // drawn for the preview slot.
-        CurrentColor = NextColor;
-        NextColor = PickRandomColor();
+        CurrentTier = NextTier;
+        NextTier = PickRandomSpawnTier();
     }
 
-    private PlanetColor PickRandomColor()
+    private PlanetTier PickRandomSpawnTier()
     {
-        return AllColors[Random.Range(0, AllColors.Length)];
+        return (PlanetTier)Random.Range(0, (int)highestSpawnTier + 1);
     }
 
     private void UpdateAimLine()
@@ -258,7 +262,9 @@ public class PlanetLauncher : MonoBehaviour
 
         // Second pass: activate and place pooled dots now that the total count
         // is known, so the size/alpha taper spans the whole visible path.
-        Color liveColor = PlanetColorPalette.ToUnityColor(CurrentColor);
+        // Dots use the tier's UI accent color — the planet sprites themselves
+        // are never tinted.
+        Color liveColor = PlanetTierPalette.GetAccentColor(CurrentTier);
         int dotCount = Mathf.Min(dotPositions.Count, activeDots.Count);
 
         for (int i = 0; i < dotCount; i++)

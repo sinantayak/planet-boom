@@ -1,20 +1,27 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(Planet))]
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(CircleCollider2D))]
 public class PlanetMerge : MonoBehaviour
 {
-    // Two planets at this level don't level up — they trigger the BOOM chain
-    // explosion instead (both die + every same-color planet in the scene).
-    [SerializeField] private int maxLevel = 3;
+    // Two planets at this tier don't merge into the next tier — they trigger
+    // the BOOM chain explosion instead (both die + every same-tier planet in
+    // the scene). Tier4 caps gameplay to the first 4 tiers for now; raise it
+    // (up to Tier8) once more of the sprite ladder is in play.
+    // Old saves stored this as the int "maxLevel"; the value carries over
+    // (3 → Tier4) because enums serialize as their int value.
+    [FormerlySerializedAs("maxLevel")]
+    [SerializeField] private PlanetTier maxTier = PlanetTier.Tier4;
 
     // Fractional size gain per tier, applied to the planet's OWN spawn scale:
-    // each level is (1 + growthPerLevel) times the size of the level below it,
+    // each tier is (1 + growthPerTier) times the size of the tier below it,
     // whatever scale the prefab/instance was authored at. 0.15 → each tier is
     // a subtle 15% larger than the previous one.
-    [SerializeField] private float growthPerLevel = 0.15f;
+    [FormerlySerializedAs("growthPerLevel")]
+    [SerializeField] private float growthPerTier = 0.15f;
     [SerializeField] private float touchDistanceMultiplier = 1.05f;
     [SerializeField] private float fusionDuration = 0.25f;
     [SerializeField] private float stretchAmount = 0.35f;
@@ -25,8 +32,8 @@ public class PlanetMerge : MonoBehaviour
     private bool hasMerged;
     private float baseColliderRadius;
 
-    // The tier-1 scale this planet spawned with, captured before any merging.
-    // All level growth is computed relative to this, so shrinking or enlarging
+    // The Tier1 scale this planet spawned with, captured before any merging.
+    // All tier growth is computed relative to this, so shrinking or enlarging
     // the prefab (or the instance in the editor) never changes the growth feel.
     private float tierOneScale;
 
@@ -43,14 +50,17 @@ public class PlanetMerge : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         circleCollider = GetComponent<CircleCollider2D>();
         baseColliderRadius = circleCollider.radius;
+
+        // The authored scale is treated as the Tier1 baseline; Start() below
+        // grows it if this planet actually enters play at a higher tier.
         tierOneScale = transform.localScale.x;
     }
 
-    // Compound growth: level 1 = spawn scale, level 2 = +15%, level 3 = +15%
-    // on top of level 2 (with the default growthPerLevel of 0.15).
-    private float ScaleForLevel(int level)
+    // Compound growth: Tier1 = spawn scale, Tier2 = +15%, Tier3 = +15%
+    // on top of Tier2 (with the default growthPerTier of 0.15).
+    private float ScaleForTier(PlanetTier tier)
     {
-        return tierOneScale * Mathf.Pow(1f + growthPerLevel, level - 1);
+        return tierOneScale * Mathf.Pow(1f + growthPerTier, (int)tier);
     }
 
     void Start()
@@ -60,6 +70,15 @@ public class PlanetMerge : MonoBehaviour
         // relative velocity next to each other. Staying awake is what lets the
         // proximity check below keep running every physics step regardless of speed.
         rb.sleepMode = RigidbodySleepMode2D.NeverSleep;
+
+        // The launcher may spawn planets above Tier1 (see PlanetLauncher's
+        // highestSpawnTier). Start runs after the launcher's same-frame SetTier
+        // call, so this snaps the spawn scale onto the tier growth curve — a
+        // spawned Tier2 is exactly the size a merged-up Tier2 would be.
+        if (planet.CurrentTier != PlanetTier.Tier1)
+        {
+            transform.localScale = Vector3.one * ScaleForTier(planet.CurrentTier);
+        }
     }
 
     void FixedUpdate()
@@ -87,7 +106,7 @@ public class PlanetMerge : MonoBehaviour
         TryMergeWith(collision.gameObject);
     }
 
-    // Bypasses Unity's collision events entirely: any same-color planet whose
+    // Bypasses Unity's collision events entirely: any same-tier planet whose
     // center is within (sum of radii * touchDistanceMultiplier) merges instantly,
     // regardless of relative velocity or whether a collision event ever fired.
     private void CheckProximityMerge()
@@ -99,8 +118,7 @@ public class PlanetMerge : MonoBehaviour
             if (otherPlanet == planet || !otherPlanet.gameObject.activeInHierarchy)
                 continue;
 
-            if (otherPlanet.CurrentColor != planet.CurrentColor ||
-                otherPlanet.Level != planet.Level)
+            if (otherPlanet.CurrentTier != planet.CurrentTier)
                 continue;
 
             if (!otherPlanet.TryGetComponent(out CircleCollider2D otherCollider))
@@ -123,9 +141,8 @@ public class PlanetMerge : MonoBehaviour
         if (!other.TryGetComponent(out Planet otherPlanet))
             return false;
 
-        // 2048/Suika rule: only an exact color AND level match can merge.
-        if (otherPlanet.CurrentColor != planet.CurrentColor ||
-            otherPlanet.Level != planet.Level)
+        // 2048/Suika rule: only an exact tier match can merge.
+        if (otherPlanet.CurrentTier != planet.CurrentTier)
             return false;
 
         // A planet already melting into someone (or busy pulling one in) is spoken
@@ -142,8 +159,8 @@ public class PlanetMerge : MonoBehaviour
 
         hasMerged = true;
 
-        // Two max-level planets don't produce a bigger planet — they detonate.
-        if (planet.Level >= maxLevel)
+        // Two max-tier planets don't produce a bigger planet — they detonate.
+        if (planet.CurrentTier >= maxTier)
         {
             TriggerBoom(otherMerge);
             return true;
@@ -152,20 +169,23 @@ public class PlanetMerge : MonoBehaviour
         isAbsorbing = true;
         otherMerge.BeginBeingAbsorbed();
 
-        planet.Level += 1;
+        // Tier1 + Tier1 → Tier2, and so on; SetTier also swaps in the next
+        // tier's sprite, so the winner visually becomes the new planet as the
+        // loser melts into it.
+        planet.SetTier(planet.CurrentTier + 1);
         StartCoroutine(FuseWith(otherMerge));
         return true;
     }
 
-    // BOOM: both max-level planets die, and the blast chains to every other
-    // active planet of the same color anywhere in the scene. Everything caught
+    // BOOM: both max-tier planets die, and the blast chains to every other
+    // active planet of the same tier anywhere in the scene. Everything caught
     // in the blast is flagged absorbed *before* the deferred Destroy lands, so
     // no other planet's collision/proximity check can start a fusion with a
     // corpse during the remainder of this physics step.
     private void TriggerBoom(PlanetMerge partner)
     {
-        PlanetColor boomColor = planet.CurrentColor;
-        Debug.Log($"BOOM! {boomColor} chain explosion at {transform.position}.");
+        PlanetTier boomTier = planet.CurrentTier;
+        Debug.Log($"BOOM! {boomTier} chain explosion at {transform.position}.");
 
         // Take the two detonators out of the merge system immediately.
         BeginBeingAbsorbed();
@@ -173,9 +193,9 @@ public class PlanetMerge : MonoBehaviour
 
         foreach (Planet victim in FindObjectsByType<Planet>(FindObjectsSortMode.None))
         {
-            // Same color only — the two trigger planets are swept up by this
+            // Same tier only — the two trigger planets are swept up by this
             // same loop, so no separate Destroy for self/partner is needed.
-            if (victim.CurrentColor != boomColor || !victim.gameObject.activeInHierarchy)
+            if (victim.CurrentTier != boomTier || !victim.gameObject.activeInHierarchy)
                 continue;
 
             if (victim.TryGetComponent(out PlanetMerge victimMerge))
@@ -191,7 +211,7 @@ public class PlanetMerge : MonoBehaviour
         // board, and that must not interleave with the destroy loop above.
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.NotifyBoom(boomColor);
+            GameManager.Instance.NotifyBoom(boomTier);
         }
     }
 
@@ -219,7 +239,7 @@ public class PlanetMerge : MonoBehaviour
     private IEnumerator FuseWith(PlanetMerge loser)
     {
         float startScale = transform.localScale.x;
-        float targetScale = ScaleForLevel(planet.Level);
+        float targetScale = ScaleForTier(planet.CurrentTier);
         Vector3 loserStartScale = loser.transform.localScale;
         float elapsed = 0f;
 

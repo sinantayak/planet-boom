@@ -351,3 +351,161 @@ Importing 'GUID: 8c9cfa26abfee488c85f1582747f6a02 - Path: Assets/Scenes/SampleSc
 Imported 'GUID: 8c9cfa26abfee488c85f1582747f6a02' -> (Import Result ID: 'db9beb7ce5103c62daf1d6156b3ca292') in 0.004 seconds [static and dynamic dependencies]. Details - ImportResultOutputID=0047a4239568a669e5abd4667aedb0c3 DependenciesID=58a82cb3546529829063024a4a62a5cf StaticDependenciesID=0c264a8ffa2f2328cf35d172d4d59ed5 
 Number of updated asset objects reloaded before import = 0
 Number of asset objects unloaded after import = 1
+========================================================================
+Received Import Request.
+  Time of request: 2026-07-06T19:41:09.7914902Z
+  Time since last request: 2731.78052849999995 seconds.
+  importAddress: GUID: 0f8cb7e347387dc48b47f0609cdd2846 - Path: Assets/Planet Icons/Planet8.png - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B
+Importing 'GUID: 0f8cb7e347387dc48b47f0609cdd2846 - Path: Assets/Planet Icons/Planet8.png - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B' with importer (ScriptedImporter : UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B)
+Imported 'GUID: 0f8cb7e347387dc48b47f0609cdd2846' -> (Import Result ID: 'c63836c727e258f44f1c804be2d340ce') in 0.266 seconds [static and dynamic dependencies]. Details - ImportResultOutputID=0b9b8963eaa7027adaf1ec383b9ba90e DependenciesID=83a6a8ddc0ca74e4376cf22e421c829c StaticDependenciesID=b5320f992c722b2d8bbbdab09d71e521 
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 3
+========================================================================
+Received Import Request.
+  Time of request: 2026-07-06T19:41:10.0751076Z
+  Time since last request: 0.0002964 seconds.
+  importAddress: GUID: 6c15182f96844c14f8d7b9d378fb381b - Path: Assets/Planet Icons/Planet7.png - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B
+Importing 'GUID: 6c15182f96844c14f8d7b9d378fb381b - Path: Assets/Planet Icons/Planet7.png - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B' with importer (ScriptedImporter : UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B)
+Imported 'GUID: 6c15182f96844c14f8d7b9d378fb381b' -> (Import Result ID: '49dd0f43b76486248665c204b2281374') in 0.008 seconds [static and dynamic dependencies]. Details - ImportResultOutputID=0f68237ae99651b1ec1815db3709cc27 DependenciesID=3ee6ee6bf0e3e125933bcfaf67d5eb7e StaticDependenciesID=72e030a2b5887c9a2e521d241426e244 
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 3
+========================================================================
+Received Import Request.
+  Time of request: 2026-07-06T19:41:10.1026398Z
+  Time since last request: 0.00026 seconds.
+  importAddress: GUID: 5991c5b8748b93541ba1d942f74c3f0a - Path: Assets/Planet Icons/Planet4.png - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B
+Importing 'GUID: 5991c5b8748b93541ba1d942f74c3f0a - Path: Assets/Planet Icons/Planet4.png - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B' with importer (ScriptedImporter : UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B)
+Imported 'GUID: 5991c5b8748b93541ba1d942f74c3f0a' -> (Import Result ID: 'fff5d3a75010cd7c9746c8fbb6230ba6') in 0.008 seconds [static and dynamic dependencies]. Details - ImportResultOutputID=cf1bcee46f661c65c3e63ff1688cc6b5 DependenciesID=acb3e77292d30b58d3cd538b585d1af6 StaticDependenciesID=07df60d2d6c985fb10c4068ff0c5bc00 
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 3
+========================================================================
+Received Import Request.
+  Time of request: 2026-07-06T19:41:10.1258382Z
+  Time since last request: 0.0002415 seconds.
+  importAddress: GUID: 84df05106c68ef041afeea83915c8251 - Path: Assets/Planet Icons/Planet5.png - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B
+Importing 'GUID: 84df05106c68ef041afeea83915c8251 - Path: Assets/Planet Icons/Planet5.png - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B' with importer (ScriptedImporter : UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B)
+Imported 'GUID: 84df05106c68ef041afeea83915c8251' -> (Import Result ID: '93b5ab105da4e425de72e486abeba307') in 0.010 seconds [static and dynamic dependencies]. Details - ImportResultOutputID=fbe96173f9cb65829540c6f485770a53 DependenciesID=c037342aa56c1aa11b937ca7415149de StaticDependenciesID=2c849540fe269cac32aaed62b1b69fbb 
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 3
+========================================================================
+Received Import Request.
+  Time of request: 2026-07-06T19:41:10.1528568Z
+  Time since last request: 0.0002487 seconds.
+  importAddress: GUID: c2aa8aced3e884b41bed224f1b847052 - Path: Assets/Planet Icons/Planet3.png - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B
+Importing 'GUID: c2aa8aced3e884b41bed224f1b847052 - Path: Assets/Planet Icons/Planet3.png - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B' with importer (ScriptedImporter : UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B)
+Imported 'GUID: c2aa8aced3e884b41bed224f1b847052' -> (Import Result ID: '5945493fa7185ecac43472c22cc47bae') in 0.008 seconds [static and dynamic dependencies]. Details - ImportResultOutputID=7e637d931e12df15b0a67341d3232527 DependenciesID=f88e7058f5816658c6594a1820eda3b6 StaticDependenciesID=9b158a8e886cc459d37e2277a40d5f68 
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 3
+========================================================================
+Received Import Request.
+  Time of request: 2026-07-06T19:41:10.1770862Z
+  Time since last request: 0.0003332 seconds.
+  importAddress: GUID: 9185c7f01a676a64f84efd4b969b68e4 - Path: Assets/Planet Icons/Planet2.png - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B
+Importing 'GUID: 9185c7f01a676a64f84efd4b969b68e4 - Path: Assets/Planet Icons/Planet2.png - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B' with importer (ScriptedImporter : UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B)
+Imported 'GUID: 9185c7f01a676a64f84efd4b969b68e4' -> (Import Result ID: '2cb1b7e1f9e4601c32af667b750c0f2c') in 0.010 seconds [static and dynamic dependencies]. Details - ImportResultOutputID=0033f970de41156a92937a0836fc0b51 DependenciesID=7f3b48c105c758db0722c1cbee60e697 StaticDependenciesID=6cafa2ebf78f55f0bc115349161270be 
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 3
+========================================================================
+Received Import Request.
+  Time of request: 2026-07-06T19:41:10.2034189Z
+  Time since last request: 0.0003093 seconds.
+  importAddress: GUID: 4fd2b47c4a7e3004f953ce24f46be5c0 - Path: Assets/Planet Icons/Planet6.png - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B
+Importing 'GUID: 4fd2b47c4a7e3004f953ce24f46be5c0 - Path: Assets/Planet Icons/Planet6.png - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B' with importer (ScriptedImporter : UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B)
+Imported 'GUID: 4fd2b47c4a7e3004f953ce24f46be5c0' -> (Import Result ID: '534db44063a354ee607182ae524740af') in 0.008 seconds [static and dynamic dependencies]. Details - ImportResultOutputID=7bbc2d3828ac7eb92251651ac97ee1ec DependenciesID=ea032b65b9536cb21fa6cb055e9a4c64 StaticDependenciesID=0219f4e0498cf5a2575e71c869edf316 
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 3
+========================================================================
+Received Import Request.
+  Time of request: 2026-07-06T19:41:13.6701387Z
+  Time since last request: 3.441575 seconds.
+  importAddress: GUID: 164f843bf77344947944a20787621310 - Path: Assets/Planet Icons - Importer: PreviewImporter
+Importing 'GUID: 164f843bf77344947944a20787621310 - Path: Assets/Planet Icons - Importer: PreviewImporter' with importer (PreviewImporter)
+Imported 'GUID: 164f843bf77344947944a20787621310' -> (Import Result ID: '603661af57aae8499405738dbfbdac9e') in 0.001 seconds [static and dynamic dependencies]. Details - ImportResultOutputID=7ecfb013f577267d8c7b8a38c617b46d DependenciesID=81dbd0760db3dc2eed88dfd5c174fca7 StaticDependenciesID=d0eb17b8862ccc44a92ef4359faccb50 
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 0
+========================================================================
+Received Import Request.
+  Time of request: 2026-07-06T19:41:14.5104892Z
+  Time since last request: 0.8266694 seconds.
+  importAddress: GUID: 98020e54fb1d7924dbfea2605715dac1 - Path: Assets/Planet Icons/Planet1.png - Importer: PreviewImporter
+Importing 'GUID: 98020e54fb1d7924dbfea2605715dac1 - Path: Assets/Planet Icons/Planet1.png - Importer: PreviewImporter' with importer (PreviewImporter)
+Imported 'GUID: 98020e54fb1d7924dbfea2605715dac1' -> (Import Result ID: 'e60e9878d556b4795ece2cc08538d70a') in 0.125 seconds [static and dynamic dependencies]. Details - ImportResultOutputID=a7fca6a95af7dd50e60eb175747a6c0a DependenciesID=492730918bbc3f382a3d96866629c60b StaticDependenciesID=f408956a75b701867550157693ca8b7d 
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 3
+========================================================================
+Received Import Request.
+  Time of request: 2026-07-06T19:42:40.8992511Z
+  Time since last request: 86.24991199999999 seconds.
+  importAddress: GUID: 98020e54fb1d7924dbfea2605715dac1 - Path: Assets/Planet Icons/Planet1.png - Importer: PreviewImporter
+Importing 'GUID: 98020e54fb1d7924dbfea2605715dac1 - Path: Assets/Planet Icons/Planet1.png - Importer: PreviewImporter' with importer (PreviewImporter)
+Imported 'GUID: 98020e54fb1d7924dbfea2605715dac1' -> (Import Result ID: 'e4faddfb7bae2f98b1d64fe9162ef64f') in 0.011 seconds [static and dynamic dependencies]. Details - ImportResultOutputID=ad4b327ddecf7e576c500326d571d78c DependenciesID=b00aae64174b36b7c944f82dc4216003 StaticDependenciesID=c6c3775fff0ef1b932ba3ae13620c17d 
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 3
+========================================================================
+Received Import Request.
+  Time of request: 2026-07-06T19:42:41.8832801Z
+  Time since last request: 0.9597389 seconds.
+  importAddress: GUID: 0f8cb7e347387dc48b47f0609cdd2846 - Path: Assets/Planet Icons/Planet8.png - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B
+Importing 'GUID: 0f8cb7e347387dc48b47f0609cdd2846 - Path: Assets/Planet Icons/Planet8.png - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B' with importer (ScriptedImporter : UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B)
+Imported 'GUID: 0f8cb7e347387dc48b47f0609cdd2846' -> (Import Result ID: '912010d7ae5221b32c0d6ffd84b2687a') in 0.007 seconds [static and dynamic dependencies]. Details - ImportResultOutputID=c112d3f26f618058b64cb27659bbd760 DependenciesID=d843eaf7be84b52d150bc0d3b7da64be StaticDependenciesID=a75e2c87415d0031465112b252af47a8 
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 3
+========================================================================
+Received Import Request.
+  Time of request: 2026-07-06T19:42:41.9080069Z
+  Time since last request: 0.0003558 seconds.
+  importAddress: GUID: 6c15182f96844c14f8d7b9d378fb381b - Path: Assets/Planet Icons/Planet7.png - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B
+Importing 'GUID: 6c15182f96844c14f8d7b9d378fb381b - Path: Assets/Planet Icons/Planet7.png - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B' with importer (ScriptedImporter : UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B)
+Imported 'GUID: 6c15182f96844c14f8d7b9d378fb381b' -> (Import Result ID: '2f97265e2a685376c8c5d7c9dab5ec33') in 0.011 seconds [static and dynamic dependencies]. Details - ImportResultOutputID=a44cde4a1dcdbddd5a665139153312ff DependenciesID=86bf4ab0896694746fb3e06d4334767d StaticDependenciesID=2a274637f9b9f3352504cf1e51cecca5 
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 3
+========================================================================
+Received Import Request.
+  Time of request: 2026-07-06T19:42:41.9393439Z
+  Time since last request: 0.000359 seconds.
+  importAddress: GUID: 5991c5b8748b93541ba1d942f74c3f0a - Path: Assets/Planet Icons/Planet4.png - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B
+Importing 'GUID: 5991c5b8748b93541ba1d942f74c3f0a - Path: Assets/Planet Icons/Planet4.png - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B' with importer (ScriptedImporter : UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B)
+Imported 'GUID: 5991c5b8748b93541ba1d942f74c3f0a' -> (Import Result ID: 'adb7792fe72f902fe141dc6d124967f4') in 0.008 seconds [static and dynamic dependencies]. Details - ImportResultOutputID=33f5e1bc71dadcdbf758601fd3c82f40 DependenciesID=b40aacd5440cc2620d71c5d7e9547eb6 StaticDependenciesID=4d1615d2ba285828b49adecab18f7226 
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 3
+========================================================================
+Received Import Request.
+  Time of request: 2026-07-06T19:42:41.9663541Z
+  Time since last request: 0.0002281 seconds.
+  importAddress: GUID: 84df05106c68ef041afeea83915c8251 - Path: Assets/Planet Icons/Planet5.png - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B
+Importing 'GUID: 84df05106c68ef041afeea83915c8251 - Path: Assets/Planet Icons/Planet5.png - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B' with importer (ScriptedImporter : UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B)
+Imported 'GUID: 84df05106c68ef041afeea83915c8251' -> (Import Result ID: '46461c1cdefcbd5d7fd2e430b260a263') in 0.012 seconds [static and dynamic dependencies]. Details - ImportResultOutputID=a1c640e7670639825f239ece6a250c8f DependenciesID=e092a13b74e28b38fb7cef0f8222c640 StaticDependenciesID=67af9423bf8ca8b989f26817aed6aa30 
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 3
+========================================================================
+Received Import Request.
+  Time of request: 2026-07-06T19:42:41.9967587Z
+  Time since last request: 0.0004175 seconds.
+  importAddress: GUID: c2aa8aced3e884b41bed224f1b847052 - Path: Assets/Planet Icons/Planet3.png - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B
+Importing 'GUID: c2aa8aced3e884b41bed224f1b847052 - Path: Assets/Planet Icons/Planet3.png - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B' with importer (ScriptedImporter : UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B)
+Imported 'GUID: c2aa8aced3e884b41bed224f1b847052' -> (Import Result ID: 'd9cc39d2894c90c6d65a37246ae6f300') in 0.011 seconds [static and dynamic dependencies]. Details - ImportResultOutputID=9b0de970ef7c1c45b664008a430a4537 DependenciesID=f00e5bb768ce58e578155f36568f5d35 StaticDependenciesID=f97ff9263c86d591b2335cf963557524 
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 3
+========================================================================
+Received Import Request.
+  Time of request: 2026-07-06T19:42:42.0298821Z
+  Time since last request: 0.0001232 seconds.
+  importAddress: GUID: 9185c7f01a676a64f84efd4b969b68e4 - Path: Assets/Planet Icons/Planet2.png - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B
+Importing 'GUID: 9185c7f01a676a64f84efd4b969b68e4 - Path: Assets/Planet Icons/Planet2.png - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B' with importer (ScriptedImporter : UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B)
+Imported 'GUID: 9185c7f01a676a64f84efd4b969b68e4' -> (Import Result ID: 'dbaf123b7176dfd96495f0c931e95b96') in 0.009 seconds [static and dynamic dependencies]. Details - ImportResultOutputID=7e505176f3d7b924db6241a72208f3ab DependenciesID=e5c57fec6473e6312b0519c8ae972791 StaticDependenciesID=3865be24e75100d1f056e44f78cc263c 
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 3
+========================================================================
+Received Import Request.
+  Time of request: 2026-07-06T19:42:42.0583093Z
+  Time since last request: 0.0002394 seconds.
+  importAddress: GUID: 4fd2b47c4a7e3004f953ce24f46be5c0 - Path: Assets/Planet Icons/Planet6.png - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B
+Importing 'GUID: 4fd2b47c4a7e3004f953ce24f46be5c0 - Path: Assets/Planet Icons/Planet6.png - Importer: ScriptedImporter/UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B' with importer (ScriptedImporter : UnityEditor.QuickSearchModule:UnityEditor.Search:ASIAI0B)
+Imported 'GUID: 4fd2b47c4a7e3004f953ce24f46be5c0' -> (Import Result ID: 'd546e987523a2ace5271a167cdf903e4') in 0.008 seconds [static and dynamic dependencies]. Details - ImportResultOutputID=4fe6b12f7978f7181394f94ad591eca9 DependenciesID=27b1aa374d1c945366d654a0d53ca2ec StaticDependenciesID=f8148d254ac1dbe3236f37ed272303bb 
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 3
+Editor requested this worker to shutdown with reason: Scaling down because of idle timeout
+AcceleratorClientConnectionCallback - disconnected - :0
+AssetImportWorker is now disconnected from the server
+Process exiting
+Exiting without the bug reporter. Application will terminate with return code 0

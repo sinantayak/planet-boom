@@ -31,7 +31,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.4, y: 0.4, z: 0.4}
+  m_LocalScale: {x: 0.15, y: 0.15, z: 0.15}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -85,7 +85,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 98020e54fb1d7924dbfea2605715dac1, type: 3}
   m_Color: {r: 0.061187245, g: 0.39208466, b: 0.5188679, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -158,7 +158,7 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Radius: 0.5
+  m_Radius: 1.7348545
 --- !u!114 &804950424806596201
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -171,8 +171,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 59fe94ae734e32b21609883100fd9ea5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CurrentColor: 3
-  Level: 1
+  planetSprites:
+  - {fileID: 21300000, guid: 98020e54fb1d7924dbfea2605715dac1, type: 3}
+  - {fileID: 21300000, guid: 9185c7f01a676a64f84efd4b969b68e4, type: 3}
+  - {fileID: 21300000, guid: c2aa8aced3e884b41bed224f1b847052, type: 3}
+  - {fileID: 21300000, guid: 5991c5b8748b93541ba1d942f74c3f0a, type: 3}
+  - {fileID: 21300000, guid: 84df05106c68ef041afeea83915c8251, type: 3}
+  - {fileID: 21300000, guid: 4fd2b47c4a7e3004f953ce24f46be5c0, type: 3}
+  - {fileID: 21300000, guid: 6c15182f96844c14f8d7b9d378fb381b, type: 3}
+  - {fileID: 21300000, guid: 0f8cb7e347387dc48b47f0609cdd2846, type: 3}
+  CurrentTier: 0
 --- !u!114 &630811434265461342
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -185,8 +193,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 000c6f8ca7f880f117555e375616113b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxLevel: 3
-  growthPerLevel: 0.5
+  maxTier: 7
+  growthPerTier: 0.21
   touchDistanceMultiplier: 1.05
   fusionDuration: 0.25
   stretchAmount: 0.35

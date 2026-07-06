@@ -2,13 +2,19 @@ using System.Collections.Generic;
 using System.Text;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-// One mission entry: "cause <count> BOOMs of <color>". Counts tick down in
-// place on the runtime copy, never on the authored level data.
+// One mission entry: "cause <count> BOOMs of <tier>". Counts tick down in
+// place on the runtime copy, never on the authored level data. Note that
+// BOOMs only ever fire at PlanetMerge's maxTier (two max-tier planets
+// colliding), so authored targets should use that tier.
 [System.Serializable]
 public class BoomTarget
 {
-    public PlanetColor color;
+    // Old scenes stored this as "color"; the enum's int values carry over
+    // (Red→Tier1, Blue→Tier2, Green→Tier3, Yellow→Tier4).
+    [FormerlySerializedAs("color")]
+    public PlanetTier tier;
     public int count = 1;
 }
 
@@ -196,21 +202,21 @@ public class GameManager : MonoBehaviour
         countdownText.text = $"CRITICAL: {remaining:F1}s!";
     }
 
-    // Called by PlanetMerge after a max-level BOOM has claimed its victims.
-    public void NotifyBoom(PlanetColor color)
+    // Called by PlanetMerge after a max-tier BOOM has claimed its victims.
+    public void NotifyBoom(PlanetTier tier)
     {
         if (State != GameState.Playing)
             return;
 
-        BoomTarget target = remainingTargets.Find(t => t.color == color && t.count > 0);
+        BoomTarget target = remainingTargets.Find(t => t.tier == tier && t.count > 0);
         if (target == null)
         {
-            Debug.Log($"GameManager: {color} boom — not a mission target on level {CurrentLevelNumber}.");
+            Debug.Log($"GameManager: {tier} boom — not a mission target on level {CurrentLevelNumber}.");
             return;
         }
 
         target.count--;
-        Debug.Log($"GameManager: {color} boom counted! Remaining mission: {DescribeTargets()}");
+        Debug.Log($"GameManager: {tier} boom counted! Remaining mission: {DescribeTargets()}");
         UpdateMissionUI();
 
         if (remainingTargets.TrueForAll(t => t.count <= 0))
@@ -245,7 +251,7 @@ public class GameManager : MonoBehaviour
         {
             remainingTargets.Add(new BoomTarget
             {
-                color = target.color,
+                tier = target.tier,
                 count = target.count + difficultyBonus
             });
         }
@@ -254,9 +260,9 @@ public class GameManager : MonoBehaviour
         UpdateMissionUI();
     }
 
-    // Mission readout, e.g. "Level 2 — Yellow x3, Blue x1". Shows "Mission
-    // complete!" for the brief window where every target is at 0 (all-zero
-    // states otherwise only exist mid-transition).
+    // Mission readout, e.g. "Level 2 — Tier4 x2". Shows "Mission complete!"
+    // for the brief window where every target is at 0 (all-zero states
+    // otherwise only exist mid-transition).
     private void UpdateMissionUI()
     {
         if (missionText == null)
@@ -302,7 +308,7 @@ public class GameManager : MonoBehaviour
             gameOverPanel.SetActive(true);
         }
 
-        Debug.Log($"GameManager: GAME OVER on level {CurrentLevelNumber} — a {offender.CurrentColor} " +
+        Debug.Log($"GameManager: GAME OVER on level {CurrentLevelNumber} — a {offender.CurrentTier} " +
                   $"planet stayed {outsideTimeLimit:F1}s outside the boundary " +
                   $"(distance {distance:F2} > radius {maxBoundaryRadius:F2}).");
     }
@@ -333,17 +339,16 @@ public class GameManager : MonoBehaviour
 
     private void BuildDefaultLevels()
     {
+        // Under the unified tier rules a BOOM needs two Tier4 planets, and each
+        // Tier4 is itself the product of a merge chain — so per-level counts
+        // are lower than the old color-based defaults were.
         levels.Add(new LevelDefinition
         {
-            targets = { new BoomTarget { color = PlanetColor.Yellow, count = 3 } }
+            targets = { new BoomTarget { tier = PlanetTier.Tier4, count = 1 } }
         });
         levels.Add(new LevelDefinition
         {
-            targets =
-            {
-                new BoomTarget { color = PlanetColor.Yellow, count = 3 },
-                new BoomTarget { color = PlanetColor.Blue, count = 1 }
-            }
+            targets = { new BoomTarget { tier = PlanetTier.Tier4, count = 2 } }
         });
         Debug.Log("GameManager: no levels authored in the Inspector — using built-in defaults.");
     }
@@ -358,7 +363,7 @@ public class GameManager : MonoBehaviour
         {
             if (i > 0)
                 sb.Append(", ");
-            sb.Append(remainingTargets[i].color).Append(" x").Append(remainingTargets[i].count);
+            sb.Append(remainingTargets[i].tier).Append(" x").Append(remainingTargets[i].count);
         }
         return sb.ToString();
     }
