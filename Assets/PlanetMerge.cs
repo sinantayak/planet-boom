@@ -58,9 +58,14 @@ public class PlanetMerge : MonoBehaviour
 
     // Compound growth: Tier1 = spawn scale, Tier2 = +15%, Tier3 = +15%
     // on top of Tier2 (with the default growthPerTier of 0.15).
-    private float ScaleForTier(PlanetTier tier)
+    // Public so PlanetLauncher can size its slot preview to the exact world
+    // scale the fired planet will have. On a prefab asset Awake never runs
+    // (tierOneScale is still 0), so the authored localScale stands in as the
+    // Tier1 baseline — the same value Awake captures on a spawned instance.
+    public float ScaleForTier(PlanetTier tier)
     {
-        return tierOneScale * Mathf.Pow(1f + growthPerTier, (int)tier);
+        float baseline = tierOneScale > 0f ? tierOneScale : transform.localScale.x;
+        return baseline * Mathf.Pow(1f + growthPerTier, (int)tier);
     }
 
     void Start()
@@ -145,6 +150,17 @@ public class PlanetMerge : MonoBehaviour
         if (otherPlanet.CurrentTier != planet.CurrentTier)
             return false;
 
+        // Mission ceiling: if merging this tier wouldn't serve any open
+        // target (GameManager.CanMerge), the pair stays two solid colliders
+        // and simply bounces — e.g. Level 5's two required Tier5s must not
+        // fuse into a Tier6 and destroy the player's progress. Checked before
+        // any state is touched so a blocked pair behaves as if no merge rule
+        // existed at all. (This also gates the max-tier BOOM: while a level
+        // caps merges below PlanetMerge.maxTier, booms can't occur — fine, as
+        // booms no longer drive missions.)
+        if (GameManager.Instance != null && !GameManager.Instance.CanMerge(planet.CurrentTier))
+            return false;
+
         // A planet already melting into someone (or busy pulling one in) is spoken
         // for — starting a second fusion with it would orphan or double-count it.
         if (!other.TryGetComponent(out PlanetMerge otherMerge) ||
@@ -170,9 +186,20 @@ public class PlanetMerge : MonoBehaviour
         otherMerge.BeginBeingAbsorbed();
 
         // Tier1 + Tier1 → Tier2, and so on; SetTier also swaps in the next
-        // tier's sprite, so the winner visually becomes the new planet as the
-        // loser melts into it.
+        // tier's sprite and applies the tier's physics profile (heavier mass,
+        // higher linear damping), so the winner both looks and *feels* like the
+        // new planet the instant the fusion starts.
         planet.SetTier(planet.CurrentTier + 1);
+
+        // Mission hook: level targets are defined as "create a planet of tier
+        // X", and this is the single point in the game where a new tier comes
+        // into existence. Reported after SetTier so CurrentTier is the tier
+        // that was just created.
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.NotifyMergeCreated(planet.CurrentTier);
+        }
+
         StartCoroutine(FuseWith(otherMerge));
         return true;
     }

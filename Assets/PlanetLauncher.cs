@@ -1,5 +1,7 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlanetLauncher : MonoBehaviour
 {
@@ -21,14 +23,41 @@ public class PlanetLauncher : MonoBehaviour
     [SerializeField] private float dotSpacing = 0.25f;
     // Number of physics steps to simulate ahead; more steps = longer preview.
     [SerializeField] private int trajectorySteps = 30;
-    // Taper: dots shrink and fade from full size/alpha near the launcher down
-    // to these values at the far end of the path.
+    // Taper: dots shrink and fade from full size (and startDotAlpha) near the
+    // launcher down to these values at the far end of the path.
     [SerializeField] private float endDotScale = 0.35f;
     [SerializeField] private float endDotAlpha = 0.2f;
+    // Alpha of the dot nearest the launcher. Dots are always pure white (the
+    // loaded planet in the slot shows the tier now); lower this for a softer
+    // guide line, e.g. 0.6.
+    [SerializeField] private float startDotAlpha = 0.85f;
 
     [Header("Pull Power")]
     [SerializeField] private float minPullDistance = 0.5f;
     [SerializeField] private float maxPullDistance = 5f;
+
+    [Header("Launcher Timing")]
+    // Minimum delay between shots. After a launch the slot sits empty for this
+    // long — no aiming, no preview — before the next queued planet is loaded.
+    // This is the anti-spam gate: rapid clicking can no longer stream planets
+    // into the arena faster than one per cooldown.
+    [SerializeField] private float launchCooldown = 0.6f;
+
+    [Header("Launcher UI Preview")]
+    // Canvas Image for the "Next Planet" box. Always visible: while the slot
+    // itself is empty during a reload, this keeps previewing the planet that
+    // will fill it when the cooldown ends (NextTier).
+    [SerializeField] private Image nextPlanetUIImg;
+    // World-space renderer sitting in the launcher slot, wearing the actual
+    // planet sprite the next click will fire (CurrentTier). Hidden while
+    // reloading so the slot reads as visibly empty. Scaled per tier in
+    // RefreshPreviews — any scale set on it in the Inspector is overridden.
+    [SerializeField] private SpriteRenderer loadedPlanetRenderer;
+
+    // Universal fudge factor on the slot preview's tier-matched size: 1 shows
+    // the planet at its exact in-arena world scale, < 1 shrinks every preview
+    // uniformly if real sizes overflow the launcher area.
+    [SerializeField] private float launcherVisualScaleModifier = 1f;
 
     [Header("Skills")]
     // Skill hook: while true, the next launched planet is a wildcard that adopts
@@ -37,10 +66,31 @@ public class PlanetLauncher : MonoBehaviour
 
     // Preview state: CurrentTier is what the next click fires; NextTier is what
     // follows it (shown in UI later). Both readable by UI code, set only here.
+    // NOTE: during a reload (IsReloading == true) CurrentTier still holds the
+    // tier that was just fired — the queue only advances once the cooldown
+    // ends — so UI showing the loaded planet should hide or dim it while
+    // IsReloading is true.
     public PlanetTier CurrentTier { get; private set; }
     public PlanetTier NextTier { get; private set; }
 
+    // True from the moment a shot fires until launchCooldown has elapsed and
+    // the next planet has been pulled into the slot. Input is ignored and the
+    // aim preview stays hidden for the whole window; UI can read this to tint
+    // or hide the launcher slot while it is locked.
+    public bool IsReloading => isWaitingForCooldown;
+
+    private bool isWaitingForCooldown;
+    private Coroutine reloadRoutine;
+
     private BlackHole blackHole;
+
+    // The prefab's Planet component: the previews read tier sprites off its
+    // serialized array, so slot/next art always matches what actually spawns.
+    private Planet prefabPlanet;
+
+    // The prefab's PlanetMerge: source of the tier growth curve, so the slot
+    // preview is sized exactly like the planet that will spawn.
+    private PlanetMerge prefabMerge;
 
     // Dot pool: pre-instantiated hidden in Awake (one per trajectory step, the
     // maximum ever needed), then repositioned/activated per aim frame. Never
@@ -65,7 +115,29 @@ public class PlanetLauncher : MonoBehaviour
         CurrentTier = PickRandomSpawnTier();
         NextTier = PickRandomSpawnTier();
         blackHole = FindFirstObjectByType<BlackHole>();
+
+        if (planetPrefab != null)
+        {
+            prefabPlanet = planetPrefab.GetComponent<Planet>();
+            prefabMerge = planetPrefab.GetComponent<PlanetMerge>();
+        }
+        if (prefabPlanet == null)
+        {
+            Debug.LogWarning("PlanetLauncher: planet prefab has no Planet component — sprite previews disabled.");
+        }
+        if (prefabMerge == null)
+        {
+            Debug.LogWarning("PlanetLauncher: planet prefab has no PlanetMerge component — the slot preview keeps its Inspector scale instead of tier sizing.");
+        }
+
+        if (nextPlanetUIImg != null)
+        {
+            // Planet PNGs aren't square-safe inside an arbitrary UI box.
+            nextPlanetUIImg.preserveAspect = true;
+        }
+
         InitializeDotPool();
+        RefreshPreviews();
     }
 
     void Update()
@@ -81,6 +153,13 @@ public class PlanetLauncher : MonoBehaviour
             }
             return;
         }
+
+        // Locked while reloading: presses during the cooldown are swallowed
+        // entirely (not queued), so the click that fired the shot can't also
+        // pre-arm the next one. The player must press again once the slot
+        // refills. isAiming can't be true here — aiming always ends at launch.
+        if (isWaitingForCooldown)
+            return;
 
         if (Input.GetMouseButtonDown(0))
         {
@@ -188,10 +267,120 @@ public class PlanetLauncher : MonoBehaviour
             Debug.LogWarning("PlanetLauncher: planet prefab has no Rigidbody2D.");
         }
 
-        // Advance the queue: the previewed tier becomes live, and a fresh one is
-        // drawn for the preview slot.
+        // Lock the launcher. The queue does NOT advance here: the slot stays
+        // empty for the cooldown, and FinishReload pulls the next planet in.
+        isWaitingForCooldown = true;
+        RefreshPreviews();
+        reloadRoutine = StartCoroutine(ReloadAfterCooldown());
+    }
+
+    private IEnumerator ReloadAfterCooldown()
+    {
+        yield return new WaitForSeconds(launchCooldown);
+        FinishReload();
+    }
+
+    // Advance the queue: the previewed tier becomes live, a fresh one is drawn
+    // for the preview slot, and input is accepted again.
+    private void FinishReload()
+    {
+        reloadRoutine = null;
+        isWaitingForCooldown = false;
         CurrentTier = NextTier;
         NextTier = PickRandomSpawnTier();
+        RefreshPreviews();
+    }
+
+    // Pushes the current queue state into both preview visuals. Sprites come
+    // straight from the Planet prefab's tier array and are shown untinted
+    // (pure white) — the pre-rendered art must display exactly as authored.
+    private void RefreshPreviews()
+    {
+        if (loadedPlanetRenderer != null)
+        {
+            Sprite loadedSprite = isWaitingForCooldown ? null : SpriteForTier(CurrentTier);
+            loadedPlanetRenderer.sprite = loadedSprite;
+            loadedPlanetRenderer.color = Color.white;
+            // Reloading (or a missing sprite) leaves the slot visibly empty.
+            loadedPlanetRenderer.enabled = loadedSprite != null;
+
+            if (loadedSprite != null && prefabMerge != null)
+            {
+                // Size the preview to the exact world scale the fired planet
+                // will spawn at (PlanetMerge.Start snaps spawns onto the same
+                // curve), so a Tier3 in the slot is visibly a Tier3.
+                float worldScale = prefabMerge.ScaleForTier(CurrentTier) * launcherVisualScaleModifier;
+
+                // localScale is multiplied by every ancestor's scale before it
+                // reaches the screen; divide that back out so the preview's
+                // on-screen size matches the arena planet even if the launcher
+                // hierarchy isn't scaled at exactly 1.
+                Transform previewTransform = loadedPlanetRenderer.transform;
+                float parentScale = previewTransform.parent != null
+                    ? previewTransform.parent.lossyScale.x
+                    : 1f;
+                if (!Mathf.Approximately(parentScale, 0f))
+                {
+                    worldScale /= parentScale;
+                }
+
+                previewTransform.localScale = Vector3.one * worldScale;
+            }
+        }
+
+        if (nextPlanetUIImg != null)
+        {
+            Sprite nextSprite = SpriteForTier(NextTier);
+            nextPlanetUIImg.sprite = nextSprite;
+            nextPlanetUIImg.color = Color.white;
+            // A UI Image with a null sprite renders as a solid white square;
+            // disable it outright instead if the tier has no art yet.
+            nextPlanetUIImg.enabled = nextSprite != null;
+        }
+    }
+
+    private Sprite SpriteForTier(PlanetTier tier)
+    {
+        return prefabPlanet != null ? prefabPlanet.GetSpriteForTier(tier) : null;
+    }
+
+    // Full queue reset for level transitions and restarts (called by
+    // GameManager): cancels any in-flight reload cooldown and drag, redraws
+    // both queue tiers from scratch, and leaves the launcher armed.
+    public void ResetQueue()
+    {
+        if (reloadRoutine != null)
+        {
+            StopCoroutine(reloadRoutine);
+            reloadRoutine = null;
+        }
+        isWaitingForCooldown = false;
+
+        if (isAiming)
+        {
+            isAiming = false;
+            HideAllDots();
+        }
+
+        CurrentTier = PickRandomSpawnTier();
+        NextTier = PickRandomSpawnTier();
+        RefreshPreviews();
+    }
+
+    // Coroutines die with the component, so a launcher disabled mid-cooldown
+    // (level transition, skill takeover) would otherwise come back permanently
+    // locked with a stale tier in the slot. Complete the reload immediately
+    // instead — the cooldown's anti-spam job is moot while nobody can shoot.
+    void OnDisable()
+    {
+        if (isWaitingForCooldown)
+        {
+            if (reloadRoutine != null)
+            {
+                StopCoroutine(reloadRoutine);
+            }
+            FinishReload();
+        }
     }
 
     private PlanetTier PickRandomSpawnTier()
@@ -214,9 +403,10 @@ public class PlanetLauncher : MonoBehaviour
 
     // Predictive trajectory: steps the launch velocity through the same
     // per-physics-step integration the real planet will experience — pulling
-    // BlackHole.GetPullForce each step (planet mass is 1, so force equals
-    // acceleration) — then lays pooled dot sprites along the curve, one every
-    // dotSpacing world units of travelled path, tapering toward the far end.
+    // BlackHole.GetPullForce each step (an acceleration, applied mass-
+    // independently to every tier, so the dots are exact for any spawn tier)
+    // — then lays pooled dot sprites along the curve, one every dotSpacing
+    // world units of travelled path, tapering toward the far end.
     private void DrawTrajectory()
     {
         if (activeDots.Count == 0)
@@ -262,9 +452,11 @@ public class PlanetLauncher : MonoBehaviour
 
         // Second pass: activate and place pooled dots now that the total count
         // is known, so the size/alpha taper spans the whole visible path.
-        // Dots use the tier's UI accent color — the planet sprites themselves
-        // are never tinted.
-        Color liveColor = PlanetTierPalette.GetAccentColor(CurrentTier);
+        // Dots render as a neutral white guide line — the real planet sprite in
+        // the slot already telegraphs the tier, so per-tier tinting is gone.
+        // White is reasserted on every dot every frame, so no leftover color
+        // (from prefab data or anything else that touched a pooled dot's
+        // renderer/material) can survive into this shot.
         int dotCount = Mathf.Min(dotPositions.Count, activeDots.Count);
 
         for (int i = 0; i < dotCount; i++)
@@ -279,8 +471,9 @@ public class PlanetLauncher : MonoBehaviour
             SpriteRenderer dotRenderer = dotRenderers[i];
             if (dotRenderer != null)
             {
-                liveColor.a = Mathf.Lerp(1f, endDotAlpha, taper);
-                dotRenderer.color = liveColor;
+                Color dotColor = Color.white;
+                dotColor.a = Mathf.Lerp(startDotAlpha, endDotAlpha, taper);
+                dotRenderer.color = dotColor;
             }
         }
 

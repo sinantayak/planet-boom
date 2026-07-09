@@ -4,41 +4,49 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-// One mission entry: "cause <count> BOOMs of <tier>". Counts tick down in
-// place on the runtime copy, never on the authored level data. Note that
-// BOOMs only ever fire at PlanetMerge's maxTier (two max-tier planets
-// colliding), so authored targets should use that tier.
-[System.Serializable]
-public class BoomTarget
-{
-    // Old scenes stored this as "color"; the enum's int values carry over
-    // (Red→Tier1, Blue→Tier2, Green→Tier3, Yellow→Tier4).
-    [FormerlySerializedAs("color")]
-    public PlanetTier tier;
-    public int count = 1;
-}
-
+// One authored level: the planets the player must CREATE (via merging) to
+// clear it. Order is cosmetic — it drives the left-to-right slot layout on
+// the MissionHUD. Duplicates are legal and rendered as separate slots (two
+// Tier5 entries = two Tier5 sprites side by side, never a "2x" label). Hard
+// cap: 3 targets per level, because the MissionHUD has exactly 3 slots;
+// extras are ignored with a warning at load.
 [System.Serializable]
 public class LevelDefinition
 {
-    public List<BoomTarget> targets = new List<BoomTarget>();
+    public List<PlanetTier> targetTiers = new List<PlanetTier>();
+
+    // Seconds on this level's clock; the level fails when it runs out.
+    public float timeLimit = 60f;
+
+    // Star brackets scale off this playtested baseline: clear within this
+    // many ELAPSED seconds → 3 stars, within twice it → 2 stars, any slower
+    // finish → 1 star (a completed level never shows zero).
+    public float threeStarThreshold = 20f;
 }
 
-// Owns the mission/level state and the Suika-style lose condition. Booms reach
-// it through NotifyBoom (called by PlanetMerge); everything else is self-driven.
+// Owns the mission/level state and the Suika-style lose condition. Merges
+// reach it through NotifyMergeCreated (called by PlanetMerge); everything
+// else is self-driven.
 public class GameManager : MonoBehaviour
 {
-    public enum GameState { Playing, GameOver }
+    public enum GameState { Playing, LevelComplete, GameOver }
 
     public static GameManager Instance { get; private set; }
 
     public GameState State { get; private set; } = GameState.Playing;
     public int CurrentLevelNumber { get; private set; } = 1;
 
+    // Seconds left on the current level's clock. Public for the timer text
+    // that will be added to the HUD later; already drives the star rating.
+    public float RemainingTime { get; private set; }
+
+    // The MissionHUD has exactly 3 target slots; levels can't ask for more.
+    public const int MaxTargetsPerLevel = 3;
+
     [Header("Levels")]
-    // Authored missions, in order. Levels past the end of this list reuse the
-    // last authored one with every target count raised by 1 per extra level,
-    // so the game keeps escalating without more authoring.
+    // Authored missions, in order. Leave empty to use the built-in 5-level
+    // configuration (BuildDefaultLevels). Levels past the end of this list
+    // replay the last authored one so the game never runs out.
     [SerializeField] private List<LevelDefinition> levels = new List<LevelDefinition>();
 
     [Header("Boundary / Lose Condition")]
@@ -52,21 +60,47 @@ public class GameManager : MonoBehaviour
     // outside the boundary; hidden the rest of the time.
     public TextMeshProUGUI countdownText;
 
-    // Always-visible mission readout: current level plus the boom targets
-    // still to hit. Refreshed on level start and every counted boom.
-    public TextMeshProUGUI missionText;
+    // Top-right live level clock, rendered MM:SS ("08:20"). Optional — when
+    // left unassigned the timer float still runs, it just isn't displayed.
+    [SerializeField] private TextMeshProUGUI gameplayTimerText;
 
     // Panel switched on when the state flips to GameOver. Wire its Restart
     // button's OnClick to GameManager.RestartGame.
     public GameObject gameOverPanel;
+
+    // Permanent top-left HUD: "LEVEL N" title plus up to 3 target planet
+    // icons that dim live as targets are met. Never hidden during play.
+    [FormerlySerializedAs("missionPanel")]
+    public MissionHUD missionHUD;
+
+    // Centered win popup, hidden during normal play. Its NEXT button wires
+    // itself to AdvanceToNextLevel in code; nothing to hook up beyond the
+    // reference here.
+    public LevelCompletePanel levelCompletePanel;
 
     // Read by BoundaryVisualizer so the drawn circle can never drift from the
     // radius the lose check actually enforces.
     public Transform BlackHoleCenter => blackHoleCenter;
     public float MaxBoundaryRadius => maxBoundaryRadius;
 
-    // Runtime copy of the current level's targets (see BoomTarget note).
-    private readonly List<BoomTarget> remainingTargets = new List<BoomTarget>();
+    // Runtime copy of the current level's targets plus per-target achieved
+    // flags. The two lists are index-aligned with each other AND with the
+    // MissionHUD's slots, so "slot i achieved" is unambiguous even when a
+    // level contains duplicate tiers.
+    private readonly List<PlanetTier> activeTargets = new List<PlanetTier>();
+    private readonly List<bool> achievedTargets = new List<bool>();
+
+    // For resetting the shot queue on level transitions and restarts.
+    private PlanetLauncher launcher;
+
+    // Last whole second written to gameplayTimerText: the clock only needs a
+    // TMP re-layout once per second, not once per frame.
+    private int lastDisplayedTimerSeconds = -1;
+
+    // The loaded level's timing, copied out of its LevelDefinition by
+    // LoadLevel so ticking and star math never index back into the list.
+    private float currentTimeLimit;
+    private float currentThreeStarThreshold;
 
     // Seconds each planet has spent continuously outside the boundary. Entries
     // are dropped the moment a planet comes back inside, so the timer measures
@@ -97,10 +131,17 @@ public class GameManager : MonoBehaviour
             }
         }
 
+        // Drop unusable entries first: this also catches scenes saved under the
+        // old BoomTarget schema, whose serialized data doesn't survive the
+        // switch to flat tier lists and would deserialize as empty levels — an
+        // empty target list would otherwise count as instantly complete.
+        levels.RemoveAll(level => level == null || level.targetTiers == null || level.targetTiers.Count == 0);
         if (levels.Count == 0)
         {
             BuildDefaultLevels();
         }
+
+        launcher = FindFirstObjectByType<PlanetLauncher>();
 
         // Start hidden; FixedUpdate re-shows it whenever a planet is outside.
         if (countdownText != null)
@@ -113,6 +154,11 @@ public class GameManager : MonoBehaviour
             gameOverPanel.SetActive(false);
         }
 
+        if (levelCompletePanel != null)
+        {
+            levelCompletePanel.Hide();
+        }
+
         LoadLevel(1);
     }
 
@@ -122,6 +168,39 @@ public class GameManager : MonoBehaviour
         {
             Instance = null;
         }
+    }
+
+    void Update()
+    {
+        // The level clock only runs while actually playing — frozen during the
+        // win popup and after a game over. Running out fails the level.
+        if (State == GameState.Playing && RemainingTime > 0f)
+        {
+            RemainingTime = Mathf.Max(0f, RemainingTime - Time.deltaTime);
+            if (RemainingTime <= 0f)
+            {
+                TriggerGameOver($"time limit reached ({currentTimeLimit:F0}s) with mission unfinished: {DescribeTargets()}.");
+            }
+        }
+
+        UpdateTimerUI();
+    }
+
+    // Raw whole-seconds readout of RemainingTime ("45", "44", ...). Ceil,
+    // not floor: the display holds the full limit through the first second and
+    // only reads "0" once the clock is truly exhausted. Skipped gracefully
+    // when no text is wired.
+    private void UpdateTimerUI()
+    {
+        if (gameplayTimerText == null)
+            return;
+
+        int totalSeconds = Mathf.CeilToInt(RemainingTime);
+        if (totalSeconds == lastDisplayedTimerSeconds)
+            return;
+        lastDisplayedTimerSeconds = totalSeconds;
+
+        gameplayTimerText.text = totalSeconds.ToString();
     }
 
     void FixedUpdate()
@@ -177,7 +256,8 @@ public class GameManager : MonoBehaviour
 
             if (timer >= outsideTimeLimit)
             {
-                TriggerGameOver(planet, distance);
+                TriggerGameOver($"a {planet.CurrentTier} planet stayed {outsideTimeLimit:F1}s outside " +
+                                $"the boundary (distance {distance:F2} > radius {maxBoundaryRadius:F2}).");
                 return;
             }
         }
@@ -203,75 +283,241 @@ public class GameManager : MonoBehaviour
     }
 
     // Called by PlanetMerge after a max-tier BOOM has claimed its victims.
+    // Booms no longer advance the mission (targets are about CREATING planets,
+    // and a boom only destroys); kept as the hook for future scoring/VFX.
     public void NotifyBoom(PlanetTier tier)
+    {
+        Debug.Log($"GameManager: {tier} chain boom on level {CurrentLevelNumber}.");
+    }
+
+    // Called by PlanetMerge the moment a merge produces its upgraded planet.
+    // Fulfils at most ONE unachieved matching target per merge — Level 4's
+    // [Tier5, Tier5] needs two separate Tier5 merges, not one counted twice.
+    //
+    // Dependency rule: a created planet is only allowed to consume a target
+    // when NO higher-tier target is still open. Merging upward eats the very
+    // planets it is built from, so without this guard a level like
+    // [Tier4, Tier3] is trivialized: the first Tier3 on the way to the Tier4
+    // would claim the Tier3 slot, then vanish into the Tier4 merge that
+    // finishes the level. With the guard, targets resolve strictly from the
+    // highest tier down — the Tier4 must exist first, and only a Tier3
+    // created AFTER that (a genuine, separate Tier3) can claim its slot.
+    public void NotifyMergeCreated(PlanetTier createdTier)
     {
         if (State != GameState.Playing)
             return;
 
-        BoomTarget target = remainingTargets.Find(t => t.tier == tier && t.count > 0);
-        if (target == null)
+        int slot = -1;
+        for (int i = 0; i < activeTargets.Count; i++)
         {
-            Debug.Log($"GameManager: {tier} boom — not a mission target on level {CurrentLevelNumber}.");
-            return;
+            if (!achievedTargets[i] && activeTargets[i] == createdTier)
+            {
+                slot = i;
+                break;
+            }
         }
 
-        target.count--;
-        Debug.Log($"GameManager: {tier} boom counted! Remaining mission: {DescribeTargets()}");
-        UpdateMissionUI();
+        if (slot < 0)
+            return;
 
-        if (remainingTargets.TrueForAll(t => t.count <= 0))
+        // The created tier matches an open target — but defer it while any
+        // higher-tier target remains unfulfilled, because this planet is
+        // (presumptively) a building block that will be consumed on the way
+        // to that bigger goal.
+        for (int i = 0; i < activeTargets.Count; i++)
+        {
+            if (!achievedTargets[i] && activeTargets[i] > createdTier)
+            {
+                Debug.Log($"GameManager: {createdTier} created but not counted — " +
+                          $"{activeTargets[i]} must be achieved first (higher targets before lower).");
+                return;
+            }
+        }
+
+        achievedTargets[slot] = true;
+        Debug.Log($"GameManager: target {slot + 1} ({createdTier}) achieved! Mission: {DescribeTargets()}");
+
+        if (missionHUD != null)
+        {
+            missionHUD.MarkAchieved(slot);
+        }
+
+        if (!achievedTargets.Contains(false))
         {
             CompleteLevel();
         }
     }
 
+    // Max Target Tier Collision Guard, asked by PlanetMerge before combining
+    // two 'tier' planets (which would create a tier+1). Allowed only while an
+    // UNFULFILLED target sits strictly above 'tier' — i.e. the merge is still
+    // a step toward an open goal. Otherwise the pair must bounce like plain
+    // physics objects: without this, Level 5's two required Tier5s would
+    // touch and fuse into a useless Tier6, eating the player's progress.
+    // Side effects of the rule, both intentional:
+    //  - planets AT the highest open target tier never merge upward, so an
+    //    achieved-or-pending target planet can't be destroyed by accident;
+    //  - once every target is achieved the level ends anyway, and while the
+    //    win popup is up (state != Playing) nothing combines behind it.
+    public bool CanMerge(PlanetTier tier)
+    {
+        if (State != GameState.Playing)
+            return false;
+
+        // No mission authored (sandbox): no ceiling to enforce.
+        if (activeTargets.Count == 0)
+            return true;
+
+        for (int i = 0; i < activeTargets.Count; i++)
+        {
+            if (!achievedTargets[i] && activeTargets[i] > tier)
+                return true;
+        }
+        return false;
+    }
+
+    // Freeze-and-celebrate: gameplay halts via the state flag alone — the
+    // launcher ignores input and the boundary lose-check stops while State is
+    // not Playing. The board is deliberately NOT cleared here so the player
+    // sees the arena they won with behind the popup; AdvanceToNextLevel does
+    // the actual cleanup when NEXT is clicked.
     private void CompleteLevel()
     {
-        Debug.Log($"GameManager: LEVEL {CurrentLevelNumber} COMPLETE!");
+        State = GameState.LevelComplete;
+
+        // Rate before anything else can touch the clock: Update stops ticking
+        // the moment State leaves Playing, so this reads the true finish time.
+        int starsEarned = CalculateStarRating();
+        Debug.Log($"GameManager: LEVEL {CurrentLevelNumber} COMPLETE! " +
+                  $"Cleared in {currentTimeLimit - RemainingTime:F1}s of {currentTimeLimit:F0}s " +
+                  $"(3-star pace: {currentThreeStarThreshold:F0}s) — {starsEarned} star(s).");
+
+        // A planet may have been mid-countdown outside the boundary; the
+        // readout is meaningless in the frozen state.
+        if (countdownText != null)
+        {
+            countdownText.gameObject.SetActive(false);
+        }
+
+        if (levelCompletePanel != null)
+        {
+            levelCompletePanel.Show(starsEarned);
+        }
+    }
+
+    // Pace-based rating against the level's own playtested baseline: elapsed
+    // time within threeStarThreshold → 3 stars, within twice it → 2 stars,
+    // anything slower → 1 star. The floor is always 1 — a completed level
+    // can't show zero.
+    private int CalculateStarRating()
+    {
+        float timePassed = currentTimeLimit - RemainingTime;
+        if (timePassed <= currentThreeStarThreshold)
+            return 3;
+        if (timePassed <= currentThreeStarThreshold * 2f)
+            return 2;
+        return 1;
+    }
+
+    // Wired to the Level Completed popup's NEXT button. Public and state-
+    // guarded so a double-click or stray call outside the popup can't skip
+    // levels or wipe a live board.
+    public void AdvanceToNextLevel()
+    {
+        if (State != GameState.LevelComplete)
+            return;
+
+        if (levelCompletePanel != null)
+        {
+            levelCompletePanel.Hide();
+        }
+
         ClearBoard();
+
+        if (launcher != null)
+        {
+            launcher.ResetQueue();
+        }
+
+        // State first, then LoadLevel: same ordering rule as RestartGame, so
+        // the first frame of the new level is fully playable. LoadLevel then
+        // pushes the new level number and targets into the MissionHUD.
+        State = GameState.Playing;
         LoadLevel(CurrentLevelNumber + 1);
+    }
+
+    // Wired to the win popup's RESTART button: replay the level just
+    // completed (unlike RestartGame, which is the Game Over path back to
+    // level 1). Same teardown as AdvanceToNextLevel — clear board, fresh
+    // launcher queue, fresh level clock via LoadLevel — but the level index
+    // stays put. State-guarded so it only fires from the win popup.
+    public void ReplayCurrentLevel()
+    {
+        if (State != GameState.LevelComplete)
+            return;
+
+        Debug.Log($"GameManager: replaying level {CurrentLevelNumber}.");
+
+        if (levelCompletePanel != null)
+        {
+            levelCompletePanel.Hide();
+        }
+
+        ClearBoard();
+
+        if (launcher != null)
+        {
+            launcher.ResetQueue();
+        }
+
+        State = GameState.Playing;
+        LoadLevel(CurrentLevelNumber);
     }
 
     private void LoadLevel(int levelNumber)
     {
         CurrentLevelNumber = levelNumber;
-        remainingTargets.Clear();
+        activeTargets.Clear();
+        achievedTargets.Clear();
 
         if (levels.Count == 0)
         {
             Debug.LogWarning("GameManager: no levels defined — mission progression disabled.");
-            UpdateMissionUI();
             return;
         }
 
+        // Past the authored list, replay the last level.
         LevelDefinition source = levels[Mathf.Min(levelNumber - 1, levels.Count - 1)];
-        int difficultyBonus = Mathf.Max(0, levelNumber - levels.Count);
 
-        foreach (BoomTarget target in source.targets)
+        // Per-level timing, floored defensively so a mis-authored 0 can't
+        // produce an instant game over or a degenerate star bracket.
+        currentTimeLimit = Mathf.Max(1f, source.timeLimit);
+        currentThreeStarThreshold = Mathf.Clamp(source.threeStarThreshold, 1f, currentTimeLimit);
+
+        // Fresh clock for every level entry — this is the single reset point,
+        // and both AdvanceToNextLevel and RestartGame funnel through here.
+        // The readout snaps to the level's full time ("45", "90", ...)
+        // immediately rather than waiting for the next Update tick.
+        RemainingTime = currentTimeLimit;
+        UpdateTimerUI();
+
+        foreach (PlanetTier tier in source.targetTiers)
         {
-            remainingTargets.Add(new BoomTarget
+            if (activeTargets.Count >= MaxTargetsPerLevel)
             {
-                tier = target.tier,
-                count = target.count + difficultyBonus
-            });
+                Debug.LogWarning($"GameManager: level {levelNumber} defines more than {MaxTargetsPerLevel} targets — extras ignored (the MissionHUD has {MaxTargetsPerLevel} slots).");
+                break;
+            }
+            activeTargets.Add(tier);
+            achievedTargets.Add(false);
+        }
+
+        if (missionHUD != null)
+        {
+            missionHUD.ShowLevel(levelNumber, activeTargets);
         }
 
         Debug.Log($"GameManager: Level {levelNumber} started. Mission: {DescribeTargets()}");
-        UpdateMissionUI();
-    }
-
-    // Mission readout, e.g. "Level 2 — Tier4 x2". Shows "Mission complete!"
-    // for the brief window where every target is at 0 (all-zero states
-    // otherwise only exist mid-transition).
-    private void UpdateMissionUI()
-    {
-        if (missionText == null)
-            return;
-
-        bool allDone = remainingTargets.Count > 0 && remainingTargets.TrueForAll(t => t.count <= 0);
-        missionText.text = allDone
-            ? $"Level {CurrentLevelNumber} — Mission complete!"
-            : $"Level {CurrentLevelNumber} — Booms needed: {DescribeTargets()}";
     }
 
     private void ClearBoard()
@@ -293,7 +539,9 @@ public class GameManager : MonoBehaviour
         Debug.Log($"GameManager: board cleared ({cleared} planets removed).");
     }
 
-    private void TriggerGameOver(Planet offender, float distance)
+    // Shared fail path for both lose conditions (boundary breach and the
+    // level clock running out); the reason string only feeds the log.
+    private void TriggerGameOver(string reason)
     {
         State = GameState.GameOver;
 
@@ -308,9 +556,7 @@ public class GameManager : MonoBehaviour
             gameOverPanel.SetActive(true);
         }
 
-        Debug.Log($"GameManager: GAME OVER on level {CurrentLevelNumber} — a {offender.CurrentTier} " +
-                  $"planet stayed {outsideTimeLimit:F1}s outside the boundary " +
-                  $"(distance {distance:F2} > radius {maxBoundaryRadius:F2}).");
+        Debug.Log($"GameManager: GAME OVER on level {CurrentLevelNumber} — {reason}");
     }
 
     // Full reset back to level 1. Public so a Game Over panel button can call
@@ -323,12 +569,21 @@ public class GameManager : MonoBehaviour
         {
             gameOverPanel.SetActive(false);
         }
+        if (levelCompletePanel != null)
+        {
+            levelCompletePanel.Hide();
+        }
         if (countdownText != null)
         {
             countdownText.gameObject.SetActive(false);
         }
 
         ClearBoard();
+
+        if (launcher != null)
+        {
+            launcher.ResetQueue();
+        }
 
         // Order matters: LoadLevel refreshes the mission UI, and the launcher
         // only re-arms once State is Playing again — set state first so the
@@ -337,33 +592,128 @@ public class GameManager : MonoBehaviour
         LoadLevel(1);
     }
 
+    // The designed 15-level ramp, Tier4 debut through the Tier7 ultimate
+    // challenge. Duplicate entries are intentional: two Tier5 targets render
+    // as two identical sprites side by side on the panel.
+    //
+    // Timing model: building a TierN from scratch costs 2^(N-1) Tier1-
+    // equivalents of merging (Tier4=8, Tier5=16, Tier6=32, Tier7=64). The
+    // playtested levels 1-3 price out at ~6s per unit with a 3-star pace of
+    // roughly a third of the limit; every level below follows that same
+    // formula (rounded to friendly numbers, with a small premium at the top
+    // end where board crowding slows play). Remember the progression rules:
+    // targets resolve highest-tier-first, and the collision guard stops
+    // merges above the highest open target — so each mission is exactly the
+    // grind its cost says it is.
     private void BuildDefaultLevels()
     {
-        // Under the unified tier rules a BOOM needs two Tier4 planets, and each
-        // Tier4 is itself the product of a merge chain — so per-level counts
-        // are lower than the old color-based defaults were.
+        // ---- Act 1: playtested openers (cost 8-40) ----
         levels.Add(new LevelDefinition
         {
-            targets = { new BoomTarget { tier = PlanetTier.Tier4, count = 1 } }
+            targetTiers = { PlanetTier.Tier4 },
+            timeLimit = 45f, threeStarThreshold = 15f
         });
         levels.Add(new LevelDefinition
         {
-            targets = { new BoomTarget { tier = PlanetTier.Tier4, count = 2 } }
+            targetTiers = { PlanetTier.Tier4, PlanetTier.Tier3 },
+            timeLimit = 90f, threeStarThreshold = 30f
         });
-        Debug.Log("GameManager: no levels authored in the Inspector — using built-in defaults.");
+        levels.Add(new LevelDefinition
+        {
+            targetTiers = { PlanetTier.Tier5, PlanetTier.Tier4 },
+            timeLimit = 135f, threeStarThreshold = 45f
+        });
+        levels.Add(new LevelDefinition
+        {
+            targetTiers = { PlanetTier.Tier5, PlanetTier.Tier5 },
+            timeLimit = 180f, threeStarThreshold = 60f
+        });
+        levels.Add(new LevelDefinition
+        {
+            targetTiers = { PlanetTier.Tier5, PlanetTier.Tier5, PlanetTier.Tier4 },
+            timeLimit = 240f, threeStarThreshold = 80f
+        });
+
+        // ---- Act 2: the Tier6 era (cost 32-64) ----
+        // L6 — Tier6 debut, a single clean goal to learn the longer chain.
+        levels.Add(new LevelDefinition
+        {
+            targetTiers = { PlanetTier.Tier6 },
+            timeLimit = 200f, threeStarThreshold = 65f
+        });
+        // L7 — Tier6 plus a quick Tier4 chaser afterwards.
+        levels.Add(new LevelDefinition
+        {
+            targetTiers = { PlanetTier.Tier6, PlanetTier.Tier4 },
+            timeLimit = 260f, threeStarThreshold = 85f
+        });
+        // L8 — Tier6 then a Tier5: the follow-up is half a Tier6 by itself.
+        levels.Add(new LevelDefinition
+        {
+            targetTiers = { PlanetTier.Tier6, PlanetTier.Tier5 },
+            timeLimit = 290f, threeStarThreshold = 95f
+        });
+        // L9 — full three-slot spread; mid-tier chasers crowd the board.
+        levels.Add(new LevelDefinition
+        {
+            targetTiers = { PlanetTier.Tier6, PlanetTier.Tier5, PlanetTier.Tier4 },
+            timeLimit = 340f, threeStarThreshold = 110f
+        });
+        // L10 — twin Tier6s, the Act 2 finale (same cost as one Tier7).
+        levels.Add(new LevelDefinition
+        {
+            targetTiers = { PlanetTier.Tier6, PlanetTier.Tier6 },
+            timeLimit = 385f, threeStarThreshold = 125f
+        });
+
+        // ---- Act 3: the Tier7 era (cost 64-112) ----
+        // L11 — Tier7 debut: one goal, the longest single chain in the game.
+        levels.Add(new LevelDefinition
+        {
+            targetTiers = { PlanetTier.Tier7 },
+            timeLimit = 400f, threeStarThreshold = 130f
+        });
+        // L12 — Tier7 with a light Tier4 epilogue.
+        levels.Add(new LevelDefinition
+        {
+            targetTiers = { PlanetTier.Tier7, PlanetTier.Tier4 },
+            timeLimit = 435f, threeStarThreshold = 145f
+        });
+        // L13 — Tier7 then Tier5.
+        levels.Add(new LevelDefinition
+        {
+            targetTiers = { PlanetTier.Tier7, PlanetTier.Tier5 },
+            timeLimit = 480f, threeStarThreshold = 160f
+        });
+        // L14 — Tier7 then Tier6: two monster chains back to back.
+        levels.Add(new LevelDefinition
+        {
+            targetTiers = { PlanetTier.Tier7, PlanetTier.Tier6 },
+            timeLimit = 580f, threeStarThreshold = 190f
+        });
+        // L15 — the ultimate: Tier7, Tier6, Tier5 in strict descending order.
+        levels.Add(new LevelDefinition
+        {
+            targetTiers = { PlanetTier.Tier7, PlanetTier.Tier6, PlanetTier.Tier5 },
+            timeLimit = 680f, threeStarThreshold = 225f
+        });
+
+        Debug.Log("GameManager: no levels authored in the Inspector — using the built-in 15-level configuration.");
     }
 
     private string DescribeTargets()
     {
-        if (remainingTargets.Count == 0)
+        if (activeTargets.Count == 0)
             return "(none)";
 
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < remainingTargets.Count; i++)
+        for (int i = 0; i < activeTargets.Count; i++)
         {
             if (i > 0)
                 sb.Append(", ");
-            sb.Append(remainingTargets[i].tier).Append(" x").Append(remainingTargets[i].count);
+            sb.Append(activeTargets[i]);
+            if (achievedTargets[i])
+                sb.Append(" (done)");
         }
         return sb.ToString();
     }

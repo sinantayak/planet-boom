@@ -1,23 +1,39 @@
-# === Unity Geçici ve Kilitlenen Klasörler ===
-/[Tt]emp/
-/[Oo]bj/
-/[Ll]og/
-/[Mm]emoryCaptures/
-/[Cc]leanup/
-/Library/
-/artifacts/
+# Unity'nin otomatik ürettiği geçici kütüphane klasörleri (KESİNLİKLE IGNORE EDİLMELİ)
+Library/
+Temp/
+Obj/
+Build/
+Builds/
+Logs/
+UserSettings/
 
-# === VS Code ve Editör Dosyaları ===
-/.vscode/
-/*.csproj
-/*.sln
-/*.userprefs
+# Hafıza kayıtları ve geçici crash logları
+MemoryCaptures/
+Crash报告/
 
-# === İşletim Sistemi Çöpleri ===
+# Editör veya IDE'lerin (VS Code, Rider, Visual Studio) ürettiği özel dosyalar
+.vs/
+.gradle/
+ExportedObj/
+.idea/
+*.sln
+*.csproj
+*.unityproj
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.opendb
+*.VC.db
+
+# İşletim sistemi çöpleri
 .DS_Store
-.DS_Store?
 Thumbs.db
 
-# === ÖNEMLİ NOT ===
-# ProjectSettings klasörünün tamamını engellemiyoruz, 
-# çünkü Unity'nin buraya ihtiyacı var. Sadece Temp ve Library uçuyor.
+# Çıkardığın APK dosyaları git'e gitmesin (Masaüstüne veya Proje içine çıkardıysan)
+*.apk
+*.aab
+*.unitypackage
