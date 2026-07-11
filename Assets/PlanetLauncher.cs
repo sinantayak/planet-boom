@@ -32,9 +32,45 @@ public class PlanetLauncher : MonoBehaviour
     // guide line, e.g. 0.6.
     [SerializeField] private float startDotAlpha = 0.85f;
 
-    [Header("Pull Power")]
-    [SerializeField] private float minPullDistance = 0.5f;
-    [SerializeField] private float maxPullDistance = 5f;
+    [Header("Aim Control (relative drag)")]
+    // Hard cap on how far the aim may tilt from straight up, in degrees per
+    // side. This is the ONLY angle limit: 60 means a usable arc of 30°..150°
+    // in polar terms — well past the old ~75°..115° feel, and past the 135°
+    // target. Raise it toward 89 for near-horizontal skill shots.
+    [SerializeField] [Range(0f, 89f)] private float maxAngleFromVertical = 60f;
+
+    // Degrees of aim rotation per full screen-WIDTH of horizontal finger
+    // travel. Relative control: only the drag delta matters, never where the
+    // finger sits — no shot ever requires reaching the physical screen edge.
+    // At 240, tilting to the 60° cap costs a quarter of the screen width.
+    [SerializeField] private float angleSensitivity = 240f;
+
+    // Classic slingshot mapping (default ON): drag RIGHT pulls the aim LEFT,
+    // drag LEFT pulls it RIGHT — like drawing a rubber band backward, the
+    // trajectory always leans opposite the pull. Turn off for the "direct"
+    // arcade feel instead, where the trajectory leans the same way the
+    // finger moves.
+    [SerializeField] private bool invertHorizontalDrag = true;
+
+    // When true, aiming only starts if the press lands within grabRadius of
+    // the launcher slot (the "press the ball" feel). Off by default: with
+    // relative drag the whole screen is a trackpad, which is the more
+    // forgiving mobile UX — a thumb can start anywhere.
+    [SerializeField] private bool requirePressOnPlanet = false;
+    [SerializeField] private float grabRadius = 1.5f;
+
+    [Header("Shot Power")]
+    // Power the shot previews at the instant the finger goes down — the
+    // "medium/default" straight-up guide. 1 = full launchSpeed.
+    [SerializeField] [Range(0.05f, 1f)] private float defaultPowerRatio = 0.7f;
+
+    // Change in power ratio per full screen-HEIGHT of vertical finger travel.
+    // Dragging DOWN charges the shot toward full power, dragging UP softens
+    // it toward minPowerRatio. Set to 0 to lock shots at defaultPowerRatio.
+    [SerializeField] private float powerSensitivity = 1.2f;
+
+    // Softest allowed shot, as a fraction of launchSpeed.
+    [SerializeField] [Range(0.05f, 1f)] private float minPowerRatio = 0.3f;
 
     [Header("Launcher Timing")]
     // Minimum delay between shots. After a launch the slot sits empty for this
@@ -101,14 +137,23 @@ public class PlanetLauncher : MonoBehaviour
     private Transform dotContainer;
     private Vector3 dotBaseScale = Vector3.one;
 
-    // Hold-to-aim state: aiming starts on press, the dots follow the pointer
-    // while held, and the shot fires on release (BBTAN-style).
+    // Hold-to-aim state: aiming starts on press (guide instantly up at default
+    // power), drag deltas steer it while held, the shot fires on release.
     private bool isAiming;
     private Vector2 lastAimDirection = Vector2.up;
 
-    // 0..1 fraction of maxPullDistance at release; scales both the previewed
-    // path length while dragging and the final launch speed (pool-cue style).
+    // Degrees the current aim is tilted from straight up (positive = right).
+    // Accumulated from drag deltas, clamped to ±maxAngleFromVertical.
+    private float aimAngleOffset;
+
+    // 0..1 fraction of launchSpeed at release; scales both the previewed
+    // path length while dragging and the final launch speed.
     private float lastPullRatio = 1f;
+
+    // Last on-screen pointer position, for frame-to-frame drag deltas.
+    // Off-screen/non-finite frames are skipped, so the delta stream never
+    // contains garbage and the aim freezes instead of jumping.
+    private Vector2 lastPointerScreenPosition;
 
     void Awake()
     {
@@ -203,15 +248,35 @@ public class PlanetLauncher : MonoBehaviour
     private void BeginAiming()
     {
         // Only start aiming from a pointer position that is actually on screen;
-        // touch simulators can report an off-screen position on the first frame,
-        // which is what fed garbage into ScreenToWorldPoint (frustum error).
-        if (!TryGetAimVector(transform.position, out Vector2 toPointer))
+        // touch simulators can report an off-screen position on the first frame.
+        if (!TryGetPointerScreenPosition(out Vector2 pointer))
+            return;
+
+        if (requirePressOnPlanet && !PressIsOnPlanet(pointer))
             return;
 
         isAiming = true;
-        lastAimDirection = toPointer.normalized;
-        lastPullRatio = ComputePullRatio(toPointer.magnitude);
-        UpdateAimLine();
+        lastPointerScreenPosition = pointer;
+
+        // Spec'd press feel: the guide appears INSTANTLY on touch — straight
+        // up, at the default medium power — before any dragging has happened.
+        aimAngleOffset = 0f;
+        lastAimDirection = Vector2.up;
+        lastPullRatio = defaultPowerRatio;
+        DrawTrajectory();
+    }
+
+    // Optional press gate: converts the press to world space and accepts it
+    // only within grabRadius of the launcher slot.
+    private bool PressIsOnPlanet(Vector2 screenPoint)
+    {
+        Camera cam = Camera.main;
+        if (cam == null)
+            return false;
+
+        Vector3 screenPosition = new Vector3(screenPoint.x, screenPoint.y, -cam.transform.position.z);
+        Vector2 worldPoint = cam.ScreenToWorldPoint(screenPosition);
+        return Vector2.Distance(worldPoint, transform.position) <= grabRadius;
     }
 
     private void EndAimingAndLaunch()
@@ -390,12 +455,43 @@ public class PlanetLauncher : MonoBehaviour
 
     private void UpdateAimLine()
     {
-        // While dragging, a finger can slide off screen; keep showing the last
-        // valid direction/pull instead of feeding bad coordinates to the camera.
-        if (TryGetAimVector(transform.position, out Vector2 toPointer))
+        // While dragging, a finger can slide off screen; skip the delta on
+        // those frames and keep showing the last valid aim.
+        if (TryGetPointerScreenPosition(out Vector2 pointer))
         {
-            lastAimDirection = toPointer.normalized;
-            lastPullRatio = ComputePullRatio(toPointer.magnitude);
+            Vector2 delta = pointer - lastPointerScreenPosition;
+            lastPointerScreenPosition = pointer;
+
+            // Relative control: horizontal finger travel ROTATES the aim,
+            // normalized by screen size so the tuning feels identical on any
+            // resolution/DPI. Where the finger sits on screen is irrelevant —
+            // only movement steers, so sharp angles never need edge reach.
+            //
+            // Classic sling mapping (invertHorizontalDrag default true): the
+            // raw delta.x>0 (finger moving right) computes a RIGHT-leaning
+            // angleDelta first, then the sign flips it — so the aim actually
+            // bends LEFT, like pulling a rubber band back opposite the throw
+            // direction. Drag left bends right the same way, symmetrically.
+            float angleDelta = delta.x / Screen.width * angleSensitivity;
+            if (invertHorizontalDrag)
+            {
+                angleDelta = -angleDelta;
+            }
+            aimAngleOffset = Mathf.Clamp(aimAngleOffset + angleDelta,
+                -maxAngleFromVertical, maxAngleFromVertical);
+
+            // Sling tension: dragging DOWN (delta.y negative — screen-space Y
+            // runs bottom-to-top) increases lastPullRatio toward full power;
+            // dragging UP softens it toward minPowerRatio. This is already
+            // the "pull the band back to charge it" mapping — no inversion
+            // flag needed, the sign falls out of screen-space Y directly.
+            lastPullRatio = Mathf.Clamp(
+                lastPullRatio - delta.y / Screen.height * powerSensitivity,
+                minPowerRatio, 1f);
+
+            // 0° = straight up; positive tilts right, negative left.
+            float radians = aimAngleOffset * Mathf.Deg2Rad;
+            lastAimDirection = new Vector2(Mathf.Sin(radians), Mathf.Cos(radians));
         }
 
         DrawTrajectory();
@@ -492,42 +588,21 @@ public class PlanetLauncher : MonoBehaviour
         }
     }
 
-    // Maps the raw pointer distance to a 0..1 power fraction: distances are
-    // clamped to [minPullDistance, maxPullDistance], so a full pull gives 1
-    // (max speed) and the shortest pull still gives a soft minimum tap.
-    private float ComputePullRatio(float pullDistance)
+    // Pointer position in screen pixels, guarded: fails (returning false)
+    // instead of producing garbage when the position is off screen or
+    // non-finite — the source of the old "Screen position out of view
+    // frustum" error. Relative aiming only ever consumes valid deltas.
+    private bool TryGetPointerScreenPosition(out Vector2 pointer)
     {
-        float clamped = Mathf.Clamp(pullDistance, minPullDistance, maxPullDistance);
-        return clamped / maxPullDistance;
-    }
+        Vector3 position = Input.mousePosition;
+        pointer = position;
 
-    // Screen-to-world conversion, guarded: fails (returning false) instead of
-    // producing garbage when there is no camera or the pointer is off screen —
-    // the source of the "Screen position out of view frustum" error. Outputs the
-    // full (unnormalized) vector so callers get both direction and pull distance.
-    private bool TryGetAimVector(Vector3 launchPosition, out Vector2 toPointer)
-    {
-        toPointer = Vector2.up;
-
-        Camera cam = Camera.main;
-        if (cam == null)
+        if (float.IsNaN(position.x) || float.IsNaN(position.y) ||
+            float.IsInfinity(position.x) || float.IsInfinity(position.y) ||
+            position.x < 0f || position.x > Screen.width ||
+            position.y < 0f || position.y > Screen.height)
             return false;
 
-        Vector3 mouseScreenPosition = Input.mousePosition;
-        if (mouseScreenPosition.x < 0f || mouseScreenPosition.x > Screen.width ||
-            mouseScreenPosition.y < 0f || mouseScreenPosition.y > Screen.height ||
-            float.IsNaN(mouseScreenPosition.x) || float.IsNaN(mouseScreenPosition.y) ||
-            float.IsInfinity(mouseScreenPosition.x) || float.IsInfinity(mouseScreenPosition.y))
-            return false;
-
-        mouseScreenPosition.z = -cam.transform.position.z;
-        Vector3 mouseWorldPosition = cam.ScreenToWorldPoint(mouseScreenPosition);
-
-        Vector2 toMouse = (Vector2)(mouseWorldPosition - launchPosition);
-        if (toMouse.sqrMagnitude <= 0.0001f)
-            return false;
-
-        toPointer = toMouse;
         return true;
     }
 }

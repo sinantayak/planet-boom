@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 3e2abce88f695574e87a709d0b2c80b9
+guid: 365b2a669b424ea4aa2047c2dc82ad2c
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4526157536208131458
-    second: Level-Complete-Panel_0
+      213: -975215847200237586
+    second: white-dot_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -97,6 +97,19 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
     buildTarget: WebGL
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -113,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Level-Complete-Panel_0
+      name: white-dot_0
       rect:
         serializedVersion: 2
-        x: 12
-        y: 13
-        width: 488
-        height: 379
+        x: 45
+        y: 45
+        width: 38
+        height: 38
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 285942f6c4420de30800000000000000
-      internalID: 4526157536208131458
+      spriteID: ee75c489a565772f0800000000000000
+      internalID: -975215847200237586
       vertices: []
       indices: 
       edges: []
@@ -148,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Level-Complete-Panel_0: 4526157536208131458
+      white-dot_0: -975215847200237586
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

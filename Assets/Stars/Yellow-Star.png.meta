@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: dee8d34e326f038429af1ee0bf337f58
+guid: 5523f074864fcac47aea87cd82ee772e
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2524343255121127719
-    second: Visual_Boundary_Ring_0
+      213: -53665745392586456
+    second: Yellow-Star_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -97,6 +97,19 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
     buildTarget: WebGL
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -113,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Visual_Boundary_Ring_0
+      name: Yellow-Star_0
       rect:
         serializedVersion: 2
-        x: 104
-        y: 107
-        width: 2039
-        height: 2039
+        x: 3
+        y: 5
+        width: 119
+        height: 114
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9d61a5b1f2bb7fcd0800000000000000
-      internalID: -2524343255121127719
+      spriteID: 821b445f947514ff0800000000000000
+      internalID: -53665745392586456
       vertices: []
       indices: 
       edges: []
@@ -148,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Visual_Boundary_Ring_0: -2524343255121127719
+      Yellow-Star_0: -53665745392586456
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
