@@ -431,8 +431,9 @@ public class GameManager : MonoBehaviour
         vortexRoutine = StartCoroutine(RunLevelCompleteVortex(starsEarned));
     }
 
-    // The cinematic itself: vortex on → wait → vortex off → sweep whatever
-    // the pull didn't physically reach in time → popup out of the core.
+    // The cinematic itself: vortex on → wait until the board is actually
+    // empty (or the safety cap expires) → vortex off → sweep whatever the
+    // pull didn't physically reach in time → popup out of the core.
     private IEnumerator RunLevelCompleteVortex(int starsEarned)
     {
         if (blackHole != null)
@@ -440,7 +441,18 @@ public class GameManager : MonoBehaviour
             blackHole.BeginVortex(vortexSwallowsMeteorites);
         }
 
-        yield return new WaitForSeconds(vortexDuration);
+        // Dynamic reveal: end the wait the instant every body has actually
+        // been swallowed by the core instead of always sitting out the full
+        // vortexDuration — that turned an already-empty screen into dead
+        // time before the popup appeared. vortexDuration still bounds the
+        // wait as a safety cap in case a straggler never arrives (e.g. stuck
+        // mid-fusion), so the cinematic can't hang indefinitely.
+        float elapsed = 0f;
+        while (elapsed < vortexDuration && blackHole != null && blackHole.HasRemainingVortexBodies())
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
 
         if (blackHole != null)
         {

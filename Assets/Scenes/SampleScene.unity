@@ -2129,7 +2129,7 @@ MonoBehaviour:
   vortexSinkholeAccel: 6
   vortexSwirlDegreesPerSecond: 240
   vortexSpinSpeed: 540
-  vortexSwallowRadius: 0.3
+  vortexSwallowRadius: 0.05
 --- !u!212 &1130355244
 SpriteRenderer:
   serializedVersion: 3

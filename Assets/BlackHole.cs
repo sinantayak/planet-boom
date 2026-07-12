@@ -110,9 +110,11 @@ public class BlackHole : MonoBehaviour
     // vortex-affected body is mathematically guaranteed to cross this
     // threshold before its radius could ever reach exactly 0 — there is no
     // tunneling case to guard against like the old velocity-integration
-    // version had. Kept small (tight around the core) so bodies spin close
-    // in before vanishing rather than popping out early.
-    [SerializeField] private float vortexSwallowRadius = 0.3f;
+    // version had. Effectively zero (not exactly 0 — direction is undefined
+    // at the exact core, see the 0.0001f guard below) so a body visibly
+    // spirals all the way into the center before vanishing, instead of
+    // popping out of existence while still visibly off-core.
+    [SerializeField] private float vortexSwallowRadius = 0.05f;
 
     private bool isVortexActive;
     private bool vortexIncludesMeteorites;
@@ -124,6 +126,24 @@ public class BlackHole : MonoBehaviour
     // false, since AddForce/velocity writes on a non-simulated body are
     // no-ops anyway, but this keeps Meteorite's FixedUpdate from bothering.
     public bool VortexIncludesMeteorites => vortexIncludesMeteorites;
+
+    // GameManager polls this each frame during the cinematic instead of
+    // always waiting out the full vortexDuration — the popup can appear the
+    // instant the board is actually empty. Swallow() destroys a body's
+    // GameObject outright, so "any left" is just "does FindObjectsByType
+    // still find one"; no extra bookkeeping needed. vortexDuration remains
+    // GameManager's safety cap for a straggler that never arrives.
+    public bool HasRemainingVortexBodies()
+    {
+        if (!isVortexActive)
+            return false;
+
+        if (FindObjectsByType<Planet>(FindObjectsSortMode.None).Length > 0)
+            return true;
+
+        return vortexIncludesMeteorites
+            && FindObjectsByType<Meteorite>(FindObjectsSortMode.None).Length > 0;
+    }
 
     // GameManager's level-complete cinematic. includeMeteorites mirrors its
     // persistence rule: when meteorites survive level transitions, the vortex
