@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using TMPro;
@@ -29,7 +30,11 @@ public class LevelDefinition
 // else is self-driven.
 public class GameManager : MonoBehaviour
 {
-    public enum GameState { Playing, LevelComplete, GameOver }
+    // CinematicVortex: the moment between "last target fulfilled" and the win
+    // popup — the black hole spins up and swallows the board while all input
+    // and lose checks are frozen (every gameplay system already gates on
+    // State == Playing, so the new state disables them for free).
+    public enum GameState { Playing, LevelComplete, GameOver, CinematicVortex }
 
     public static GameManager Instance { get; private set; }
 
@@ -54,6 +59,20 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Transform blackHoleCenter;
     [SerializeField] private float maxBoundaryRadius = 6f;
     [SerializeField] private float outsideTimeLimit = 2f;
+
+    [Header("Level Complete Vortex")]
+    // Seconds the CinematicVortex phase runs before the win popup appears —
+    // long enough for the boosted pull to visibly swallow the whole board.
+    // Must stay >= the farthest planet's actual travel time in BlackHole's
+    // spiral (AdvanceSpiral) or the cleanup sweep below cuts the animation
+    // short and yanks stragglers out instead of letting them get swallowed;
+    // a body starting at maxBoundaryRadius (~2.4) takes ~3s with the current
+    // slow-cruise/late-acceleration tuning, so this needs headroom above that.
+    [SerializeField] private float vortexDuration = 3.5f;
+    // Whether the vortex also drags in and eats meteorites. ON matches the
+    // "board fully swallowed" cinematic; turn OFF to restore full meteorite
+    // persistence across level wins (they'll sit untouched through the show).
+    [SerializeField] private bool vortexSwallowsMeteorites = true;
 
     [Header("UI")]
     // Countdown readout ("CRITICAL: 1.4s!") shown while at least one planet is
@@ -93,6 +112,14 @@ public class GameManager : MonoBehaviour
     // For resetting the shot queue on level transitions and restarts.
     private PlanetLauncher launcher;
 
+    // The scene's black hole component (blackHoleCenter is just its
+    // transform): drives the win vortex via BeginVortex/EndVortex.
+    private BlackHole blackHole;
+
+    // Live while the CinematicVortex phase runs; RestartGame must be able to
+    // cancel it (and shut the vortex down) if called mid-cinematic.
+    private Coroutine vortexRoutine;
+
     // Last whole second written to gameplayTimerText: the clock only needs a
     // TMP re-layout once per second, not once per frame.
     private int lastDisplayedTimerSeconds = -1;
@@ -118,9 +145,9 @@ public class GameManager : MonoBehaviour
         }
         Instance = this;
 
+        blackHole = FindFirstObjectByType<BlackHole>();
         if (blackHoleCenter == null)
         {
-            BlackHole blackHole = FindFirstObjectByType<BlackHole>();
             if (blackHole != null)
             {
                 blackHoleCenter = blackHole.transform;
@@ -376,17 +403,19 @@ public class GameManager : MonoBehaviour
         return false;
     }
 
-    // Freeze-and-celebrate: gameplay halts via the state flag alone — the
-    // launcher ignores input and the boundary lose-check stops while State is
-    // not Playing. The board is deliberately NOT cleared here so the player
-    // sees the arena they won with behind the popup; AdvanceToNextLevel does
-    // the actual cleanup when NEXT is clicked.
+    // The win no longer snaps the popup open: it enters the CinematicVortex
+    // phase first — input frozen via the state flag (the launcher ignores
+    // everything while State != Playing, so the player watches, not shoots),
+    // the black hole spins up and swallows the board, and only then does the
+    // popup bloom out of the core. The old "board stays behind the popup"
+    // behavior is gone by design: the vortex IS the board clear now.
     private void CompleteLevel()
     {
-        State = GameState.LevelComplete;
+        State = GameState.CinematicVortex;
 
         // Rate before anything else can touch the clock: Update stops ticking
-        // the moment State leaves Playing, so this reads the true finish time.
+        // the moment State leaves Playing, so this reads the true finish time
+        // no matter how long the cinematic runs.
         int starsEarned = CalculateStarRating();
         Debug.Log($"GameManager: LEVEL {CurrentLevelNumber} COMPLETE! " +
                   $"Cleared in {currentTimeLimit - RemainingTime:F1}s of {currentTimeLimit:F0}s " +
@@ -399,9 +428,37 @@ public class GameManager : MonoBehaviour
             countdownText.gameObject.SetActive(false);
         }
 
+        vortexRoutine = StartCoroutine(RunLevelCompleteVortex(starsEarned));
+    }
+
+    // The cinematic itself: vortex on → wait → vortex off → sweep whatever
+    // the pull didn't physically reach in time → popup out of the core.
+    private IEnumerator RunLevelCompleteVortex(int starsEarned)
+    {
+        if (blackHole != null)
+        {
+            blackHole.BeginVortex(vortexSwallowsMeteorites);
+        }
+
+        yield return new WaitForSeconds(vortexDuration);
+
+        if (blackHole != null)
+        {
+            blackHole.EndVortex();
+        }
+
+        // The vortex swallows bodies that reach the core, but a straggler
+        // parked at the rim might not arrive within vortexDuration — the
+        // sweep guarantees the next level starts clean regardless.
+        ClearBoard(clearMeteorites: vortexSwallowsMeteorites);
+
+        vortexRoutine = null;
+        State = GameState.LevelComplete;
+
         if (levelCompletePanel != null)
         {
-            levelCompletePanel.Show(starsEarned);
+            Vector3 core = blackHoleCenter != null ? blackHoleCenter.position : Vector3.zero;
+            levelCompletePanel.ShowFromWorldPoint(starsEarned, core);
         }
     }
 
@@ -432,7 +489,12 @@ public class GameManager : MonoBehaviour
             levelCompletePanel.Hide();
         }
 
-        ClearBoard();
+        // The win vortex already swallowed the board before this popup ever
+        // appeared; this sweep is a belt-and-braces no-op in the normal flow.
+        // clearMeteorites stays false so that when vortexSwallowsMeteorites
+        // is turned OFF, surviving meteorites still persist into the next
+        // level as designed.
+        ClearBoard(clearMeteorites: false);
 
         if (launcher != null)
         {
@@ -463,7 +525,9 @@ public class GameManager : MonoBehaviour
             levelCompletePanel.Hide();
         }
 
-        ClearBoard();
+        // Meteorites persist across a replay too — they were part of the
+        // board state the player actually won with.
+        ClearBoard(clearMeteorites: false);
 
         if (launcher != null)
         {
@@ -520,7 +584,12 @@ public class GameManager : MonoBehaviour
         Debug.Log($"GameManager: Level {levelNumber} started. Mission: {DescribeTargets()}");
     }
 
-    private void ClearBoard()
+    // Meteorites are persistent obstacles by design (see Meteorite.cs's
+    // Direct Growth rule): clearing them on every level win would erase the
+    // exact escalating hazard the mechanic is built around. clearMeteorites
+    // is true only for RestartGame's hard reset back to level 1, where a
+    // fully blank board is the expected "start over" behavior.
+    private void ClearBoard(bool clearMeteorites)
     {
         int cleared = 0;
         foreach (Planet planet in FindObjectsByType<Planet>(FindObjectsSortMode.None))
@@ -535,8 +604,20 @@ public class GameManager : MonoBehaviour
             cleared++;
         }
 
+        int meteoritesCleared = 0;
+        if (clearMeteorites)
+        {
+            foreach (Meteorite meteorite in FindObjectsByType<Meteorite>(FindObjectsSortMode.None))
+            {
+                meteorite.PrepareForDespawn();
+                Destroy(meteorite.gameObject);
+                meteoritesCleared++;
+            }
+        }
+
         outsideTimers.Clear();
-        Debug.Log($"GameManager: board cleared ({cleared} planets removed).");
+        Debug.Log($"GameManager: board cleared ({cleared} planets removed, " +
+                  $"{(clearMeteorites ? meteoritesCleared.ToString() : "0 (persisted)")} meteorites removed).");
     }
 
     // Shared fail path for both lose conditions (boundary breach and the
@@ -565,6 +646,19 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("GameManager: restarting game.");
 
+        // RestartGame is public and unguarded by design; if it fires while
+        // the win cinematic is mid-swallow, shut the vortex down cleanly so
+        // the next run doesn't start inside a super-gravity black hole.
+        if (vortexRoutine != null)
+        {
+            StopCoroutine(vortexRoutine);
+            vortexRoutine = null;
+            if (blackHole != null)
+            {
+                blackHole.EndVortex();
+            }
+        }
+
         if (gameOverPanel != null)
         {
             gameOverPanel.SetActive(false);
@@ -578,7 +672,10 @@ public class GameManager : MonoBehaviour
             countdownText.gameObject.SetActive(false);
         }
 
-        ClearBoard();
+        // Full restart wipes meteorites too — a hard reset back to level 1
+        // should hand back a genuinely blank board, not a hazard the player
+        // accumulated in a run that's over.
+        ClearBoard(clearMeteorites: true);
 
         if (launcher != null)
         {
@@ -592,110 +689,114 @@ public class GameManager : MonoBehaviour
         LoadLevel(1);
     }
 
-    // The designed 15-level ramp, Tier4 debut through the Tier7 ultimate
-    // challenge. Duplicate entries are intentional: two Tier5 targets render
-    // as two identical sprites side by side on the panel.
+    // The designed 15-level ramp, Tier5 debut through the Tier8 ultimate
+    // challenge (PlanetMerge.maxTier is configured at Tier8 — two Tier8s BOOM
+    // instead of merging further, so Tier8 is the true ceiling). Duplicate
+    // entries are intentional: two Tier6 targets render as two identical
+    // sprites side by side on the panel.
     //
     // Timing model: building a TierN from scratch costs 2^(N-1) Tier1-
-    // equivalents of merging (Tier4=8, Tier5=16, Tier6=32, Tier7=64). The
-    // playtested levels 1-3 price out at ~6s per unit with a 3-star pace of
-    // roughly a third of the limit; every level below follows that same
-    // formula (rounded to friendly numbers, with a small premium at the top
-    // end where board crowding slows play). Remember the progression rules:
-    // targets resolve highest-tier-first, and the collision guard stops
-    // merges above the highest open target — so each mission is exactly the
-    // grind its cost says it is.
+    // equivalents of merging (Tier4=8, Tier5=16, Tier6=32, Tier7=64,
+    // Tier8=128). Every level prices out at ~6s per cost unit with a 3-star
+    // pace of roughly a third of the limit — the same formula as before,
+    // just carried one tier higher and with every level's targets bumped up
+    // the ladder so the early game no longer clears on autopilot. Remember
+    // the progression rules: targets resolve highest-tier-first, and the
+    // collision guard stops merges above the highest open target — so each
+    // mission is exactly the grind its cost says it is, and a bigger target
+    // means a bigger, heavier pile the player has to keep inside the
+    // boundary the whole time it's being built.
     private void BuildDefaultLevels()
     {
-        // ---- Act 1: playtested openers (cost 8-40) ----
+        // ---- Act 1: openers (cost 16-56) — was Tier3/4, now Tier4/5/6 ----
         levels.Add(new LevelDefinition
         {
-            targetTiers = { PlanetTier.Tier4 },
-            timeLimit = 45f, threeStarThreshold = 15f
-        });
-        levels.Add(new LevelDefinition
-        {
-            targetTiers = { PlanetTier.Tier4, PlanetTier.Tier3 },
-            timeLimit = 90f, threeStarThreshold = 30f
+            targetTiers = { PlanetTier.Tier5 },
+            timeLimit = 95f, threeStarThreshold = 30f
         });
         levels.Add(new LevelDefinition
         {
             targetTiers = { PlanetTier.Tier5, PlanetTier.Tier4 },
-            timeLimit = 135f, threeStarThreshold = 45f
+            timeLimit = 145f, threeStarThreshold = 50f
         });
-        levels.Add(new LevelDefinition
-        {
-            targetTiers = { PlanetTier.Tier5, PlanetTier.Tier5 },
-            timeLimit = 180f, threeStarThreshold = 60f
-        });
-        levels.Add(new LevelDefinition
-        {
-            targetTiers = { PlanetTier.Tier5, PlanetTier.Tier5, PlanetTier.Tier4 },
-            timeLimit = 240f, threeStarThreshold = 80f
-        });
-
-        // ---- Act 2: the Tier6 era (cost 32-64) ----
-        // L6 — Tier6 debut, a single clean goal to learn the longer chain.
-        levels.Add(new LevelDefinition
-        {
-            targetTiers = { PlanetTier.Tier6 },
-            timeLimit = 200f, threeStarThreshold = 65f
-        });
-        // L7 — Tier6 plus a quick Tier4 chaser afterwards.
         levels.Add(new LevelDefinition
         {
             targetTiers = { PlanetTier.Tier6, PlanetTier.Tier4 },
-            timeLimit = 260f, threeStarThreshold = 85f
+            timeLimit = 240f, threeStarThreshold = 80f
         });
-        // L8 — Tier6 then a Tier5: the follow-up is half a Tier6 by itself.
         levels.Add(new LevelDefinition
         {
             targetTiers = { PlanetTier.Tier6, PlanetTier.Tier5 },
             timeLimit = 290f, threeStarThreshold = 95f
         });
-        // L9 — full three-slot spread; mid-tier chasers crowd the board.
         levels.Add(new LevelDefinition
         {
             targetTiers = { PlanetTier.Tier6, PlanetTier.Tier5, PlanetTier.Tier4 },
-            timeLimit = 340f, threeStarThreshold = 110f
-        });
-        // L10 — twin Tier6s, the Act 2 finale (same cost as one Tier7).
-        levels.Add(new LevelDefinition
-        {
-            targetTiers = { PlanetTier.Tier6, PlanetTier.Tier6 },
-            timeLimit = 385f, threeStarThreshold = 125f
+            timeLimit = 335f, threeStarThreshold = 110f
         });
 
-        // ---- Act 3: the Tier7 era (cost 64-112) ----
-        // L11 — Tier7 debut: one goal, the longest single chain in the game.
+        // ---- Act 2: the Tier7 era (cost 64-112) — was Tier6, now Tier7 ----
+        // L6 — Tier7 debut, a single clean goal to learn the longer chain.
         levels.Add(new LevelDefinition
         {
             targetTiers = { PlanetTier.Tier7 },
-            timeLimit = 400f, threeStarThreshold = 130f
+            timeLimit = 385f, threeStarThreshold = 130f
         });
-        // L12 — Tier7 with a light Tier4 epilogue.
-        levels.Add(new LevelDefinition
-        {
-            targetTiers = { PlanetTier.Tier7, PlanetTier.Tier4 },
-            timeLimit = 435f, threeStarThreshold = 145f
-        });
-        // L13 — Tier7 then Tier5.
+        // L7 — Tier7 plus a Tier5 chaser afterwards.
         levels.Add(new LevelDefinition
         {
             targetTiers = { PlanetTier.Tier7, PlanetTier.Tier5 },
             timeLimit = 480f, threeStarThreshold = 160f
         });
-        // L14 — Tier7 then Tier6: two monster chains back to back.
+        // L8 — Tier7 then a Tier6: the follow-up is half a Tier7 by itself.
         levels.Add(new LevelDefinition
         {
             targetTiers = { PlanetTier.Tier7, PlanetTier.Tier6 },
-            timeLimit = 580f, threeStarThreshold = 190f
+            timeLimit = 575f, threeStarThreshold = 190f
         });
-        // L15 — the ultimate: Tier7, Tier6, Tier5 in strict descending order.
+        // L9 — full three-slot spread; high-tier chasers crowd the board.
         levels.Add(new LevelDefinition
         {
             targetTiers = { PlanetTier.Tier7, PlanetTier.Tier6, PlanetTier.Tier5 },
-            timeLimit = 680f, threeStarThreshold = 225f
+            timeLimit = 670f, threeStarThreshold = 225f
+        });
+        // L10 — twin Tier7s, the Act 2 finale (same cost as one Tier8).
+        levels.Add(new LevelDefinition
+        {
+            targetTiers = { PlanetTier.Tier7, PlanetTier.Tier7 },
+            timeLimit = 770f, threeStarThreshold = 255f
+        });
+
+        // ---- Act 3: the Tier8 era (cost 128-224) — was Tier7, now Tier8 ----
+        // L11 — Tier8 debut: one goal, the longest single chain in the game.
+        levels.Add(new LevelDefinition
+        {
+            targetTiers = { PlanetTier.Tier8 },
+            timeLimit = 770f, threeStarThreshold = 255f
+        });
+        // L12 — Tier8 with a Tier5 epilogue.
+        levels.Add(new LevelDefinition
+        {
+            targetTiers = { PlanetTier.Tier8, PlanetTier.Tier5 },
+            timeLimit = 865f, threeStarThreshold = 290f
+        });
+        // L13 — Tier8 then Tier6.
+        levels.Add(new LevelDefinition
+        {
+            targetTiers = { PlanetTier.Tier8, PlanetTier.Tier6 },
+            timeLimit = 960f, threeStarThreshold = 320f
+        });
+        // L14 — Tier8 then Tier7: two monster chains back to back.
+        levels.Add(new LevelDefinition
+        {
+            targetTiers = { PlanetTier.Tier8, PlanetTier.Tier7 },
+            timeLimit = 1150f, threeStarThreshold = 385f
+        });
+        // L15 — the ultimate: Tier8, Tier7, Tier6 in strict descending order.
+        levels.Add(new LevelDefinition
+        {
+            targetTiers = { PlanetTier.Tier8, PlanetTier.Tier7, PlanetTier.Tier6 },
+            timeLimit = 1345f, threeStarThreshold = 450f
         });
 
         Debug.Log("GameManager: no levels authored in the Inspector — using the built-in 15-level configuration.");

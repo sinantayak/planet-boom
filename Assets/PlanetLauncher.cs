@@ -18,6 +18,16 @@ public class PlanetLauncher : MonoBehaviour
     // growth curve, so a spawned Tier2 matches a merged-up Tier2 in size.
     [SerializeField] private PlanetTier highestSpawnTier = PlanetTier.Tier2;
 
+    [Header("Meteorite Obstacles")]
+    // Dead-rock obstacle prefab (see Meteorite.cs) — a separate merge system
+    // from planets entirely. Left unassigned, meteorites never spawn.
+    [SerializeField] private GameObject meteoritePrefab;
+
+    // Chance [0..1] that each queue slot rolls a Tier1 Meteorite instead of a
+    // regular planet. Rolled independently per slot (see RollIsMeteorite),
+    // so both CurrentTier and NextTier can be meteorites at once.
+    [SerializeField] [Range(0f, 1f)] private float meteoriteSpawnChance = 0.1f;
+
     [Header("Aim Dots")]
     [SerializeField] private GameObject dotPrefab;
     [SerializeField] private float dotSpacing = 0.25f;
@@ -79,6 +89,18 @@ public class PlanetLauncher : MonoBehaviour
     // into the arena faster than one per cooldown.
     [SerializeField] private float launchCooldown = 0.6f;
 
+    // Second half of the anti-spam gate: after the cooldown, the launcher
+    // STAYS locked until the fired planet has slowed under this speed
+    // (units/sec), merged away, or been destroyed — so the player must watch
+    // each shot land before queuing the next, Suika-style. Set to 0 to
+    // restore pure time-based reloading.
+    [SerializeField] private float stableVelocityThreshold = 1.5f;
+
+    // Hard ceiling on the total reload wait (cooldown included). A shot that
+    // never calms down — stuck oscillating, flung out of bounds — can't lock
+    // the launcher forever.
+    [SerializeField] private float maxReloadWait = 4f;
+
     [Header("Launcher UI Preview")]
     // Canvas Image for the "Next Planet" box. Always visible: while the slot
     // itself is empty during a reload, this keeps previewing the planet that
@@ -109,6 +131,13 @@ public class PlanetLauncher : MonoBehaviour
     public PlanetTier CurrentTier { get; private set; }
     public PlanetTier NextTier { get; private set; }
 
+    // Whichever queue slot this reads is a meteorite instead of a regular
+    // planet; CurrentTier/NextTier are meaningless for that slot when true
+    // (meteorites always spawn at MeteoriteTier.Tier1 and track their own
+    // tier internally). UI can read these to swap the preview art.
+    public bool CurrentIsMeteorite { get; private set; }
+    public bool NextIsMeteorite { get; private set; }
+
     // True from the moment a shot fires until launchCooldown has elapsed and
     // the next planet has been pulled into the slot. Input is ignored and the
     // aim preview stays hidden for the whole window; UI can read this to tint
@@ -117,6 +146,11 @@ public class PlanetLauncher : MonoBehaviour
 
     private bool isWaitingForCooldown;
     private Coroutine reloadRoutine;
+
+    // Rigidbody of the most recently fired planet; the reload gate watches it
+    // until it stabilizes. Unity's overloaded == makes this null once the
+    // planet is destroyed (merge loser, board clear).
+    private Rigidbody2D lastLaunchedBody;
 
     private BlackHole blackHole;
 
@@ -127,6 +161,11 @@ public class PlanetLauncher : MonoBehaviour
     // The prefab's PlanetMerge: source of the tier growth curve, so the slot
     // preview is sized exactly like the planet that will spawn.
     private PlanetMerge prefabMerge;
+
+    // The meteorite prefab's own SpriteRenderer: single source of truth for
+    // the preview's sprite, Tier1 color, and authored scale — mirrors how
+    // prefabPlanet/prefabMerge drive the regular planet preview.
+    private SpriteRenderer prefabMeteoriteRenderer;
 
     // Dot pool: pre-instantiated hidden in Awake (one per trajectory step, the
     // maximum ever needed), then repositioned/activated per aim frame. Never
@@ -158,7 +197,9 @@ public class PlanetLauncher : MonoBehaviour
     void Awake()
     {
         CurrentTier = PickRandomSpawnTier();
+        CurrentIsMeteorite = RollIsMeteorite();
         NextTier = PickRandomSpawnTier();
+        NextIsMeteorite = RollIsMeteorite();
         blackHole = FindFirstObjectByType<BlackHole>();
 
         if (planetPrefab != null)
@@ -173,6 +214,11 @@ public class PlanetLauncher : MonoBehaviour
         if (prefabMerge == null)
         {
             Debug.LogWarning("PlanetLauncher: planet prefab has no PlanetMerge component — the slot preview keeps its Inspector scale instead of tier sizing.");
+        }
+
+        if (meteoritePrefab != null)
+        {
+            prefabMeteoriteRenderer = meteoritePrefab.GetComponent<SpriteRenderer>();
         }
 
         if (nextPlanetUIImg != null)
@@ -263,6 +309,7 @@ public class PlanetLauncher : MonoBehaviour
         aimAngleOffset = 0f;
         lastAimDirection = Vector2.up;
         lastPullRatio = defaultPowerRatio;
+
         DrawTrajectory();
     }
 
@@ -288,9 +335,16 @@ public class PlanetLauncher : MonoBehaviour
 
     private void LaunchPlanet()
     {
-        if (planetPrefab == null)
+        // The meteorite roll pre-empts the regular planet entirely: it's a
+        // completely separate prefab/component (Meteorite, not Planet), so
+        // there is no tier to set here — Meteorite.Awake starts every fresh
+        // rock at Tier1 on its own.
+        GameObject prefabToSpawn = CurrentIsMeteorite ? meteoritePrefab : planetPrefab;
+        if (prefabToSpawn == null)
         {
-            Debug.LogWarning("PlanetLauncher: no planet prefab assigned.");
+            Debug.LogWarning(CurrentIsMeteorite
+                ? "PlanetLauncher: meteorite roll fired but no meteorite prefab assigned."
+                : "PlanetLauncher: no planet prefab assigned.");
             return;
         }
 
@@ -299,26 +353,29 @@ public class PlanetLauncher : MonoBehaviour
             Random.Range(-spawnPositionJitter, spawnPositionJitter));
         Vector3 spawnPosition = transform.position + (Vector3)spawnJitter;
 
-        GameObject planetObject = Instantiate(planetPrefab, spawnPosition, Quaternion.identity);
+        GameObject spawnedObject = Instantiate(prefabToSpawn, spawnPosition, Quaternion.identity);
 
-        if (!planetObject.TryGetComponent(out Planet planet))
+        if (!CurrentIsMeteorite)
         {
-            planet = planetObject.AddComponent<Planet>();
+            if (!spawnedObject.TryGetComponent(out Planet planet))
+            {
+                planet = spawnedObject.AddComponent<Planet>();
+            }
+
+            // The queued tier overrides whatever tier was baked into the prefab;
+            // only merging is allowed to raise it beyond this. PlanetMerge.Start
+            // (which runs after this call) sizes the planet for its spawn tier.
+            planet.SetTier(CurrentTier);
+
+            if (isRainbowActive)
+            {
+                // Skill hook: mark the spawned planet as a wildcard here once
+                // Planet/PlanetMerge grow rainbow support (adopt tier on first touch).
+                isRainbowActive = false;
+            }
         }
 
-        // The queued tier overrides whatever tier was baked into the prefab;
-        // only merging is allowed to raise it beyond this. PlanetMerge.Start
-        // (which runs after this call) sizes the planet for its spawn tier.
-        planet.SetTier(CurrentTier);
-
-        if (isRainbowActive)
-        {
-            // Skill hook: mark the spawned planet as a wildcard here once
-            // Planet/PlanetMerge grow rainbow support (adopt tier on first touch).
-            isRainbowActive = false;
-        }
-
-        if (planetObject.TryGetComponent(out Rigidbody2D rb))
+        if (spawnedObject.TryGetComponent(out Rigidbody2D rb))
         {
             // Fire along the last direction the player was aiming while holding;
             // the pointer may already be gone on the release frame (touch up), so
@@ -326,10 +383,21 @@ public class PlanetLauncher : MonoBehaviour
             // the pointer was pulled from the launcher: full pull = full speed.
             rb.linearVelocity = lastAimDirection * (launchSpeed * lastPullRatio);
             rb.AddTorque(Random.Range(-maxSpinTorque, maxSpinTorque), ForceMode2D.Impulse);
+
+            // Remembered so ReloadAfterCooldown can hold the launcher locked
+            // until this shot has actually calmed down (or merged/died).
+            lastLaunchedBody = rb;
         }
         else
         {
             Debug.LogWarning("PlanetLauncher: planet prefab has no Rigidbody2D.");
+        }
+
+        // The shot is definitely away (planet or meteorite alike) — fire the
+        // launch SFX with it.
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayLaunch();
         }
 
         // Lock the launcher. The queue does NOT advance here: the slot stays
@@ -342,7 +410,34 @@ public class PlanetLauncher : MonoBehaviour
     private IEnumerator ReloadAfterCooldown()
     {
         yield return new WaitForSeconds(launchCooldown);
+
+        // Stabilization gate: keep the slot locked while the last shot is
+        // still flying fast, bounded by maxReloadWait so a shot that never
+        // settles (oscillating, flung off-arena) can't jam the launcher.
+        float waited = launchCooldown;
+        while (waited < maxReloadWait && LastShotStillFlying())
+        {
+            yield return new WaitForFixedUpdate();
+            waited += Time.fixedDeltaTime;
+        }
+
         FinishReload();
+    }
+
+    // True while the most recently fired planet is still a live, simulated
+    // body moving faster than stableVelocityThreshold. A destroyed body
+    // (merged away as the fusion loser, cleared by GameManager) compares as
+    // null; a fusion loser mid-melt has simulated turned off — both count as
+    // "done" and release the launcher.
+    private bool LastShotStillFlying()
+    {
+        if (stableVelocityThreshold <= 0f)
+            return false;
+
+        if (lastLaunchedBody == null || !lastLaunchedBody.simulated)
+            return false;
+
+        return lastLaunchedBody.linearVelocity.magnitude > stableVelocityThreshold;
     }
 
     // Advance the queue: the previewed tier becomes live, a fresh one is drawn
@@ -352,7 +447,9 @@ public class PlanetLauncher : MonoBehaviour
         reloadRoutine = null;
         isWaitingForCooldown = false;
         CurrentTier = NextTier;
+        CurrentIsMeteorite = NextIsMeteorite;
         NextTier = PickRandomSpawnTier();
+        NextIsMeteorite = RollIsMeteorite();
         RefreshPreviews();
     }
 
@@ -363,27 +460,49 @@ public class PlanetLauncher : MonoBehaviour
     {
         if (loadedPlanetRenderer != null)
         {
-            Sprite loadedSprite = isWaitingForCooldown ? null : SpriteForTier(CurrentTier);
+            Sprite loadedSprite = isWaitingForCooldown
+                ? null
+                : (CurrentIsMeteorite ? MeteoritePreviewSprite() : SpriteForTier(CurrentTier));
             loadedPlanetRenderer.sprite = loadedSprite;
-            loadedPlanetRenderer.color = Color.white;
+            // Meteorite preview keeps the prefab's own dead-grey tint (its
+            // color IS the tier signal, unlike planet sprites which must stay
+            // untinted pure white to display their pre-rendered art as authored).
+            loadedPlanetRenderer.color = CurrentIsMeteorite && prefabMeteoriteRenderer != null
+                ? prefabMeteoriteRenderer.color
+                : Color.white;
             // Reloading (or a missing sprite) leaves the slot visibly empty.
             loadedPlanetRenderer.enabled = loadedSprite != null;
 
-            if (loadedSprite != null && prefabMerge != null)
+            if (loadedSprite != null)
             {
-                // Size the preview to the exact world scale the fired planet
-                // will spawn at (PlanetMerge.Start snaps spawns onto the same
-                // curve), so a Tier3 in the slot is visibly a Tier3.
-                float worldScale = prefabMerge.ScaleForTier(CurrentTier) * launcherVisualScaleModifier;
+                Transform previewTransform = loadedPlanetRenderer.transform;
+                float parentScale = previewTransform.parent != null
+                    ? previewTransform.parent.lossyScale.x
+                    : 1f;
+
+                float worldScale;
+                if (CurrentIsMeteorite)
+                {
+                    // Meteorites have no PlanetMerge growth curve — the
+                    // prefab's own authored scale IS its Tier1 size.
+                    worldScale = meteoritePrefab.transform.localScale.x * launcherVisualScaleModifier;
+                }
+                else if (prefabMerge != null)
+                {
+                    // Size the preview to the exact world scale the fired planet
+                    // will spawn at (PlanetMerge.Start snaps spawns onto the same
+                    // curve), so a Tier3 in the slot is visibly a Tier3.
+                    worldScale = prefabMerge.ScaleForTier(CurrentTier) * launcherVisualScaleModifier;
+                }
+                else
+                {
+                    worldScale = previewTransform.localScale.x;
+                }
 
                 // localScale is multiplied by every ancestor's scale before it
                 // reaches the screen; divide that back out so the preview's
                 // on-screen size matches the arena planet even if the launcher
                 // hierarchy isn't scaled at exactly 1.
-                Transform previewTransform = loadedPlanetRenderer.transform;
-                float parentScale = previewTransform.parent != null
-                    ? previewTransform.parent.lossyScale.x
-                    : 1f;
                 if (!Mathf.Approximately(parentScale, 0f))
                 {
                     worldScale /= parentScale;
@@ -395,9 +514,11 @@ public class PlanetLauncher : MonoBehaviour
 
         if (nextPlanetUIImg != null)
         {
-            Sprite nextSprite = SpriteForTier(NextTier);
+            Sprite nextSprite = NextIsMeteorite ? MeteoritePreviewSprite() : SpriteForTier(NextTier);
             nextPlanetUIImg.sprite = nextSprite;
-            nextPlanetUIImg.color = Color.white;
+            nextPlanetUIImg.color = NextIsMeteorite && prefabMeteoriteRenderer != null
+                ? prefabMeteoriteRenderer.color
+                : Color.white;
             // A UI Image with a null sprite renders as a solid white square;
             // disable it outright instead if the tier has no art yet.
             nextPlanetUIImg.enabled = nextSprite != null;
@@ -407,6 +528,20 @@ public class PlanetLauncher : MonoBehaviour
     private Sprite SpriteForTier(PlanetTier tier)
     {
         return prefabPlanet != null ? prefabPlanet.GetSpriteForTier(tier) : null;
+    }
+
+    private Sprite MeteoritePreviewSprite()
+    {
+        return prefabMeteoriteRenderer != null ? prefabMeteoriteRenderer.sprite : null;
+    }
+
+    // Rolled independently per queue slot: a 10% default chance means each of
+    // the two visible slots (current + next) has its own 1-in-10 shot, not a
+    // shared roll — over a long queue that averages out to the configured
+    // rate per spawn either way.
+    private bool RollIsMeteorite()
+    {
+        return meteoritePrefab != null && Random.value < meteoriteSpawnChance;
     }
 
     // Full queue reset for level transitions and restarts (called by
@@ -420,6 +555,7 @@ public class PlanetLauncher : MonoBehaviour
             reloadRoutine = null;
         }
         isWaitingForCooldown = false;
+        lastLaunchedBody = null;
 
         if (isAiming)
         {
@@ -428,7 +564,9 @@ public class PlanetLauncher : MonoBehaviour
         }
 
         CurrentTier = PickRandomSpawnTier();
+        CurrentIsMeteorite = RollIsMeteorite();
         NextTier = PickRandomSpawnTier();
+        NextIsMeteorite = RollIsMeteorite();
         RefreshPreviews();
     }
 

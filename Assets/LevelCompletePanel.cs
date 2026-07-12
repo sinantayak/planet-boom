@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -46,8 +47,29 @@ public class LevelCompletePanel : MonoBehaviour
     // Banner wording; swap to "SUCCESS" here or in the Inspector if preferred.
     [SerializeField] private string titleMessage = "LEVEL COMPLETED";
 
+    [Header("Vortex Reveal")]
+    // Seconds for the popup to fly/scale out of the black hole core when
+    // shown via ShowFromWorldPoint (the win-vortex path). Plain Show() stays
+    // instant for any other caller.
+    [SerializeField] private float popDuration = 0.45f;
+
+    private RectTransform rectTransform;
+
+    // The panel's authored resting place, captured once on first activation;
+    // every reveal animation ends exactly here regardless of where the black
+    // hole was.
+    private Vector2 homeAnchoredPosition;
+    private bool homeCaptured;
+
     void Awake()
     {
+        rectTransform = transform as RectTransform;
+        if (rectTransform != null && !homeCaptured)
+        {
+            homeAnchoredPosition = rectTransform.anchoredPosition;
+            homeCaptured = true;
+        }
+
         if (nextButton != null)
         {
             nextButton.onClick.AddListener(OnNextClicked);
@@ -101,6 +123,76 @@ public class LevelCompletePanel : MonoBehaviour
         }
 
         gameObject.SetActive(true);
+
+        // A previous reveal may have been cut short by Hide() (disabling the
+        // object kills its coroutines mid-flight); snap back to the resting
+        // pose so no show can inherit a half-animated scale or position.
+        // Runs after SetActive so Awake (which captures the pose on the very
+        // first activation) has definitely executed.
+        if (homeCaptured && rectTransform != null)
+        {
+            rectTransform.anchoredPosition = homeAnchoredPosition;
+            rectTransform.localScale = Vector3.one;
+        }
+    }
+
+    // The win-vortex reveal: same content as Show, but the panel blooms out
+    // of the given world point (the black hole core) — starting at zero
+    // scale on top of it and easing up/over to its authored spot.
+    public void ShowFromWorldPoint(int starsEarned, Vector3 worldPoint)
+    {
+        Show(starsEarned);
+
+        if (rectTransform == null)
+            return;
+
+        // StartCoroutine is legal here because Show just activated us.
+        StartCoroutine(PopFromPoint(AnchoredPointForWorld(worldPoint)));
+    }
+
+    private IEnumerator PopFromPoint(Vector2 startPoint)
+    {
+        rectTransform.anchoredPosition = startPoint;
+        rectTransform.localScale = Vector3.zero;
+
+        float elapsed = 0f;
+        while (elapsed < popDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / popDuration);
+            float eased = t * t * (3f - 2f * t); // smoothstep
+
+            rectTransform.anchoredPosition = Vector2.Lerp(startPoint, homeAnchoredPosition, eased);
+            rectTransform.localScale = Vector3.one * eased;
+            yield return null;
+        }
+
+        rectTransform.anchoredPosition = homeAnchoredPosition;
+        rectTransform.localScale = Vector3.one;
+    }
+
+    // Converts a world-space point (the black hole core) into this panel's
+    // parent-relative anchored space, handling both Screen Space - Overlay
+    // and camera-driven canvases. Falls back to the resting position if
+    // anything needed for the conversion is missing.
+    private Vector2 AnchoredPointForWorld(Vector3 worldPoint)
+    {
+        Canvas canvas = GetComponentInParent<Canvas>();
+        Camera worldCamera = Camera.main;
+        RectTransform parentRect = rectTransform.parent as RectTransform;
+
+        if (canvas == null || worldCamera == null || parentRect == null)
+            return homeAnchoredPosition;
+
+        Vector2 screenPoint = worldCamera.WorldToScreenPoint(worldPoint);
+        Camera uiCamera = canvas.renderMode == RenderMode.ScreenSpaceOverlay
+            ? null
+            : canvas.worldCamera;
+
+        return RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            parentRect, screenPoint, uiCamera, out Vector2 localPoint)
+            ? localPoint
+            : homeAnchoredPosition;
     }
 
     public void Hide()

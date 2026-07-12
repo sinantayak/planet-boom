@@ -2063,6 +2063,8 @@ MonoBehaviour:
   blackHoleCenter: {fileID: 1130355245}
   maxBoundaryRadius: 2.38
   outsideTimeLimit: 5
+  vortexDuration: 3.5
+  vortexSwallowsMeteorites: 0
   countdownText: {fileID: 1827558355}
   gameplayTimerText: {fileID: 2134406812}
   gameOverPanel: {fileID: 1862289739}
@@ -2121,6 +2123,13 @@ MonoBehaviour:
   maxSettlingAccel: 2
   settlingDownwardMix: 0.25
   isBlackHoleFrozen: 0
+  vortexOuterCloseTimeConstant: 3.6
+  vortexCoreSpeedFloor: 0.2
+  vortexSinkholeRadius: 0.9
+  vortexSinkholeAccel: 6
+  vortexSwirlDegreesPerSecond: 240
+  vortexSpinSpeed: 540
+  vortexSwallowRadius: 0.3
 --- !u!212 &1130355244
 SpriteRenderer:
   serializedVersion: 3
@@ -2290,6 +2299,8 @@ MonoBehaviour:
   spawnPositionJitter: 0.05
   maxSpinTorque: 0
   highestSpawnTier: 1
+  meteoritePrefab: {fileID: 1000000000000000001, guid: 9ce448208ffa4bbaadfbd4703e8f05fc, type: 3}
+  meteoriteSpawnChance: 0.1
   dotPrefab: {fileID: 1962485415518948208, guid: bed2cd13564eafb4283cc937ff0531db, type: 3}
   dotSpacing: 0.25
   trajectorySteps: 30
@@ -2305,6 +2316,8 @@ MonoBehaviour:
   powerSensitivity: 5
   minPowerRatio: 0.3
   launchCooldown: 0.6
+  stableVelocityThreshold: 1.5
+  maxReloadWait: 4
   nextPlanetUIImg: {fileID: 826403677}
   loadedPlanetRenderer: {fileID: 760694412}
   launcherVisualScaleModifier: 1
@@ -4056,6 +4069,62 @@ MonoBehaviour:
   - {fileID: 1228761277}
   planetPrefab: {fileID: 804950424806596201, guid: 603fc024be9b949468e2ed37b069c7b1, type: 3}
   achievedTint: {r: 0.45, g: 0.45, b: 0.45, a: 0.9}
+--- !u!1 &2000000001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2000000002}
+  - component: {fileID: 2000000003}
+  m_Layer: 0
+  m_Name: AudioManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2000000002
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2000000001}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2000000003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2000000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45bd5781e50d41ce8522dad17d7f1c24, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::AudioManager
+  launchClip: {fileID: 8300000, guid: 4d2ef94b99cba284ca9d0e6c430d2d0d, type: 3}
+  collisionClip: {fileID: 8300000, guid: 54a4304b6a3aefe438fd37ee9216f335, type: 3}
+  mergeClip: {fileID: 8300000, guid: ac670b8d1c0caab4d9c6a840047a9cb3, type: 3}
+  launchVolume: 0.9
+  minImpactSpeed: 0.6
+  fullVolumeImpactSpeed: 8
+  maxCollisionVolume: 0.8
+  collisionSoundCooldown: 0.07
+  comboResetWindow: 1.5
+  pitchStepPerCombo: 0.2
+  maxComboPitch: 2
+  mergeVolume: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -4071,3 +4140,4 @@ SceneRoots:
   - {fileID: 784801118}
   - {fileID: 1402421113}
   - {fileID: 452798351}
+  - {fileID: 2000000002}

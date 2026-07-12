@@ -37,8 +37,15 @@ public class PlanetMerge : MonoBehaviour
     // the prefab (or the instance in the editor) never changes the growth feel.
     private float tierOneScale;
 
-    // Winner side: currently pulling a losing planet into itself.
+    // Winner side: currently pulling a losing planet into itself. Public so
+    // BlackHole's win-vortex spiral can leave a still-fusing pair's
+    // transforms alone until FuseWith's own animation finishes — otherwise
+    // the vortex and the fuse coroutine fight over the same transform every
+    // frame, which is exactly what made the level-completing merge (the one
+    // most likely to be actively fusing the instant CompleteLevel fires)
+    // look glitchy or invisible.
     private bool isAbsorbing;
+    public bool IsAbsorbing => isAbsorbing;
 
     // Loser side: currently being pulled into a winner; physics is off and this
     // planet must be ignored by every other merge check until it is destroyed.
@@ -198,6 +205,13 @@ public class PlanetMerge : MonoBehaviour
         if (GameManager.Instance != null)
         {
             GameManager.Instance.NotifyMergeCreated(planet.CurrentTier);
+        }
+
+        // Merge SFX rides the shared combo chain (meteorite merges feed the
+        // same one): quick successive merges climb in pitch.
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayMerge();
         }
 
         StartCoroutine(FuseWith(otherMerge));

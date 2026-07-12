@@ -67,6 +67,29 @@ public class Planet : MonoBehaviour
     [SerializeField] private float baseLinearDamping = 0f;
     [SerializeField] private float linearDampingPerTier = 0.4f;
 
+    // Angular damping on the same tier curve. Friction alone can't stop two
+    // touching circles from rolling around each other (Box2D has no rolling
+    // resistance), so this is what actually kills the endless spin-and-slide
+    // that let planets ladder past each other into unearned chain merges.
+    [SerializeField] private float baseAngularDamping = 1.5f;
+    [SerializeField] private float angularDampingPerTier = 0.5f;
+
+    [Header("Settling Stabilization")]
+    // A planet counts as SETTLED once it sits inside this radius around the
+    // black hole AND is moving slower than settleSpeedThreshold. Settled
+    // planets swap to the much higher damping pair below, so they park in
+    // place, resist the constant central pull, and can physically block each
+    // other — the Suika-style clutter the balance needs. Size this to the
+    // cluster zone around the core, not the whole arena.
+    [SerializeField] private float settleRadius = 4f;
+    [SerializeField] private float settleSpeedThreshold = 0.8f;
+    // Hysteresis: a settled planet only wakes back to flight damping once
+    // something shoves it faster than threshold * this multiplier, so grazing
+    // hits from new shots rock it without re-liquefying the whole pile.
+    [SerializeField] private float settleExitSpeedMultiplier = 2f;
+    [SerializeField] private float settledLinearDamping = 4f;
+    [SerializeField] private float settledAngularDamping = 8f;
+
     // Old scenes/prefabs stored this as "CurrentColor"; the enum's int values
     // carry over (Red→Tier1, Blue→Tier2, Green→Tier3, Yellow→Tier4).
     [FormerlySerializedAs("CurrentColor")]
@@ -74,15 +97,25 @@ public class Planet : MonoBehaviour
 
     public int UniqueId { get; private set; }
 
+    private Rigidbody2D rb;
+    private BlackHole blackHole;
+
+    // The tier-curve damping this planet flies with while NOT settled;
+    // recomputed by ApplyTierPhysics on every tier change.
+    private float flightLinearDamping;
+    private float flightAngularDamping;
+    private bool isSettled;
+
     void Awake()
     {
         UniqueId = nextUniqueId++;
+        blackHole = FindFirstObjectByType<BlackHole>();
 
         // Planets settling into a resting cluster (pulled by BlackHole but pinned by
         // neighbors) fall below Unity's sleep velocity threshold and go to sleep.
         // Once both bodies in a contact are asleep, OnCollisionStay2D stops firing for
         // that pair, so same-tier planets could sit touching forever without merging.
-        if (TryGetComponent(out Rigidbody2D rb))
+        if (TryGetComponent(out rb))
         {
             rb.sleepMode = RigidbodySleepMode2D.NeverSleep;
         }
@@ -93,17 +126,65 @@ public class Planet : MonoBehaviour
         ApplyTierPhysics(CurrentTier);
     }
 
+    // Settled-state bookkeeping: swap between the flight and settled damping
+    // profiles based on where the planet is and how fast it moves. Runs even
+    // while the merge system owns the body (rb.simulated false) — writing
+    // damping to a frozen body is harmless and the state stays current.
+    void FixedUpdate()
+    {
+        if (rb == null)
+            return;
+
+        float speed = rb.linearVelocity.magnitude;
+        bool inOrbitArea = blackHole == null ||
+            Vector2.Distance(rb.position, blackHole.transform.position) <= settleRadius;
+
+        if (isSettled)
+        {
+            if (!inOrbitArea || speed > settleSpeedThreshold * settleExitSpeedMultiplier)
+            {
+                isSettled = false;
+            }
+        }
+        else if (inOrbitArea && speed <= settleSpeedThreshold)
+        {
+            isSettled = true;
+        }
+
+        ApplyDamping();
+    }
+
+    // Impact SFX for any contact this planet is part of (planet-vs-planet,
+    // planet-vs-meteorite): AudioManager damps the volume by this impact
+    // speed and its internal cooldown swallows the mirrored callback the
+    // other body fires for the same contact.
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayCollision(collision.relativeVelocity.magnitude);
+        }
+    }
+
     // Mass and damping for the given tier, per the curves configured above.
     // Called from SetTier, so a merge upgrade instantly makes the planet heavier
     // and more grounded in the same frame its sprite changes.
     private void ApplyTierPhysics(PlanetTier tier)
     {
-        if (!TryGetComponent(out Rigidbody2D rb))
+        if (rb == null && !TryGetComponent(out rb))
             return;
 
         int tierSteps = (int)tier; // Tier1 = 0 steps above base.
         rb.mass = baseMass * Mathf.Pow(massMultiplierPerTier, tierSteps);
-        rb.linearDamping = baseLinearDamping + linearDampingPerTier * tierSteps;
+        flightLinearDamping = baseLinearDamping + linearDampingPerTier * tierSteps;
+        flightAngularDamping = baseAngularDamping + angularDampingPerTier * tierSteps;
+        ApplyDamping();
+    }
+
+    private void ApplyDamping()
+    {
+        rb.linearDamping = isSettled ? settledLinearDamping : flightLinearDamping;
+        rb.angularDamping = isSettled ? settledAngularDamping : flightAngularDamping;
     }
 
     // Single source of truth for tier art: SetTier uses it on live planets, and
