@@ -17,29 +17,36 @@ public enum PlanetTier
     Tier8
 }
 
-// UI accent colors only (HUD hints — the aim dots went neutral white once the
-// launcher slot started showing the real planet sprite; currently no code
-// consumes this). Planet sprites themselves are pre-rendered and must NEVER
-// be tinted — Planet.SetTier forces sr.color to pure white for exactly that
-// reason.
+// Per-tier accent colors matching each planet's actual sprite art (lava,
+// earth, sand, ...) — consumed by PlanetMerge's merge-sparkle VFX (which
+// can't read a real color off the sprite itself, see below) and available
+// for HUD accents. Planet sprites themselves are pre-rendered and must
+// NEVER be tinted with these — Planet.SetTier forces sr.color to pure white
+// for exactly that reason; these colors exist for effects/UI that sit
+// alongside the sprite, not on top of it.
 public static class PlanetTierPalette
 {
     private static readonly Color[] Accents =
     {
-        new Color(0.96f, 0.35f, 0.35f), // Tier1
-        new Color(0.35f, 0.55f, 0.96f), // Tier2
-        new Color(0.38f, 0.85f, 0.45f), // Tier3
-        new Color(0.98f, 0.85f, 0.30f), // Tier4
-        new Color(0.75f, 0.45f, 0.95f), // Tier5
-        new Color(0.35f, 0.90f, 0.90f), // Tier6
-        new Color(0.98f, 0.55f, 0.25f), // Tier7
-        new Color(0.95f, 0.95f, 0.95f), // Tier8
+        new Color(1.0f, 0.6f, 0.0f),    // Tier1 — Lava: fiery yellow/orange
+        new Color(0.2f, 0.65f, 1.0f),   // Tier2 — Earth: soft ocean blue/green
+        new Color(0.9f, 0.75f, 0.55f),  // Tier3 — Sand: beige/sandy brown
+        new Color(1.0f, 0.0f, 0.8f),    // Tier4 — Pink/Magenta: vibrant magenta
+        new Color(0.35f, 0.2f, 0.9f),   // Tier5 — Dark Blue: deep violet/indigo
+        new Color(0.75f, 0.75f, 0.75f), // Tier6 — Moon/Grey: ash grey
+        new Color(0.4f, 1.0f, 0.1f),    // Tier7 — Lime Green: acid lime green
+        new Color(0.6f, 0.85f, 1.0f),   // Tier8 — Ice Blue: cool frost ice blue
     };
+
+    // Asteroid/base-meteor lava red-orange — fallback for a tier index
+    // outside the array (shouldn't happen on the current 8-tier ladder, but
+    // keeps this defensive rather than silently going white/invisible).
+    private static readonly Color DefaultColor = new Color(1.0f, 0.35f, 0.0f);
 
     public static Color GetAccentColor(PlanetTier tier)
     {
         int index = (int)tier;
-        return (index >= 0 && index < Accents.Length) ? Accents[index] : Color.white;
+        return (index >= 0 && index < Accents.Length) ? Accents[index] : DefaultColor;
     }
 }
 

@@ -97,6 +97,30 @@ public class GameManager : MonoBehaviour
     // reference here.
     public LevelCompletePanel levelCompletePanel;
 
+    [Header("Level Complete Screen")]
+    // Wraps Overlay_BG + the Level Complete Popup under one parent so both
+    // switch on/off together and nothing else can render between them;
+    // disabled by default in the scene. LevelCompletePanel's own Show/Hide
+    // only toggles the popup itself — this group is what actually makes it
+    // (and the dimming overlay) visible, since a child under an inactive
+    // parent stays invisible regardless of its own active state.
+    [SerializeField] private GameObject levelCompleteGroup;
+
+    [Header("Gameplay HUD")]
+    // Hidden while the level-complete screen is up (score/timer/next-planet
+    // HUD would otherwise show through behind the popup); re-enabled the
+    // instant play resumes (next level, replay, or restart).
+    [SerializeField] private GameObject safeAreaRoot;
+    [SerializeField] private GameObject nextPlanetContainer;
+
+    [Header("Arena Visuals")]
+    // World-space visuals hidden alongside the HUD above so the board reads
+    // as fully cleared behind the win screen — no orbit guides still
+    // spinning, no boundary ring, no stray ball waiting in the launcher.
+    [SerializeField] private GameObject boundaryRingVisual;
+    [SerializeField] private GameObject orbitLinesVisual;
+    [SerializeField] private GameObject launcherVisual;
+
     // Read by BoundaryVisualizer so the drawn circle can never drift from the
     // radius the lose check actually enforces.
     public Transform BlackHoleCenter => blackHoleCenter;
@@ -191,6 +215,10 @@ public class GameManager : MonoBehaviour
         {
             levelCompletePanel.Hide();
         }
+
+        // Defensive start state regardless of how the scene was left
+        // authored: gameplay HUD visible, the level-complete group hidden.
+        HideLevelCompleteScreen();
 
         LoadLevel(1);
     }
@@ -320,6 +348,86 @@ public class GameManager : MonoBehaviour
         float remaining = Mathf.Max(0f, outsideTimeLimit - worstTimer);
         countdownText.gameObject.SetActive(true);
         countdownText.text = $"CRITICAL: {remaining:F1}s!";
+    }
+
+    // Swaps the whole screen from "playing" to "level complete" in one call:
+    // the group holding Overlay_BG + the popup comes on, and everything else
+    // (HUD, orbit/boundary visuals, the launcher, any surviving meteorite)
+    // goes off so nothing shows through behind the dim overlay.
+    private void ShowLevelCompleteScreen()
+    {
+        if (levelCompleteGroup != null)
+        {
+            levelCompleteGroup.SetActive(true);
+        }
+        SetGameplayElementsVisible(false);
+        SetSurvivingMeteoritesVisible(false);
+    }
+
+    // Reverse of ShowLevelCompleteScreen — called by every path that returns
+    // to actual play (next level, replay, or a restart that interrupts the
+    // win screen).
+    private void HideLevelCompleteScreen()
+    {
+        if (levelCompleteGroup != null)
+        {
+            levelCompleteGroup.SetActive(false);
+        }
+        SetGameplayElementsVisible(true);
+        SetSurvivingMeteoritesVisible(true);
+    }
+
+    private void SetGameplayElementsVisible(bool visible)
+    {
+        if (safeAreaRoot != null)
+        {
+            safeAreaRoot.SetActive(visible);
+        }
+        if (nextPlanetContainer != null)
+        {
+            nextPlanetContainer.SetActive(visible);
+        }
+        if (boundaryRingVisual != null)
+        {
+            boundaryRingVisual.SetActive(visible);
+        }
+        if (orbitLinesVisual != null)
+        {
+            orbitLinesVisual.SetActive(visible);
+        }
+        if (launcherVisual != null)
+        {
+            launcherVisual.SetActive(visible);
+        }
+    }
+
+    // Meteorites are the one gameplay body that survives a level win BY
+    // DESIGN (ClearBoard only ever destroys them on a hard RestartGame — see
+    // its clearMeteorites param). When vortexSwallowsMeteorites is off (as
+    // configured in this scene), a meteorite that was never pulled into the
+    // vortex just sits there fully active — visible and still physically
+    // simulated — floating behind the level-complete popup. There's no
+    // single tracked "carry-over" reference to hide; every live Meteorite
+    // in the scene at this moment is, by definition, the one carrying over.
+    //
+    // FindObjectsInactive.Include (not the Exclude default used elsewhere in
+    // this file) is required on BOTH ends: without it, the restore call
+    // would search only for ACTIVE meteorites and find none, since Show just
+    // deactivated all of them — the round trip would never re-enable them.
+    //
+    // Disabling the GameObject also freezes its Rigidbody2D/coroutines for
+    // the duration of the screen (no physics step, no FixedUpdate) and
+    // leaves its position untouched, so re-enabling drops it back exactly
+    // where the player left it.
+    private void SetSurvivingMeteoritesVisible(bool visible)
+    {
+        foreach (Meteorite meteorite in FindObjectsByType<Meteorite>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+        {
+            if (meteorite != null)
+            {
+                meteorite.gameObject.SetActive(visible);
+            }
+        }
     }
 
     // Called by PlanetMerge after a max-tier BOOM has claimed its victims.
@@ -479,6 +587,7 @@ public class GameManager : MonoBehaviour
 
         vortexRoutine = null;
         State = GameState.LevelComplete;
+        ShowLevelCompleteScreen();
 
         if (levelCompletePanel != null)
         {
@@ -513,6 +622,7 @@ public class GameManager : MonoBehaviour
         {
             levelCompletePanel.Hide();
         }
+        HideLevelCompleteScreen();
 
         // The win vortex already swallowed the board before this popup ever
         // appeared; this sweep is a belt-and-braces no-op in the normal flow.
@@ -549,6 +659,7 @@ public class GameManager : MonoBehaviour
         {
             levelCompletePanel.Hide();
         }
+        HideLevelCompleteScreen();
 
         // Meteorites persist across a replay too — they were part of the
         // board state the player actually won with.
@@ -692,6 +803,7 @@ public class GameManager : MonoBehaviour
         {
             levelCompletePanel.Hide();
         }
+        HideLevelCompleteScreen();
         if (countdownText != null)
         {
             countdownText.gameObject.SetActive(false);

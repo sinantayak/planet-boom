@@ -214,6 +214,18 @@ public class PlanetMerge : MonoBehaviour
             AudioManager.Instance.PlayMerge();
         }
 
+        // Subtle sparkle around the planet's perimeter, distinct from the big
+        // BOOM burst. Pass the real WORLD radius (collider radius × lossyScale)
+        // — NOT localScale, which at ~0.15 used to shrink the particles to
+        // nothing — so the sparkle rings the actual on-screen planet edge.
+        // Color comes from PlanetTierPalette, NOT spriteRenderer.color: every
+        // planet sprite renders pure white (Planet.SetTier), so sampling the
+        // renderer can never reflect the actual art — the palette hardcodes
+        // each tier's real sprite color (lava orange, earth blue, ...) instead.
+        float worldRadius = circleCollider.radius * transform.lossyScale.x;
+        Color sparkColor = PlanetTierPalette.GetAccentColor(planet.CurrentTier);
+        MeteorExplosionVFX.SpawnMergeBurst(transform.position, sparkColor, worldRadius);
+
         StartCoroutine(FuseWith(otherMerge));
         return true;
     }
@@ -232,6 +244,8 @@ public class PlanetMerge : MonoBehaviour
         {
             AudioManager.Instance.PlayExplosion();
         }
+
+        MeteorExplosionVFX.Spawn(transform.position, transform.localScale.x);
 
         // Take the two detonators out of the merge system immediately.
         BeginBeingAbsorbed();

@@ -55,10 +55,23 @@ public class Meteorite : MonoBehaviour
     [SerializeField] private Color moltenColor = new Color(1f, 0.32f, 0.05f, 1f);
 
     [Header("Tier Physics")]
-    // Same shape as Planet's mass curve: heavier at higher tiers so a molten
-    // Tier5 shoves the pile around more convincingly than a Tier1 pebble.
+    // Same growth rate as Planet.massMultiplierPerTier (2.7) rather than a
+    // gentler curve — dead rock reads as dense, so a high-tier meteorite
+    // should feel at least as immovable as a same-tier planet, not lighter.
+    // baseMass starts above Planet's Tier1 (1f) so even a fresh meteorite
+    // reads as "heavier" than a fresh planet.
     [SerializeField] private float baseMass = 1.4f;
-    [SerializeField] private float massMultiplierPerTier = 1.8f;
+    [SerializeField] private float massMultiplierPerTier = 2.7f;
+
+    // Sluggishness that grows with tier, mirroring Planet's damping curve.
+    // Mass alone barely changes how "loose" a body feels once it's already
+    // moving — a heavy Rigidbody2D still skates and spins freely without
+    // damping. This is what actually makes a high-tier meteorite resist
+    // being shoved and stop rolling instead of bouncing around forever.
+    [SerializeField] private float baseLinearDamping = 0f;
+    [SerializeField] private float linearDampingPerTier = 0.4f;
+    [SerializeField] private float baseAngularDamping = 1.5f;
+    [SerializeField] private float angularDampingPerTier = 0.5f;
 
     [Header("Fusion Feel")]
     [SerializeField] private float fusionDuration = 0.2f;
@@ -233,6 +246,14 @@ public class Meteorite : MonoBehaviour
             AudioManager.Instance.PlayMerge();
         }
 
+        // Subtle sparkle around the meteorite's perimeter, distinct from the
+        // Big Pop burst — tinted to this meteorite's own current color (dead
+        // grey through molten orange/red per ColorForTier), so hotter rocks
+        // spark hotter. Pass the real WORLD radius (collider × lossyScale), not
+        // the tiny localScale, so the ring lands on the actual on-screen edge.
+        float worldRadius = circleCollider.radius * transform.lossyScale.x;
+        MeteorExplosionVFX.SpawnMergeBurst(transform.position, sr.color, worldRadius);
+
         StartCoroutine(FuseWith(otherMeteorite));
         return true;
     }
@@ -256,6 +277,8 @@ public class Meteorite : MonoBehaviour
         {
             AudioManager.Instance.PlayExplosion();
         }
+
+        MeteorExplosionVFX.Spawn(center, transform.localScale.x);
 
         // Take both detonators out of the merge/physics system first, so
         // OverlapCircleAll below can't pick up their own (about-to-be-
@@ -337,7 +360,7 @@ public class Meteorite : MonoBehaviour
 
         transform.localScale = Vector3.one * targetScale;
         sr.color = targetColor;
-        rb.mass = MassForTier(CurrentTier);
+        ApplyTierPhysics(CurrentTier);
 
         if (loser != null)
         {
@@ -351,7 +374,20 @@ public class Meteorite : MonoBehaviour
     {
         transform.localScale = Vector3.one * ScaleForTier(CurrentTier);
         sr.color = ColorForTier(CurrentTier);
-        rb.mass = MassForTier(CurrentTier);
+        ApplyTierPhysics(CurrentTier);
+    }
+
+    // Mass and damping for the given tier, mirroring Planet.ApplyTierPhysics
+    // exactly — a merge that bumps CurrentTier makes the winner both heavier
+    // AND more sluggish in the same step, instead of mass alone (which does
+    // little to a body that's already moving/rolling without damping to
+    // actually bleed that motion off).
+    private void ApplyTierPhysics(MeteoriteTier tier)
+    {
+        int tierSteps = (int)tier;
+        rb.mass = MassForTier(tier);
+        rb.linearDamping = baseLinearDamping + linearDampingPerTier * tierSteps;
+        rb.angularDamping = baseAngularDamping + angularDampingPerTier * tierSteps;
     }
 
     private float ScaleForTier(MeteoriteTier tier)
