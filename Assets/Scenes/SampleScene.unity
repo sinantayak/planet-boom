@@ -2235,6 +2235,7 @@ MonoBehaviour:
   nextPlanetUIImg: {fileID: 826403677}
   loadedPlanetRenderer: {fileID: 760694412}
   launcherVisualScaleModifier: 1
+  meteoritePreviewScaleModifier: 0.75
   isRainbowActive: 0
 --- !u!4 &1153348843
 Transform:
@@ -2936,7 +2937,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.8113208, g: 0.6467604, b: 0.6467604, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
