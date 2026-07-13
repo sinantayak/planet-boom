@@ -117,6 +117,16 @@ public class PlanetLauncher : MonoBehaviour
     // uniformly if real sizes overflow the launcher area.
     [SerializeField] private float launcherVisualScaleModifier = 1f;
 
+    // Fixed (NOT tier-based — the Next box shows every planet tier at one
+    // identical size by design, see RefreshPreviews) correction for the
+    // meteorite's Next-box preview only. The meteorite sprite's own authored
+    // bounds are proportioned differently from the planet PNGs, so at the
+    // same 1:1 scale it overflows the HUD's circular frame even though
+    // preserveAspect keeps it inside its RectTransform. 1 = no correction;
+    // tune down in the Inspector until it visually sits inside the frame
+    // like the planet previews do.
+    [SerializeField] [Range(0.1f, 1f)] private float meteoritePreviewScaleModifier = 0.5f;
+
     [Header("Skills")]
     // Skill hook: while true, the next launched planet is a wildcard that adopts
     // the tier of whatever planet it touches first. Consumed on launch.
@@ -480,24 +490,11 @@ public class PlanetLauncher : MonoBehaviour
                     ? previewTransform.parent.lossyScale.x
                     : 1f;
 
-                float worldScale;
-                if (CurrentIsMeteorite)
-                {
-                    // Meteorites have no PlanetMerge growth curve — the
-                    // prefab's own authored scale IS its Tier1 size.
-                    worldScale = meteoritePrefab.transform.localScale.x * launcherVisualScaleModifier;
-                }
-                else if (prefabMerge != null)
-                {
-                    // Size the preview to the exact world scale the fired planet
-                    // will spawn at (PlanetMerge.Start snaps spawns onto the same
-                    // curve), so a Tier3 in the slot is visibly a Tier3.
-                    worldScale = prefabMerge.ScaleForTier(CurrentTier) * launcherVisualScaleModifier;
-                }
-                else
-                {
-                    worldScale = previewTransform.localScale.x;
-                }
+                // Falls back to whatever scale is already on the transform
+                // if neither prefab reference is wired, so a misconfigured
+                // Inspector never zeroes the preview out.
+                float worldScale = ComputeQueueWorldScale(CurrentIsMeteorite, CurrentTier)
+                    ?? previewTransform.localScale.x;
 
                 // localScale is multiplied by every ancestor's scale before it
                 // reaches the screen; divide that back out so the preview's
@@ -514,6 +511,13 @@ public class PlanetLauncher : MonoBehaviour
 
         if (nextPlanetUIImg != null)
         {
+            // Deliberately NOT sized off PLANET tier: the Next box shows
+            // every planet tier at one identical size by design. Only
+            // sprite/color/visibility swap for planets — the RectTransform
+            // itself is never touched. (The physical bodies still get their
+            // real diverse scale once actually launched/merged in the arena
+            // — see loadedPlanetRenderer above and PlanetMerge/Meteorite's
+            // own tier-growth curves.)
             Sprite nextSprite = NextIsMeteorite ? MeteoritePreviewSprite() : SpriteForTier(NextTier);
             nextPlanetUIImg.sprite = nextSprite;
             nextPlanetUIImg.color = NextIsMeteorite && prefabMeteoriteRenderer != null
@@ -522,7 +526,44 @@ public class PlanetLauncher : MonoBehaviour
             // A UI Image with a null sprite renders as a solid white square;
             // disable it outright instead if the tier has no art yet.
             nextPlanetUIImg.enabled = nextSprite != null;
+
+            // The one exception: the meteorite sprite's own authored bounds
+            // overflow the HUD's circular frame at the planet previews'
+            // scale, so it gets a fixed corrective shrink here. Reset to
+            // Vector3.one for every planet frame too — otherwise a meteorite
+            // preview's shrink would still be sitting on the transform the
+            // next time a regular planet cycles into the Next slot.
+            nextPlanetUIImg.rectTransform.localScale = NextIsMeteorite
+                ? Vector3.one * meteoritePreviewScaleModifier
+                : Vector3.one;
         }
+    }
+
+    // Source of truth for "how big will this queued spawn actually be in
+    // world units" — used by the loaded-slot world-space preview so it
+    // always matches the real spawned body's size. (The Next UI indicator
+    // deliberately does NOT use this — it stays a fixed-size box regardless
+    // of tier/type, see RefreshPreviews.) Returns null when the relevant
+    // prefab reference isn't wired, so the caller can fall back to whatever
+    // it'd otherwise do instead of silently collapsing to a zero scale.
+    private float? ComputeQueueWorldScale(bool isMeteorite, PlanetTier tier)
+    {
+        if (isMeteorite)
+        {
+            // Meteorites have no PlanetMerge growth curve — the prefab's own
+            // authored scale IS its Tier1 size (the only tier the launcher
+            // ever queues one at; growth only happens after it's on the board).
+            return meteoritePrefab != null
+                ? meteoritePrefab.transform.localScale.x * launcherVisualScaleModifier
+                : (float?)null;
+        }
+
+        // Size to the exact world scale the fired planet will spawn at
+        // (PlanetMerge.Start snaps spawns onto the same curve), so a Tier3
+        // preview is visibly a Tier3.
+        return prefabMerge != null
+            ? prefabMerge.ScaleForTier(tier) * launcherVisualScaleModifier
+            : (float?)null;
     }
 
     private Sprite SpriteForTier(PlanetTier tier)
