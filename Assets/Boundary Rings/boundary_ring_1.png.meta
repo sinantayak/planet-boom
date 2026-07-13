@@ -1,0 +1,975 @@
+fileFormatVersion: 2
+guid: 33de0f2f853ff124999b1ed7a4400bc0
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5454876558979703671
+    second: boundary_ring_1_0
+  - first:
+      213: -3617526298608442278
+    second: boundary_ring_1_1
+  - first:
+      213: 3880161289584131834
+    second: boundary_ring_1_2
+  - first:
+      213: 704337247692211904
+    second: boundary_ring_1_3
+  - first:
+      213: -259272384308884397
+    second: boundary_ring_1_4
+  - first:
+      213: -1799715708712114155
+    second: boundary_ring_1_5
+  - first:
+      213: 6223387309864877310
+    second: boundary_ring_1_6
+  - first:
+      213: 3286849233356649277
+    second: boundary_ring_1_7
+  - first:
+      213: 2168648667783159357
+    second: boundary_ring_1_8
+  - first:
+      213: 2309851912680313998
+    second: boundary_ring_1_9
+  - first:
+      213: -3814350886347491615
+    second: boundary_ring_1_10
+  - first:
+      213: 1169908241013066446
+    second: boundary_ring_1_11
+  - first:
+      213: 3656061624216982674
+    second: boundary_ring_1_12
+  - first:
+      213: 509462941936790063
+    second: boundary_ring_1_13
+  - first:
+      213: 6522267697693539711
+    second: boundary_ring_1_14
+  - first:
+      213: -3357522941985046750
+    second: boundary_ring_1_15
+  - first:
+      213: 1125075864298378486
+    second: boundary_ring_1_16
+  - first:
+      213: -744867025012189256
+    second: boundary_ring_1_17
+  - first:
+      213: 7779217833817017869
+    second: boundary_ring_1_18
+  - first:
+      213: 2339594163024816324
+    second: boundary_ring_1_19
+  - first:
+      213: 8250296484301457485
+    second: boundary_ring_1_20
+  - first:
+      213: -6612291887380083109
+    second: boundary_ring_1_21
+  - first:
+      213: -3071528273913218972
+    second: boundary_ring_1_22
+  - first:
+      213: 7847132710021685644
+    second: boundary_ring_1_23
+  - first:
+      213: -4234876994330723083
+    second: boundary_ring_1_24
+  - first:
+      213: -2057472915226787063
+    second: boundary_ring_1_25
+  - first:
+      213: 3777379589643718025
+    second: boundary_ring_1_26
+  - first:
+      213: -8384703089890432773
+    second: boundary_ring_1_27
+  - first:
+      213: -2059540946114444623
+    second: boundary_ring_1_28
+  - first:
+      213: -83270900739844108
+    second: boundary_ring_1_29
+  - first:
+      213: 3004954600009147468
+    second: boundary_ring_1_30
+  - first:
+      213: -9207991136617439297
+    second: boundary_ring_1_31
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: boundary_ring_1_0
+      rect:
+        serializedVersion: 2
+        x: 556
+        y: 1924
+        width: 372
+        height: 120
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 98cd868bba26c44b0800000000000000
+      internalID: -5454876558979703671
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_1
+      rect:
+        serializedVersion: 2
+        x: 775
+        y: 1941
+        width: 365
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a546fc57ff6fbcdc0800000000000000
+      internalID: -3617526298608442278
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_2
+      rect:
+        serializedVersion: 2
+        x: 1030
+        y: 1966
+        width: 361
+        height: 82
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: afe32e8822a19d530800000000000000
+      internalID: 3880161289584131834
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_3
+      rect:
+        serializedVersion: 2
+        x: 136
+        y: 1527
+        width: 357
+        height: 365
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0c645cabefe46c900800000000000000
+      internalID: 704337247692211904
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_4
+      rect:
+        serializedVersion: 2
+        x: 346
+        y: 1701
+        width: 335
+        height: 219
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 35c4331e321e66cf0800000000000000
+      internalID: -259272384308884397
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_5
+      rect:
+        serializedVersion: 2
+        x: 1243
+        y: 1818
+        width: 299
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 518268529102607e0800000000000000
+      internalID: -1799715708712114155
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_6
+      rect:
+        serializedVersion: 2
+        x: 1472
+        y: 1817
+        width: 186
+        height: 120
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: efc7b2019c9ed5650800000000000000
+      internalID: 6223387309864877310
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_7
+      rect:
+        serializedVersion: 2
+        x: 1713
+        y: 1736
+        width: 44
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d33fc7896fb3d9d20800000000000000
+      internalID: 3286849233356649277
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_8
+      rect:
+        serializedVersion: 2
+        x: 88
+        y: 1232
+        width: 201
+        height: 405
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d3ed6dd2976981e10800000000000000
+      internalID: 2168648667783159357
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_9
+      rect:
+        serializedVersion: 2
+        x: 1783
+        y: 1458
+        width: 89
+        height: 133
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e841113931e3e0020800000000000000
+      internalID: 2309851912680313998
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_10
+      rect:
+        serializedVersion: 2
+        x: 1791
+        y: 1442
+        width: 161
+        height: 244
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1e6bf820414b01bc0800000000000000
+      internalID: -3814350886347491615
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_11
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1004
+        width: 99
+        height: 435
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ecac265c8595c3010800000000000000
+      internalID: 1169908241013066446
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_12
+      rect:
+        serializedVersion: 2
+        x: 1960
+        y: 1329
+        width: 44
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 29414643da0fcb230800000000000000
+      internalID: 3656061624216982674
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_13
+      rect:
+        serializedVersion: 2
+        x: 66
+        y: 786
+        width: 40
+        height: 347
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f2a2e50b8d9f11700800000000000000
+      internalID: 509462941936790063
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_14
+      rect:
+        serializedVersion: 2
+        x: 1953
+        y: 1052
+        width: 22
+        height: 122
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f7d37032aefb38a50800000000000000
+      internalID: 6522267697693539711
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_15
+      rect:
+        serializedVersion: 2
+        x: 2002
+        y: 990
+        width: 39
+        height: 270
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 22fb1c55caea761d0800000000000000
+      internalID: -3357522941985046750
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_16
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 585
+        width: 106
+        height: 319
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6f4ded4a9821d9f00800000000000000
+      internalID: 1125075864298378486
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_17
+      rect:
+        serializedVersion: 2
+        x: 2005
+        y: 878
+        width: 43
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8b71f312363b9a5f0800000000000000
+      internalID: -744867025012189256
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_18
+      rect:
+        serializedVersion: 2
+        x: 126
+        y: 475
+        width: 122
+        height: 220
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d0e0c0f576555fb60800000000000000
+      internalID: 7779217833817017869
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_19
+      rect:
+        serializedVersion: 2
+        x: 1879
+        y: 629
+        width: 54
+        height: 120
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4c8ebadde78e77020800000000000000
+      internalID: 2339594163024816324
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_20
+      rect:
+        serializedVersion: 2
+        x: 1909
+        y: 545
+        width: 106
+        height: 253
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d484176c0f0fe7270800000000000000
+      internalID: 8250296484301457485
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_21
+      rect:
+        serializedVersion: 2
+        x: 145
+        y: 269
+        width: 207
+        height: 249
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b5e4385df8b6c34a0800000000000000
+      internalID: -6612291887380083109
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_22
+      rect:
+        serializedVersion: 2
+        x: 1849
+        y: 439
+        width: 44
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 46875dbfe4dbf55d0800000000000000
+      internalID: -3071528273913218972
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_23
+      rect:
+        serializedVersion: 2
+        x: 304
+        y: 204
+        width: 236
+        height: 196
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c81e036bf9d96ec60800000000000000
+      internalID: 7847132710021685644
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_24
+      rect:
+        serializedVersion: 2
+        x: 418
+        y: 60
+        width: 287
+        height: 159
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5fc717d9fc1ba35c0800000000000000
+      internalID: -4234876994330723083
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_25
+      rect:
+        serializedVersion: 2
+        x: 1580
+        y: 179
+        width: 231
+        height: 211
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9038be8d8436273e0800000000000000
+      internalID: -2057472915226787063
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_26
+      rect:
+        serializedVersion: 2
+        x: 636
+        y: 83
+        width: 252
+        height: 80
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 98d468e29b2fb6430800000000000000
+      internalID: 3777379589643718025
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_27
+      rect:
+        serializedVersion: 2
+        x: 1201
+        y: 91
+        width: 132
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf8e5fbb6fc83ab80800000000000000
+      internalID: -8384703089890432773
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_28
+      rect:
+        serializedVersion: 2
+        x: 1489
+        y: 113
+        width: 44
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1b20a72eb6a0b63e0800000000000000
+      internalID: -2059540946114444623
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_29
+      rect:
+        serializedVersion: 2
+        x: 797
+        y: 8
+        width: 174
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4f756459e8928def0800000000000000
+      internalID: -83270900739844108
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_30
+      rect:
+        serializedVersion: 2
+        x: 1046
+        y: 0
+        width: 45
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c44a8bba94eb3b920800000000000000
+      internalID: 3004954600009147468
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boundary_ring_1_31
+      rect:
+        serializedVersion: 2
+        x: 1165
+        y: 18
+        width: 250
+        height: 79
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fbfd8f6e8d4a63080800000000000000
+      internalID: -9207991136617439297
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      boundary_ring_1_0: -5454876558979703671
+      boundary_ring_1_1: -3617526298608442278
+      boundary_ring_1_10: -3814350886347491615
+      boundary_ring_1_11: 1169908241013066446
+      boundary_ring_1_12: 3656061624216982674
+      boundary_ring_1_13: 509462941936790063
+      boundary_ring_1_14: 6522267697693539711
+      boundary_ring_1_15: -3357522941985046750
+      boundary_ring_1_16: 1125075864298378486
+      boundary_ring_1_17: -744867025012189256
+      boundary_ring_1_18: 7779217833817017869
+      boundary_ring_1_19: 2339594163024816324
+      boundary_ring_1_2: 3880161289584131834
+      boundary_ring_1_20: 8250296484301457485
+      boundary_ring_1_21: -6612291887380083109
+      boundary_ring_1_22: -3071528273913218972
+      boundary_ring_1_23: 7847132710021685644
+      boundary_ring_1_24: -4234876994330723083
+      boundary_ring_1_25: -2057472915226787063
+      boundary_ring_1_26: 3777379589643718025
+      boundary_ring_1_27: -8384703089890432773
+      boundary_ring_1_28: -2059540946114444623
+      boundary_ring_1_29: -83270900739844108
+      boundary_ring_1_3: 704337247692211904
+      boundary_ring_1_30: 3004954600009147468
+      boundary_ring_1_31: -9207991136617439297
+      boundary_ring_1_4: -259272384308884397
+      boundary_ring_1_5: -1799715708712114155
+      boundary_ring_1_6: 6223387309864877310
+      boundary_ring_1_7: 3286849233356649277
+      boundary_ring_1_8: 2168648667783159357
+      boundary_ring_1_9: 2309851912680313998
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -5,6 +5,729 @@ TextureImporter:
   - first:
       213: 6843867007339870724
     second: orbit_2_0
+  - first:
+      213: -952858597641611613
+    second: orbit_2_1
+  - first:
+      213: -2462956654732380298
+    second: orbit_2_2
+  - first:
+      213: -2381089153468461989
+    second: orbit_2_3
+  - first:
+      213: -1396264419080170808
+    second: orbit_2_4
+  - first:
+      213: 5021824591141475183
+    second: orbit_2_5
+  - first:
+      213: 715034296588056824
+    second: orbit_2_6
+  - first:
+      213: 5464208825692254772
+    second: orbit_2_7
+  - first:
+      213: -3237227695267787710
+    second: orbit_2_8
+  - first:
+      213: 6183310165294733072
+    second: orbit_2_9
+  - first:
+      213: -6251411772446853207
+    second: orbit_2_10
+  - first:
+      213: -8459681813408826787
+    second: orbit_2_11
+  - first:
+      213: -6131920190921745309
+    second: orbit_2_12
+  - first:
+      213: 1281550982975613190
+    second: orbit_2_13
+  - first:
+      213: 6556558281863045836
+    second: orbit_2_14
+  - first:
+      213: 3726661983215920975
+    second: orbit_2_15
+  - first:
+      213: -4149608782360505872
+    second: orbit_2_16
+  - first:
+      213: 4677262226015935805
+    second: orbit_2_17
+  - first:
+      213: -1511666437767677717
+    second: orbit_2_18
+  - first:
+      213: -3810232818381653143
+    second: orbit_2_19
+  - first:
+      213: -8757303284266917902
+    second: orbit_2_20
+  - first:
+      213: 422442232415554375
+    second: orbit_2_21
+  - first:
+      213: 5548030821540021336
+    second: orbit_2_22
+  - first:
+      213: 7049768668708151916
+    second: orbit_2_23
+  - first:
+      213: 4127550790124593236
+    second: orbit_2_24
+  - first:
+      213: -4091879779536663545
+    second: orbit_2_25
+  - first:
+      213: -8016611166351763664
+    second: orbit_2_26
+  - first:
+      213: 7788108026332059626
+    second: orbit_2_27
+  - first:
+      213: 2083713296566253238
+    second: orbit_2_28
+  - first:
+      213: 1244652191117389873
+    second: orbit_2_29
+  - first:
+      213: -8169051577854132005
+    second: orbit_2_30
+  - first:
+      213: 2621761354667956801
+    second: orbit_2_31
+  - first:
+      213: 90903324086830337
+    second: orbit_2_32
+  - first:
+      213: 734871386587800803
+    second: orbit_2_33
+  - first:
+      213: -7895145972373188260
+    second: orbit_2_34
+  - first:
+      213: 868648623572008342
+    second: orbit_2_35
+  - first:
+      213: -7926011212986240498
+    second: orbit_2_36
+  - first:
+      213: -6880180132457222883
+    second: orbit_2_37
+  - first:
+      213: 9142015022436500742
+    second: orbit_2_38
+  - first:
+      213: -8078054118173185888
+    second: orbit_2_39
+  - first:
+      213: 1635262653611094416
+    second: orbit_2_40
+  - first:
+      213: 1981927569777995099
+    second: orbit_2_41
+  - first:
+      213: 4338337336653782401
+    second: orbit_2_42
+  - first:
+      213: -5225943636299542851
+    second: orbit_2_43
+  - first:
+      213: 4266575697137643340
+    second: orbit_2_44
+  - first:
+      213: -3694119083977198397
+    second: orbit_2_45
+  - first:
+      213: 14147438763502403
+    second: orbit_2_46
+  - first:
+      213: 6469810354650210070
+    second: orbit_2_47
+  - first:
+      213: 7158220869949163135
+    second: orbit_2_48
+  - first:
+      213: -3249653159871928056
+    second: orbit_2_49
+  - first:
+      213: -1112795282686826884
+    second: orbit_2_50
+  - first:
+      213: 8264826228976503851
+    second: orbit_2_51
+  - first:
+      213: -2899499123760103165
+    second: orbit_2_52
+  - first:
+      213: 2240574866075274677
+    second: orbit_2_53
+  - first:
+      213: -2693775876278344173
+    second: orbit_2_54
+  - first:
+      213: 6018312225579991634
+    second: orbit_2_55
+  - first:
+      213: 4821260606396822816
+    second: orbit_2_56
+  - first:
+      213: -3662135710778288451
+    second: orbit_2_57
+  - first:
+      213: -8265185479921933594
+    second: orbit_2_58
+  - first:
+      213: 3258701172625362001
+    second: orbit_2_59
+  - first:
+      213: -9105573862509100250
+    second: orbit_2_60
+  - first:
+      213: 5086070974087948455
+    second: orbit_2_61
+  - first:
+      213: 8938927011617521835
+    second: orbit_2_62
+  - first:
+      213: -3585954971189585211
+    second: orbit_2_63
+  - first:
+      213: 6285485952951380384
+    second: orbit_2_64
+  - first:
+      213: -179559632708390820
+    second: orbit_2_65
+  - first:
+      213: -6986112184518500295
+    second: orbit_2_66
+  - first:
+      213: 7776924170030404321
+    second: orbit_2_67
+  - first:
+      213: -4532644706232182234
+    second: orbit_2_68
+  - first:
+      213: -9220493845218402456
+    second: orbit_2_69
+  - first:
+      213: -5402680653162961071
+    second: orbit_2_70
+  - first:
+      213: -1828921996537612928
+    second: orbit_2_71
+  - first:
+      213: 3870898886422438797
+    second: orbit_2_72
+  - first:
+      213: -4416747627394183934
+    second: orbit_2_73
+  - first:
+      213: 4854324848115990650
+    second: orbit_2_74
+  - first:
+      213: -2910230895391290886
+    second: orbit_2_75
+  - first:
+      213: 4165488950392581201
+    second: orbit_2_76
+  - first:
+      213: -8853875713629058582
+    second: orbit_2_77
+  - first:
+      213: -6520360652456316673
+    second: orbit_2_78
+  - first:
+      213: 6732390534016548195
+    second: orbit_2_79
+  - first:
+      213: -8542695346652472475
+    second: orbit_2_80
+  - first:
+      213: 9172211992154081100
+    second: orbit_2_81
+  - first:
+      213: -976352371383085539
+    second: orbit_2_82
+  - first:
+      213: -1304150710803573912
+    second: orbit_2_83
+  - first:
+      213: -6920039497013318483
+    second: orbit_2_84
+  - first:
+      213: 3018811664846139418
+    second: orbit_2_85
+  - first:
+      213: 7273947358682853087
+    second: orbit_2_86
+  - first:
+      213: 1211015413430460168
+    second: orbit_2_87
+  - first:
+      213: -4843093793863735403
+    second: orbit_2_88
+  - first:
+      213: 1905984179420025130
+    second: orbit_2_89
+  - first:
+      213: -4814638232915692354
+    second: orbit_2_90
+  - first:
+      213: 4897971385161641179
+    second: orbit_2_91
+  - first:
+      213: -2146936062088718755
+    second: orbit_2_92
+  - first:
+      213: -149240411140213818
+    second: orbit_2_93
+  - first:
+      213: 2127753686152635459
+    second: orbit_2_94
+  - first:
+      213: -2043001206385939161
+    second: orbit_2_95
+  - first:
+      213: 5075458814731699039
+    second: orbit_2_96
+  - first:
+      213: 3148437242854825666
+    second: orbit_2_97
+  - first:
+      213: -1885267465941664040
+    second: orbit_2_98
+  - first:
+      213: -7495168237160740604
+    second: orbit_2_99
+  - first:
+      213: -3881537357797099187
+    second: orbit_2_100
+  - first:
+      213: 127063615661634509
+    second: orbit_2_101
+  - first:
+      213: -7448861293174329933
+    second: orbit_2_102
+  - first:
+      213: 7092309636881398787
+    second: orbit_2_103
+  - first:
+      213: -4927172818405474249
+    second: orbit_2_104
+  - first:
+      213: 6767694389202048560
+    second: orbit_2_105
+  - first:
+      213: -1451071864079334131
+    second: orbit_2_106
+  - first:
+      213: 1614955478107280015
+    second: orbit_2_107
+  - first:
+      213: 7122356639878655610
+    second: orbit_2_108
+  - first:
+      213: 7097541302678150523
+    second: orbit_2_109
+  - first:
+      213: 9170258093359875252
+    second: orbit_2_110
+  - first:
+      213: -7303665594167334519
+    second: orbit_2_111
+  - first:
+      213: 2598944447799796827
+    second: orbit_2_112
+  - first:
+      213: -8086960344643998036
+    second: orbit_2_113
+  - first:
+      213: -1799798670808502757
+    second: orbit_2_114
+  - first:
+      213: -7541806693026151532
+    second: orbit_2_115
+  - first:
+      213: 6784684925395862112
+    second: orbit_2_116
+  - first:
+      213: -5331474658448067518
+    second: orbit_2_117
+  - first:
+      213: 8333289924782609509
+    second: orbit_2_118
+  - first:
+      213: -8106066093073645036
+    second: orbit_2_119
+  - first:
+      213: -3364300304910238474
+    second: orbit_2_120
+  - first:
+      213: 9027961803330555316
+    second: orbit_2_121
+  - first:
+      213: 5287049585997089695
+    second: orbit_2_122
+  - first:
+      213: -8512381502355017469
+    second: orbit_2_123
+  - first:
+      213: 5331041068804468884
+    second: orbit_2_124
+  - first:
+      213: 8461283130066391839
+    second: orbit_2_125
+  - first:
+      213: -1812473717450916786
+    second: orbit_2_126
+  - first:
+      213: 5968383320309053721
+    second: orbit_2_127
+  - first:
+      213: 7769447146634773655
+    second: orbit_2_128
+  - first:
+      213: 5140027985979446724
+    second: orbit_2_129
+  - first:
+      213: 8692630723405053578
+    second: orbit_2_130
+  - first:
+      213: -4091509831365798229
+    second: orbit_2_131
+  - first:
+      213: -2420610228115170556
+    second: orbit_2_132
+  - first:
+      213: -4795931118773068770
+    second: orbit_2_133
+  - first:
+      213: 14752985268191187
+    second: orbit_2_134
+  - first:
+      213: 3621234416841031969
+    second: orbit_2_135
+  - first:
+      213: 4858128696909276372
+    second: orbit_2_136
+  - first:
+      213: -1659459313400456487
+    second: orbit_2_137
+  - first:
+      213: 6013470077507584686
+    second: orbit_2_138
+  - first:
+      213: -3100146604337641288
+    second: orbit_2_139
+  - first:
+      213: -5003832486515656444
+    second: orbit_2_140
+  - first:
+      213: 277484261659505373
+    second: orbit_2_141
+  - first:
+      213: 5600508220431486117
+    second: orbit_2_142
+  - first:
+      213: 5460042601487014504
+    second: orbit_2_143
+  - first:
+      213: 908880567464258639
+    second: orbit_2_144
+  - first:
+      213: -8826238854522009246
+    second: orbit_2_145
+  - first:
+      213: -3598948540649393781
+    second: orbit_2_146
+  - first:
+      213: 1930398806125041782
+    second: orbit_2_147
+  - first:
+      213: 5857323945883455989
+    second: orbit_2_148
+  - first:
+      213: 8630110168164036220
+    second: orbit_2_149
+  - first:
+      213: -7603173370930368515
+    second: orbit_2_150
+  - first:
+      213: -2369027454378599470
+    second: orbit_2_151
+  - first:
+      213: -8560478924782715992
+    second: orbit_2_152
+  - first:
+      213: 667364573352615042
+    second: orbit_2_153
+  - first:
+      213: 3853583872316427350
+    second: orbit_2_154
+  - first:
+      213: -678962862204200153
+    second: orbit_2_155
+  - first:
+      213: -7000913535801108615
+    second: orbit_2_156
+  - first:
+      213: -2184472093927711876
+    second: orbit_2_157
+  - first:
+      213: -4431792825029625744
+    second: orbit_2_158
+  - first:
+      213: 5892921243653771266
+    second: orbit_2_159
+  - first:
+      213: -8704206826389865280
+    second: orbit_2_160
+  - first:
+      213: -299088645911547441
+    second: orbit_2_161
+  - first:
+      213: -5509192598392759176
+    second: orbit_2_162
+  - first:
+      213: 7698972042488232568
+    second: orbit_2_163
+  - first:
+      213: 58786670438564719
+    second: orbit_2_164
+  - first:
+      213: -6242741301319645957
+    second: orbit_2_165
+  - first:
+      213: -2982742418473155855
+    second: orbit_2_166
+  - first:
+      213: -7478591957095453417
+    second: orbit_2_167
+  - first:
+      213: 106541329794356471
+    second: orbit_2_168
+  - first:
+      213: 8017187006747413370
+    second: orbit_2_169
+  - first:
+      213: 2820929440283301158
+    second: orbit_2_170
+  - first:
+      213: -950067745981594258
+    second: orbit_2_171
+  - first:
+      213: 6947380591991157339
+    second: orbit_2_172
+  - first:
+      213: -4297550886741253308
+    second: orbit_2_173
+  - first:
+      213: 5644311751817696594
+    second: orbit_2_174
+  - first:
+      213: -1605932446445234447
+    second: orbit_2_175
+  - first:
+      213: 7780961956721909372
+    second: orbit_2_176
+  - first:
+      213: 7166056050774164731
+    second: orbit_2_177
+  - first:
+      213: 4300525109634379678
+    second: orbit_2_178
+  - first:
+      213: -3147138280895087981
+    second: orbit_2_179
+  - first:
+      213: -606519733829706148
+    second: orbit_2_180
+  - first:
+      213: 3462782909559236032
+    second: orbit_2_181
+  - first:
+      213: 8165546419927509624
+    second: orbit_2_182
+  - first:
+      213: -8445808772959873606
+    second: orbit_2_183
+  - first:
+      213: 4094735281761684004
+    second: orbit_2_184
+  - first:
+      213: 2707055160265328616
+    second: orbit_2_185
+  - first:
+      213: 1492500724894415312
+    second: orbit_2_186
+  - first:
+      213: -1057740853080497746
+    second: orbit_2_187
+  - first:
+      213: -2061065786721417762
+    second: orbit_2_188
+  - first:
+      213: 3004537088526348472
+    second: orbit_2_189
+  - first:
+      213: 4542839530776937479
+    second: orbit_2_190
+  - first:
+      213: 8724318346238953217
+    second: orbit_2_191
+  - first:
+      213: 7880015839740217337
+    second: orbit_2_192
+  - first:
+      213: -9077238153656499804
+    second: orbit_2_193
+  - first:
+      213: -1996058792416438216
+    second: orbit_2_194
+  - first:
+      213: 3907303596750439790
+    second: orbit_2_195
+  - first:
+      213: 5617727401137802801
+    second: orbit_2_196
+  - first:
+      213: -8556886242091181288
+    second: orbit_2_197
+  - first:
+      213: -4995389897829782683
+    second: orbit_2_198
+  - first:
+      213: -611024428015266545
+    second: orbit_2_199
+  - first:
+      213: -7891025548728368510
+    second: orbit_2_200
+  - first:
+      213: -4573527855459854440
+    second: orbit_2_201
+  - first:
+      213: 2164893432322673786
+    second: orbit_2_202
+  - first:
+      213: -6175390323507829792
+    second: orbit_2_203
+  - first:
+      213: -3309213406623454634
+    second: orbit_2_204
+  - first:
+      213: 2793229818413931764
+    second: orbit_2_205
+  - first:
+      213: 5297549567802982725
+    second: orbit_2_206
+  - first:
+      213: -1663429125240213972
+    second: orbit_2_207
+  - first:
+      213: -1284477105912163758
+    second: orbit_2_208
+  - first:
+      213: -5902800817107113898
+    second: orbit_2_209
+  - first:
+      213: 3700643662965706535
+    second: orbit_2_210
+  - first:
+      213: -7970769319195970946
+    second: orbit_2_211
+  - first:
+      213: -2456147847321263096
+    second: orbit_2_212
+  - first:
+      213: 1560741306294769287
+    second: orbit_2_213
+  - first:
+      213: 8568143117965486394
+    second: orbit_2_214
+  - first:
+      213: 2411903914422077143
+    second: orbit_2_215
+  - first:
+      213: -3593356655291524263
+    second: orbit_2_216
+  - first:
+      213: -4504005480517594867
+    second: orbit_2_217
+  - first:
+      213: -3387637472447184790
+    second: orbit_2_218
+  - first:
+      213: 3237647534872696495
+    second: orbit_2_219
+  - first:
+      213: 4511504998183385842
+    second: orbit_2_220
+  - first:
+      213: -8323543346426555271
+    second: orbit_2_221
+  - first:
+      213: -5400738064292945499
+    second: orbit_2_222
+  - first:
+      213: -6510755867383195587
+    second: orbit_2_223
+  - first:
+      213: -7528540311789308857
+    second: orbit_2_224
+  - first:
+      213: -4809325330540228513
+    second: orbit_2_225
+  - first:
+      213: -5806334554285386481
+    second: orbit_2_226
+  - first:
+      213: 4783887462521344731
+    second: orbit_2_227
+  - first:
+      213: -7343143120944161350
+    second: orbit_2_228
+  - first:
+      213: 2758620152626684775
+    second: orbit_2_229
+  - first:
+      213: 1036863074216102532
+    second: orbit_2_230
+  - first:
+      213: 2864075907713333639
+    second: orbit_2_231
+  - first:
+      213: 7223416290238879659
+    second: orbit_2_232
+  - first:
+      213: 4099881526432076989
+    second: orbit_2_233
+  - first:
+      213: 7673174997598400148
+    second: orbit_2_234
+  - first:
+      213: 6656263330870400369
+    second: orbit_2_235
+  - first:
+      213: 5491311885384145429
+    second: orbit_2_236
+  - first:
+      213: 4591734726059255968
+    second: orbit_2_237
+  - first:
+      213: -4633226170370101940
+    second: orbit_2_238
+  - first:
+      213: 4769646090926602593
+    second: orbit_2_239
+  - first:
+      213: 6146386906477914900
+    second: orbit_2_240
+  - first:
+      213: -1175848815773192261
+    second: orbit_2_241
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,7 +769,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -129,10 +852,10 @@ TextureImporter:
       name: orbit_2_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 1024
-        height: 1024
+        x: 912
+        y: 2038
+        width: 32
+        height: 10
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -147,11 +870,5313 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: orbit_2_1
+      rect:
+        serializedVersion: 2
+        x: 977
+        y: 2043
+        width: 33
+        height: 5
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3a615666724c6c2f0800000000000000
+      internalID: -952858597641611613
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_2
+      rect:
+        serializedVersion: 2
+        x: 1043
+        y: 2043
+        width: 32
+        height: 5
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 677fd79c8f1d1ddd0800000000000000
+      internalID: -2462956654732380298
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_3
+      rect:
+        serializedVersion: 2
+        x: 1108
+        y: 2038
+        width: 33
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b5c0afcc70ca4fed0800000000000000
+      internalID: -2381089153468461989
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_4
+      rect:
+        serializedVersion: 2
+        x: 783
+        y: 2016
+        width: 32
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8c2953898e87f9ce0800000000000000
+      internalID: -1396264419080170808
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_5
+      rect:
+        serializedVersion: 2
+        x: 847
+        y: 2029
+        width: 32
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f631f4fdbda11b540800000000000000
+      internalID: 5021824591141475183
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_6
+      rect:
+        serializedVersion: 2
+        x: 1173
+        y: 2028
+        width: 33
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8f83a5287ef4ce900800000000000000
+      internalID: 715034296588056824
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_7
+      rect:
+        serializedVersion: 2
+        x: 1238
+        y: 2015
+        width: 32
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 432f0f1f9f4c4db40800000000000000
+      internalID: 5464208825692254772
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_8
+      rect:
+        serializedVersion: 2
+        x: 720
+        y: 1999
+        width: 31
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24cc18e009e0313d0800000000000000
+      internalID: -3237227695267787710
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_9
+      rect:
+        serializedVersion: 2
+        x: 1301
+        y: 1998
+        width: 32
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0175472b5d78fc550800000000000000
+      internalID: 6183310165294733072
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_10
+      rect:
+        serializedVersion: 2
+        x: 658
+        y: 1978
+        width: 31
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9a73c964d168e39a0800000000000000
+      internalID: -6251411772446853207
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_11
+      rect:
+        serializedVersion: 2
+        x: 1364
+        y: 1976
+        width: 31
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d5a3fe6463c299a80800000000000000
+      internalID: -8459681813408826787
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_12
+      rect:
+        serializedVersion: 2
+        x: 597
+        y: 1952
+        width: 31
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 36c501d131b07eaa0800000000000000
+      internalID: -6131920190921745309
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_13
+      rect:
+        serializedVersion: 2
+        x: 915
+        y: 1944
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 60960dd34dbf8c110800000000000000
+      internalID: 1281550982975613190
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_14
+      rect:
+        serializedVersion: 2
+        x: 936
+        y: 1946
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cc2a79be4039dfa50800000000000000
+      internalID: 6556558281863045836
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_15
+      rect:
+        serializedVersion: 2
+        x: 957
+        y: 1948
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f47a98b3453c7b330800000000000000
+      internalID: 3726661983215920975
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_16
+      rect:
+        serializedVersion: 2
+        x: 977
+        y: 1949
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0f19f8a4cc0a966c0800000000000000
+      internalID: -4149608782360505872
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_17
+      rect:
+        serializedVersion: 2
+        x: 998
+        y: 1950
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d3d580f9639f8e040800000000000000
+      internalID: 4677262226015935805
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_18
+      rect:
+        serializedVersion: 2
+        x: 1019
+        y: 1950
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be83afd426b750be0800000000000000
+      internalID: -1511666437767677717
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_19
+      rect:
+        serializedVersion: 2
+        x: 1040
+        y: 1950
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 96b73dc60755f1bc0800000000000000
+      internalID: -3810232818381653143
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_20
+      rect:
+        serializedVersion: 2
+        x: 1061
+        y: 1949
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2ff98e6af0fc77680800000000000000
+      internalID: -8757303284266917902
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_21
+      rect:
+        serializedVersion: 2
+        x: 1082
+        y: 1948
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 74b8041e8f0dcd500800000000000000
+      internalID: 422442232415554375
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_22
+      rect:
+        serializedVersion: 2
+        x: 1103
+        y: 1947
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 854cfc033a09efc40800000000000000
+      internalID: 5548030821540021336
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_23
+      rect:
+        serializedVersion: 2
+        x: 1123
+        y: 1944
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c62270fb04fc5d160800000000000000
+      internalID: 7049768668708151916
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_24
+      rect:
+        serializedVersion: 2
+        x: 1425
+        y: 1951
+        width: 30
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 45062cd2391084930800000000000000
+      internalID: 4127550790124593236
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_25
+      rect:
+        serializedVersion: 2
+        x: 539
+        y: 1924
+        width: 30
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 70c0d1d2509b637c0800000000000000
+      internalID: -4091879779536663545
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_26
+      rect:
+        serializedVersion: 2
+        x: 853
+        y: 1935
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0375c273e964fb090800000000000000
+      internalID: -8016611166351763664
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_27
+      rect:
+        serializedVersion: 2
+        x: 874
+        y: 1939
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae714ed9cfae41c60800000000000000
+      internalID: 7788108026332059626
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_28
+      rect:
+        serializedVersion: 2
+        x: 894
+        y: 1942
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6b6f6970436daec10800000000000000
+      internalID: 2083713296566253238
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_29
+      rect:
+        serializedVersion: 2
+        x: 1144
+        y: 1942
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 130b678c294e54110800000000000000
+      internalID: 1244652191117389873
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_30
+      rect:
+        serializedVersion: 2
+        x: 1165
+        y: 1939
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bd009261fd2b1ae80800000000000000
+      internalID: -8169051577854132005
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_31
+      rect:
+        serializedVersion: 2
+        x: 1185
+        y: 1936
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 14a94d6bf0e526420800000000000000
+      internalID: 2621761354667956801
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_32
+      rect:
+        serializedVersion: 2
+        x: 812
+        y: 1927
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 10509157714f24100800000000000000
+      internalID: 90903324086830337
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_33
+      rect:
+        serializedVersion: 2
+        x: 833
+        y: 1931
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3e42a21f1a9c23a00800000000000000
+      internalID: 734871386587800803
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_34
+      rect:
+        serializedVersion: 2
+        x: 1206
+        y: 1932
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5117d2819ece6290800000000000000
+      internalID: -7895145972373188260
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_35
+      rect:
+        serializedVersion: 2
+        x: 1226
+        y: 1927
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 69d34a2225f0e0c00800000000000000
+      internalID: 868648623572008342
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_36
+      rect:
+        serializedVersion: 2
+        x: 1484
+        y: 1921
+        width: 30
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e02313cabc6210290800000000000000
+      internalID: -7926011212986240498
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_37
+      rect:
+        serializedVersion: 2
+        x: 772
+        y: 1917
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d1def2e4f90b480a0800000000000000
+      internalID: -6880180132457222883
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_38
+      rect:
+        serializedVersion: 2
+        x: 792
+        y: 1922
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 605cc97f936fede70800000000000000
+      internalID: 9142015022436500742
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_39
+      rect:
+        serializedVersion: 2
+        x: 1247
+        y: 1922
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0a8e7e1349cf4ef80800000000000000
+      internalID: -8078054118173185888
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_40
+      rect:
+        serializedVersion: 2
+        x: 1267
+        y: 1917
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 091b3fe28be91b610800000000000000
+      internalID: 1635262653611094416
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_41
+      rect:
+        serializedVersion: 2
+        x: 482
+        y: 1891
+        width: 29
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b5dab2fbf98318b10800000000000000
+      internalID: 1981927569777995099
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_42
+      rect:
+        serializedVersion: 2
+        x: 732
+        y: 1905
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 18d101b72ded43c30800000000000000
+      internalID: 4338337336653782401
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_43
+      rect:
+        serializedVersion: 2
+        x: 752
+        y: 1911
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dbe072673f7b977b0800000000000000
+      internalID: -5225943636299542851
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_44
+      rect:
+        serializedVersion: 2
+        x: 1287
+        y: 1911
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c4f2433cdfbe53b30800000000000000
+      internalID: 4266575697137643340
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_45
+      rect:
+        serializedVersion: 2
+        x: 1307
+        y: 1905
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3c43c81f34adbbcc0800000000000000
+      internalID: -3694119083977198397
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_46
+      rect:
+        serializedVersion: 2
+        x: 692
+        y: 1891
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 34beaf54503423000800000000000000
+      internalID: 14147438763502403
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_47
+      rect:
+        serializedVersion: 2
+        x: 712
+        y: 1898
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 61fd1113d3269c950800000000000000
+      internalID: 6469810354650210070
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_48
+      rect:
+        serializedVersion: 2
+        x: 1327
+        y: 1898
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f768b1194fb175360800000000000000
+      internalID: 7158220869949163135
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_49
+      rect:
+        serializedVersion: 2
+        x: 1346
+        y: 1891
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 809ab922ba9e6e2d0800000000000000
+      internalID: -3249653159871928056
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_50
+      rect:
+        serializedVersion: 2
+        x: 1542
+        y: 1888
+        width: 29
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c76a8b3169e8e80f0800000000000000
+      internalID: -1112795282686826884
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_51
+      rect:
+        serializedVersion: 2
+        x: 673
+        y: 1883
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b2cc9749aaf82b270800000000000000
+      internalID: 8264826228976503851
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_52
+      rect:
+        serializedVersion: 2
+        x: 1366
+        y: 1884
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 30109bdb8e8e2c7d0800000000000000
+      internalID: -2899499123760103165
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_53
+      rect:
+        serializedVersion: 2
+        x: 1385
+        y: 1876
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5bdc51938fe181f10800000000000000
+      internalID: 2240574866075274677
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_54
+      rect:
+        serializedVersion: 2
+        x: 428
+        y: 1855
+        width: 28
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 316a9eddc19cd9ad0800000000000000
+      internalID: -2693775876278344173
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_55
+      rect:
+        serializedVersion: 2
+        x: 635
+        y: 1867
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 25206113517558350800000000000000
+      internalID: 6018312225579991634
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_56
+      rect:
+        serializedVersion: 2
+        x: 654
+        y: 1875
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 025fdd53afe88e240800000000000000
+      internalID: 4821260606396822816
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_57
+      rect:
+        serializedVersion: 2
+        x: 1404
+        y: 1867
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: db699cf49fa7d2dc0800000000000000
+      internalID: -3662135710778288451
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_58
+      rect:
+        serializedVersion: 2
+        x: 190
+        y: 189
+        width: 1669
+        height: 1669
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6e2698ac8992c4d80800000000000000
+      internalID: -8265185479921933594
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_59
+      rect:
+        serializedVersion: 2
+        x: 616
+        y: 1858
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 15ccb7f737b393d20800000000000000
+      internalID: 3258701172625362001
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_60
+      rect:
+        serializedVersion: 2
+        x: 1423
+        y: 1858
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6234011c0d082a180800000000000000
+      internalID: -9105573862509100250
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_61
+      rect:
+        serializedVersion: 2
+        x: 1597
+        y: 1852
+        width: 28
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7a8efe09a9a559640800000000000000
+      internalID: 5086070974087948455
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_62
+      rect:
+        serializedVersion: 2
+        x: 158
+        y: 1572
+        width: 22
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ba04b90b1c27d0c70800000000000000
+      internalID: 8938927011617521835
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_63
+      rect:
+        serializedVersion: 2
+        x: 1872
+        y: 1568
+        width: 22
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5cad2b1f3f02c3ec0800000000000000
+      internalID: -3585954971189585211
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_64
+      rect:
+        serializedVersion: 2
+        x: 124
+        y: 1516
+        width: 21
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0a9ef5a1c288a3750800000000000000
+      internalID: 6285485952951380384
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_65
+      rect:
+        serializedVersion: 2
+        x: 1907
+        y: 1511
+        width: 20
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c50ba642773128df0800000000000000
+      internalID: -179559632708390820
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_66
+      rect:
+        serializedVersion: 2
+        x: 94
+        y: 1457
+        width: 19
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9302fb07bf75c0f90800000000000000
+      internalID: -6986112184518500295
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_67
+      rect:
+        serializedVersion: 2
+        x: 1938
+        y: 1453
+        width: 18
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1e2dfc7245f2deb60800000000000000
+      internalID: 7776924170030404321
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_68
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 1397
+        width: 18
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 62ad9f797afc811c0800000000000000
+      internalID: -4532644706232182234
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_69
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 1423
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 86fd41633b93a0080800000000000000
+      internalID: -9220493845218402456
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_70
+      rect:
+        serializedVersion: 2
+        x: 1858
+        y: 1424
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 157a8511292d505b0800000000000000
+      internalID: -5402680653162961071
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_71
+      rect:
+        serializedVersion: 2
+        x: 1965
+        y: 1393
+        width: 17
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0853a7a522d5e96e0800000000000000
+      internalID: -1828921996537612928
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_72
+      rect:
+        serializedVersion: 2
+        x: 173
+        y: 1404
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d832aae370238b530800000000000000
+      internalID: 3870898886422438797
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_73
+      rect:
+        serializedVersion: 2
+        x: 1867
+        y: 1405
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 20dce9e0f6f84b2c0800000000000000
+      internalID: -4416747627394183934
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_74
+      rect:
+        serializedVersion: 2
+        x: 164
+        y: 1385
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a704e44eab60e5340800000000000000
+      internalID: 4854324848115990650
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_75
+      rect:
+        serializedVersion: 2
+        x: 1876
+        y: 1386
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af9c5d17b68cc97d0800000000000000
+      internalID: -2910230895391290886
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_76
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 1335
+        width: 16
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 15ce6f3712acec930800000000000000
+      internalID: 4165488950392581201
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_77
+      rect:
+        serializedVersion: 2
+        x: 156
+        y: 1366
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae98ea3c2f6b02580800000000000000
+      internalID: -8853875713629058582
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_78
+      rect:
+        serializedVersion: 2
+        x: 1884
+        y: 1367
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff038ee68860385a0800000000000000
+      internalID: -6520360652456316673
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_79
+      rect:
+        serializedVersion: 2
+        x: 149
+        y: 1346
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 36d324d55814e6d50800000000000000
+      internalID: 6732390534016548195
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_80
+      rect:
+        serializedVersion: 2
+        x: 1891
+        y: 1348
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 56b9566e7df327980800000000000000
+      internalID: -8542695346652472475
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_81
+      rect:
+        serializedVersion: 2
+        x: 1988
+        y: 1331
+        width: 16
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c470cecd53e3a4f70800000000000000
+      internalID: 9172211992154081100
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_82
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 1326
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d16d910f0bc4372f0800000000000000
+      internalID: -976352371383085539
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_83
+      rect:
+        serializedVersion: 2
+        x: 1898
+        y: 1328
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 863daf496d9b6ede0800000000000000
+      internalID: -1304150710803573912
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_84
+      rect:
+        serializedVersion: 2
+        x: 135
+        y: 1306
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dac29dccdb417ff90800000000000000
+      internalID: -6920039497013318483
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_85
+      rect:
+        serializedVersion: 2
+        x: 1905
+        y: 1308
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a10b5fef639f4e920800000000000000
+      internalID: 3018811664846139418
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_86
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 1272
+        width: 14
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fdeae2d659042f460800000000000000
+      internalID: 7273947358682853087
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_87
+      rect:
+        serializedVersion: 2
+        x: 129
+        y: 1286
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 80f9b0f2a146ec010800000000000000
+      internalID: 1211015413430460168
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_88
+      rect:
+        serializedVersion: 2
+        x: 1911
+        y: 1288
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5976ad2badfd9ccb0800000000000000
+      internalID: -4843093793863735403
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_89
+      rect:
+        serializedVersion: 2
+        x: 2008
+        y: 1268
+        width: 14
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a2158d9438a637a10800000000000000
+      internalID: 1905984179420025130
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_90
+      rect:
+        serializedVersion: 2
+        x: 123
+        y: 1266
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eb4bb054908fe2db0800000000000000
+      internalID: -4814638232915692354
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_91
+      rect:
+        serializedVersion: 2
+        x: 1917
+        y: 1268
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bdc6694360719f340800000000000000
+      internalID: 4897971385161641179
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_92
+      rect:
+        serializedVersion: 2
+        x: 118
+        y: 1246
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d56d9b7c60d8432e0800000000000000
+      internalID: -2146936062088718755
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_93
+      rect:
+        serializedVersion: 2
+        x: 1923
+        y: 1248
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6c3bad303aacdedf0800000000000000
+      internalID: -149240411140213818
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_94
+      rect:
+        serializedVersion: 2
+        x: 14
+        y: 1208
+        width: 13
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 344e7a844bc478d10800000000000000
+      internalID: 2127753686152635459
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_95
+      rect:
+        serializedVersion: 2
+        x: 113
+        y: 1226
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 72deba12a3dc5a3e0800000000000000
+      internalID: -2043001206385939161
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_96
+      rect:
+        serializedVersion: 2
+        x: 1927
+        y: 1228
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f53453ca6e6af6640800000000000000
+      internalID: 5075458814731699039
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_97
+      rect:
+        serializedVersion: 2
+        x: 2023
+        y: 1204
+        width: 13
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2ced8f1cdfe71bb20800000000000000
+      internalID: 3148437242854825666
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_98
+      rect:
+        serializedVersion: 2
+        x: 108
+        y: 1205
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8de32f17a3f26d5e0800000000000000
+      internalID: -1885267465941664040
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_99
+      rect:
+        serializedVersion: 2
+        x: 1932
+        y: 1207
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4094e3c0330dbf790800000000000000
+      internalID: -7495168237160740604
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_100
+      rect:
+        serializedVersion: 2
+        x: 104
+        y: 1185
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d49781e9652022ac0800000000000000
+      internalID: -3881537357797099187
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_101
+      rect:
+        serializedVersion: 2
+        x: 1936
+        y: 1187
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dc3736b6fab63c100800000000000000
+      internalID: 127063615661634509
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_102
+      rect:
+        serializedVersion: 2
+        x: 4
+        y: 1143
+        width: 11
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3bdef2f9e1450a890800000000000000
+      internalID: -7448861293174329933
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_103
+      rect:
+        serializedVersion: 2
+        x: 101
+        y: 1164
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 30c356fb902fc6260800000000000000
+      internalID: 7092309636881398787
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_104
+      rect:
+        serializedVersion: 2
+        x: 1939
+        y: 1166
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7304bfb4d6a2f9bb0800000000000000
+      internalID: -4927172818405474249
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_105
+      rect:
+        serializedVersion: 2
+        x: 2034
+        y: 1140
+        width: 11
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 036dac0b03eabed50800000000000000
+      internalID: 6767694389202048560
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_106
+      rect:
+        serializedVersion: 2
+        x: 98
+        y: 1144
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d05ccf5e3d1ccdbe0800000000000000
+      internalID: -1451071864079334131
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_107
+      rect:
+        serializedVersion: 2
+        x: 1942
+        y: 1146
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f82d7a07379796610800000000000000
+      internalID: 1614955478107280015
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_108
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 1123
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a7eac9bc0a1b7d260800000000000000
+      internalID: 7122356639878655610
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_109
+      rect:
+        serializedVersion: 2
+        x: 1945
+        y: 1125
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b7d5bccd5388f7260800000000000000
+      internalID: 7097541302678150523
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_110
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1078
+        width: 8
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4b4cd59562d434f70800000000000000
+      internalID: 9170258093359875252
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_111
+      rect:
+        serializedVersion: 2
+        x: 93
+        y: 1102
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 989e96da6da24aa90800000000000000
+      internalID: -7303665594167334519
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_112
+      rect:
+        serializedVersion: 2
+        x: 1947
+        y: 1104
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b54a41a943e411420800000000000000
+      internalID: 2598944447799796827
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_113
+      rect:
+        serializedVersion: 2
+        x: 2041
+        y: 1074
+        width: 7
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: caee2d0c96855cf80800000000000000
+      internalID: -8086960344643998036
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_114
+      rect:
+        serializedVersion: 2
+        x: 92
+        y: 1081
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b1e2d3705a4d507e0800000000000000
+      internalID: -1799798670808502757
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_115
+      rect:
+        serializedVersion: 2
+        x: 1949
+        y: 1083
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 493438955ce165790800000000000000
+      internalID: -7541806693026151532
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_116
+      rect:
+        serializedVersion: 2
+        x: 91
+        y: 1061
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0620b2b2efa082e50800000000000000
+      internalID: 6784684925395862112
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_117
+      rect:
+        serializedVersion: 2
+        x: 1950
+        y: 1062
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 244b436ab0cc206b0800000000000000
+      internalID: -5331474658448067518
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_118
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1013
+        width: 5
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5645201f80bc5a370800000000000000
+      internalID: 8333289924782609509
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_119
+      rect:
+        serializedVersion: 2
+        x: 90
+        y: 1040
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 412c18c06d7718f80800000000000000
+      internalID: -8106066093073645036
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_120
+      rect:
+        serializedVersion: 2
+        x: 1951
+        y: 1042
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6fc361092ba9f41d0800000000000000
+      internalID: -3364300304910238474
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_121
+      rect:
+        serializedVersion: 2
+        x: 90
+        y: 1019
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4bd005d8d63c94d70800000000000000
+      internalID: 9027961803330555316
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_122
+      rect:
+        serializedVersion: 2
+        x: 1951
+        y: 1019
+        width: 8
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f9b8b33269f5f5940800000000000000
+      internalID: 5287049585997089695
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_123
+      rect:
+        serializedVersion: 2
+        x: 2041
+        y: 930
+        width: 7
+        height: 111
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 301f587cf12fdd980800000000000000
+      internalID: -8512381502355017469
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_124
+      rect:
+        serializedVersion: 2
+        x: 90
+        y: 998
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 490fb156b99abf940800000000000000
+      internalID: 5331041068804468884
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_125
+      rect:
+        serializedVersion: 2
+        x: 1951
+        y: 998
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f13dc9f4d248c6570800000000000000
+      internalID: 8461283130066391839
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_126
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 947
+        width: 7
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e4c3b92c1ccc8d6e0800000000000000
+      internalID: -1812473717450916786
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_127
+      rect:
+        serializedVersion: 2
+        x: 91
+        y: 977
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 919336a0205f3d250800000000000000
+      internalID: 5968383320309053721
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_128
+      rect:
+        serializedVersion: 2
+        x: 1950
+        y: 977
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 794865cf30f92db60800000000000000
+      internalID: 7769447146634773655
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_129
+      rect:
+        serializedVersion: 2
+        x: 92
+        y: 956
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4c51fdf583c055740800000000000000
+      internalID: 5140027985979446724
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_130
+      rect:
+        serializedVersion: 2
+        x: 1949
+        y: 957
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a8e7430669d62a870800000000000000
+      internalID: 8692630723405053578
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_131
+      rect:
+        serializedVersion: 2
+        x: 94
+        y: 935
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ba65c627c790837c0800000000000000
+      internalID: -4091509831365798229
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_132
+      rect:
+        serializedVersion: 2
+        x: 1947
+        y: 936
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 40b948d82d3486ed0800000000000000
+      internalID: -2420610228115170556
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_133
+      rect:
+        serializedVersion: 2
+        x: 3
+        y: 882
+        width: 11
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e1c1a42be0e617db0800000000000000
+      internalID: -4795931118773068770
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_134
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 915
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3df794e03c9643000800000000000000
+      internalID: 14752985268191187
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_135
+      rect:
+        serializedVersion: 2
+        x: 1945
+        y: 915
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1218a381485314230800000000000000
+      internalID: 3621234416841031969
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_136
+      rect:
+        serializedVersion: 2
+        x: 98
+        y: 894
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4d4a8647f4a8b6340800000000000000
+      internalID: 4858128696909276372
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_137
+      rect:
+        serializedVersion: 2
+        x: 1943
+        y: 894
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9da5d81fb8a68f8e0800000000000000
+      internalID: -1659459313400456487
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_138
+      rect:
+        serializedVersion: 2
+        x: 2033
+        y: 865
+        width: 11
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ea2c74dbc23247350800000000000000
+      internalID: 6013470077507584686
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_139
+      rect:
+        serializedVersion: 2
+        x: 101
+        y: 873
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8b842d0b6111af4d0800000000000000
+      internalID: -3100146604337641288
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_140
+      rect:
+        serializedVersion: 2
+        x: 1940
+        y: 874
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 409bcad6dd0de8ab0800000000000000
+      internalID: -5003832486515656444
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_141
+      rect:
+        serializedVersion: 2
+        x: 105
+        y: 853
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd2f9fe3772d9d300800000000000000
+      internalID: 277484261659505373
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_142
+      rect:
+        serializedVersion: 2
+        x: 1936
+        y: 853
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5ac4970cd8009bd40800000000000000
+      internalID: 5600508220431486117
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_143
+      rect:
+        serializedVersion: 2
+        x: 12
+        y: 817
+        width: 12
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 86a122841d7f5cb40800000000000000
+      internalID: 5460042601487014504
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_144
+      rect:
+        serializedVersion: 2
+        x: 109
+        y: 832
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f4c66f68f0efc9c00800000000000000
+      internalID: 908880567464258639
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_145
+      rect:
+        serializedVersion: 2
+        x: 1932
+        y: 833
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 26907757686e28580800000000000000
+      internalID: -8826238854522009246
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_146
+      rect:
+        serializedVersion: 2
+        x: 113
+        y: 812
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b81beadce57fd0ec0800000000000000
+      internalID: -3598948540649393781
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_147
+      rect:
+        serializedVersion: 2
+        x: 1928
+        y: 812
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 678dbe98c772aca10800000000000000
+      internalID: 1930398806125041782
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_148
+      rect:
+        serializedVersion: 2
+        x: 2021
+        y: 800
+        width: 13
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5f1d5c86815694150800000000000000
+      internalID: 5857323945883455989
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_149
+      rect:
+        serializedVersion: 2
+        x: 118
+        y: 792
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c7e67e1497f44c770800000000000000
+      internalID: 8630110168164036220
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_150
+      rect:
+        serializedVersion: 2
+        x: 1923
+        y: 792
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dff6cfb3a1a1c7690800000000000000
+      internalID: -7603173370930368515
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_151
+      rect:
+        serializedVersion: 2
+        x: 25
+        y: 754
+        width: 14
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2db9d96f4168f1fd0800000000000000
+      internalID: -2369027454378599470
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_152
+      rect:
+        serializedVersion: 2
+        x: 123
+        y: 771
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8abbb15f5c1133980800000000000000
+      internalID: -8560478924782715992
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_153
+      rect:
+        serializedVersion: 2
+        x: 1918
+        y: 772
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 28cdc5a2b84f24900800000000000000
+      internalID: 667364573352615042
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_154
+      rect:
+        serializedVersion: 2
+        x: 129
+        y: 751
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 65c489d5d1eaa7530800000000000000
+      internalID: 3853583872316427350
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_155
+      rect:
+        serializedVersion: 2
+        x: 1912
+        y: 752
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 72bd2a6cfd6d396f0800000000000000
+      internalID: -678962862204200153
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_156
+      rect:
+        serializedVersion: 2
+        x: 2005
+        y: 737
+        width: 14
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 977d95b4b32c7de90800000000000000
+      internalID: -7000913535801108615
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_157
+      rect:
+        serializedVersion: 2
+        x: 135
+        y: 731
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c7b5fa354323fa1e0800000000000000
+      internalID: -2184472093927711876
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_158
+      rect:
+        serializedVersion: 2
+        x: 1906
+        y: 732
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 078fbf108eb1f72c0800000000000000
+      internalID: -4431792825029625744
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_159
+      rect:
+        serializedVersion: 2
+        x: 43
+        y: 691
+        width: 15
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 200165926acd7c150800000000000000
+      internalID: 5892921243653771266
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_160
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 712
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0cc708d1202743780800000000000000
+      internalID: -8704206826389865280
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_161
+      rect:
+        serializedVersion: 2
+        x: 1899
+        y: 712
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fc1f610167c69dbf0800000000000000
+      internalID: -299088645911547441
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_162
+      rect:
+        serializedVersion: 2
+        x: 149
+        y: 692
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 87c969d458a6b83b0800000000000000
+      internalID: -5509192598392759176
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_163
+      rect:
+        serializedVersion: 2
+        x: 1892
+        y: 692
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 87abc20284e38da60800000000000000
+      internalID: 7698972042488232568
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_164
+      rect:
+        serializedVersion: 2
+        x: 1985
+        y: 674
+        width: 16
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f63c4015a2ad0d000800000000000000
+      internalID: 58786670438564719
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_165
+      rect:
+        serializedVersion: 2
+        x: 157
+        y: 672
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf4ce26acd35d59a0800000000000000
+      internalID: -6242741301319645957
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_166
+      rect:
+        serializedVersion: 2
+        x: 1884
+        y: 673
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1f20b6ad29b2b96d0800000000000000
+      internalID: -2982742418473155855
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_167
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 630
+        width: 17
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 71d6b310d34b63890800000000000000
+      internalID: -7478591957095453417
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_168
+      rect:
+        serializedVersion: 2
+        x: 165
+        y: 653
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f45a4466c28a7100800000000000000
+      internalID: 106541329794356471
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_169
+      rect:
+        serializedVersion: 2
+        x: 1876
+        y: 653
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a7b8e031b15c24f60800000000000000
+      internalID: 8017187006747413370
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_170
+      rect:
+        serializedVersion: 2
+        x: 173
+        y: 634
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 62517884164f52720800000000000000
+      internalID: 2820929440283301158
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_171
+      rect:
+        serializedVersion: 2
+        x: 1868
+        y: 634
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e6506303b6ea0d2f0800000000000000
+      internalID: -950067745981594258
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_172
+      rect:
+        serializedVersion: 2
+        x: 1961
+        y: 613
+        width: 17
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b527311f6dd0a6060800000000000000
+      internalID: 6947380591991157339
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_173
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 615
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4436f97ec380c54c0800000000000000
+      internalID: -4297550886741253308
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_174
+      rect:
+        serializedVersion: 2
+        x: 1859
+        y: 615
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 25518a822af945e40800000000000000
+      internalID: 5644311751817696594
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_175
+      rect:
+        serializedVersion: 2
+        x: 90
+        y: 570
+        width: 18
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1f69b54d2f496b9e0800000000000000
+      internalID: -1605932446445234447
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_176
+      rect:
+        serializedVersion: 2
+        x: 1933
+        y: 554
+        width: 18
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c7edc31aca78bfb60800000000000000
+      internalID: 7780961956721909372
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_177
+      rect:
+        serializedVersion: 2
+        x: 119
+        y: 512
+        width: 20
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf4cee2c202f27360800000000000000
+      internalID: 7166056050774164731
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_178
+      rect:
+        serializedVersion: 2
+        x: 1901
+        y: 496
+        width: 20
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e9fa7635dc88eab30800000000000000
+      internalID: 4300525109634379678
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_179
+      rect:
+        serializedVersion: 2
+        x: 152
+        y: 457
+        width: 21
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 39af634686e1354d0800000000000000
+      internalID: -3147138280895087981
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_180
+      rect:
+        serializedVersion: 2
+        x: 1865
+        y: 441
+        width: 22
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5ed0dbf3853597f0800000000000000
+      internalID: -606519733829706148
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_181
+      rect:
+        serializedVersion: 2
+        x: 188
+        y: 403
+        width: 23
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0c5629aa5b64e0030800000000000000
+      internalID: 3462782909559236032
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_182
+      rect:
+        serializedVersion: 2
+        x: 418
+        y: 177
+        width: 28
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 87aedbcb439d15170800000000000000
+      internalID: 8165546419927509624
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_183
+      rect:
+        serializedVersion: 2
+        x: 616
+        y: 181
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab559d63ba57aca80800000000000000
+      internalID: -8445808772959873606
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_184
+      rect:
+        serializedVersion: 2
+        x: 1424
+        y: 181
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 42a0aae3b0c63d830800000000000000
+      internalID: 4094735281761684004
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_185
+      rect:
+        serializedVersion: 2
+        x: 1587
+        y: 167
+        width: 29
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8e7c00f5354619520800000000000000
+      internalID: 2707055160265328616
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_186
+      rect:
+        serializedVersion: 2
+        x: 635
+        y: 172
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0d9385e608d66b410800000000000000
+      internalID: 1492500724894415312
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_187
+      rect:
+        serializedVersion: 2
+        x: 654
+        y: 164
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ea1e7bb5c462251f0800000000000000
+      internalID: -1057740853080497746
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_188
+      rect:
+        serializedVersion: 2
+        x: 1386
+        y: 164
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ed542c3469f9563e0800000000000000
+      internalID: -2061065786721417762
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_189
+      rect:
+        serializedVersion: 2
+        x: 1405
+        y: 172
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8b07914309242b920800000000000000
+      internalID: 3004537088526348472
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_190
+      rect:
+        serializedVersion: 2
+        x: 472
+        y: 142
+        width: 29
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 704cf87fb786b0f30800000000000000
+      internalID: 4542839530776937479
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_191
+      rect:
+        serializedVersion: 2
+        x: 674
+        y: 156
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1070ffeff41031970800000000000000
+      internalID: 8724318346238953217
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_192
+      rect:
+        serializedVersion: 2
+        x: 693
+        y: 148
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9f7ca28f7a07b5d60800000000000000
+      internalID: 7880015839740217337
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_193
+      rect:
+        serializedVersion: 2
+        x: 1347
+        y: 148
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4a18ea51efb270280800000000000000
+      internalID: -9077238153656499804
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_194
+      rect:
+        serializedVersion: 2
+        x: 1367
+        y: 156
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 83819379a139c44e0800000000000000
+      internalID: -1996058792416438216
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_195
+      rect:
+        serializedVersion: 2
+        x: 713
+        y: 141
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e658ae16be7893630800000000000000
+      internalID: 3907303596750439790
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_196
+      rect:
+        serializedVersion: 2
+        x: 733
+        y: 134
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 13e0ccdae4d26fd40800000000000000
+      internalID: 5617727401137802801
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_197
+      rect:
+        serializedVersion: 2
+        x: 1308
+        y: 134
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 81b5ab49c45df3980800000000000000
+      internalID: -8556886242091181288
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_198
+      rect:
+        serializedVersion: 2
+        x: 1328
+        y: 141
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 56be749ca5fccaab0800000000000000
+      internalID: -4995389897829782683
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_199
+      rect:
+        serializedVersion: 2
+        x: 1532
+        y: 132
+        width: 29
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f05501325843587f0800000000000000
+      internalID: -611024428015266545
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_200
+      rect:
+        serializedVersion: 2
+        x: 529
+        y: 110
+        width: 29
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 282838662127d7290800000000000000
+      internalID: -7891025548728368510
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_201
+      rect:
+        serializedVersion: 2
+        x: 753
+        y: 128
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 89716f4a5a09780c0800000000000000
+      internalID: -4573527855459854440
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_202
+      rect:
+        serializedVersion: 2
+        x: 773
+        y: 122
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a7c4b2a4b1f3b0e10800000000000000
+      internalID: 2164893432322673786
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_203
+      rect:
+        serializedVersion: 2
+        x: 1268
+        y: 122
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0e36ee9283b9c4aa0800000000000000
+      internalID: -6175390323507829792
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_204
+      rect:
+        serializedVersion: 2
+        x: 1288
+        y: 128
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 65aaf3c80ff4312d0800000000000000
+      internalID: -3309213406623454634
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_205
+      rect:
+        serializedVersion: 2
+        x: 793
+        y: 117
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4fc579e78bb83c620800000000000000
+      internalID: 2793229818413931764
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_206
+      rect:
+        serializedVersion: 2
+        x: 813
+        y: 112
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 541cbe8a34da48940800000000000000
+      internalID: 5297549567802982725
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_207
+      rect:
+        serializedVersion: 2
+        x: 1227
+        y: 112
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c2ea40916005ae8e0800000000000000
+      internalID: -1663429125240213972
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_208
+      rect:
+        serializedVersion: 2
+        x: 1248
+        y: 117
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 252dbfba0ee9c2ee0800000000000000
+      internalID: -1284477105912163758
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_209
+      rect:
+        serializedVersion: 2
+        x: 1474
+        y: 101
+        width: 30
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 658e1746ee9051ea0800000000000000
+      internalID: -5902800817107113898
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_210
+      rect:
+        serializedVersion: 2
+        x: 834
+        y: 108
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 72f0f5bfdc35b5330800000000000000
+      internalID: 3700643662965706535
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_211
+      rect:
+        serializedVersion: 2
+        x: 854
+        y: 104
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e72fdbef883226190800000000000000
+      internalID: -7970769319195970946
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_212
+      rect:
+        serializedVersion: 2
+        x: 875
+        y: 100
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 804639ccb820aedd0800000000000000
+      internalID: -2456147847321263096
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_213
+      rect:
+        serializedVersion: 2
+        x: 1166
+        y: 100
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7869afbe2fdd8a510800000000000000
+      internalID: 1560741306294769287
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_214
+      rect:
+        serializedVersion: 2
+        x: 1186
+        y: 104
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a396a0315c828e670800000000000000
+      internalID: 8568143117965486394
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_215
+      rect:
+        serializedVersion: 2
+        x: 1207
+        y: 108
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7d68083d4ddc87120800000000000000
+      internalID: 2411903914422077143
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_216
+      rect:
+        serializedVersion: 2
+        x: 587
+        y: 81
+        width: 31
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 95b10121925d12ec0800000000000000
+      internalID: -3593356655291524263
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_217
+      rect:
+        serializedVersion: 2
+        x: 895
+        y: 97
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d011653f0ee8e71c0800000000000000
+      internalID: -4504005480517594867
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_218
+      rect:
+        serializedVersion: 2
+        x: 916
+        y: 95
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a60cbf2daa1bcf0d0800000000000000
+      internalID: -3387637472447184790
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_219
+      rect:
+        serializedVersion: 2
+        x: 937
+        y: 93
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fa69108774f6eec20800000000000000
+      internalID: 3237647534872696495
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_220
+      rect:
+        serializedVersion: 2
+        x: 958
+        y: 91
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2fabe1394e51c9e30800000000000000
+      internalID: 4511504998183385842
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_221
+      rect:
+        serializedVersion: 2
+        x: 979
+        y: 90
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 974ddab2d65dc7c80800000000000000
+      internalID: -8323543346426555271
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_222
+      rect:
+        serializedVersion: 2
+        x: 999
+        y: 89
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5a163e84859bc05b0800000000000000
+      internalID: -5400738064292945499
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_223
+      rect:
+        serializedVersion: 2
+        x: 1020
+        y: 89
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d389559b80625a5a0800000000000000
+      internalID: -6510755867383195587
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_224
+      rect:
+        serializedVersion: 2
+        x: 1041
+        y: 89
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 744f69e6970458790800000000000000
+      internalID: -7528540311789308857
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_225
+      rect:
+        serializedVersion: 2
+        x: 1062
+        y: 90
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f509cdfb718d14db0800000000000000
+      internalID: -4809325330540228513
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_226
+      rect:
+        serializedVersion: 2
+        x: 1083
+        y: 91
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f055eb47c71cb6fa0800000000000000
+      internalID: -5806334554285386481
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_227
+      rect:
+        serializedVersion: 2
+        x: 1104
+        y: 93
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bd297011d48c36240800000000000000
+      internalID: 4783887462521344731
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_228
+      rect:
+        serializedVersion: 2
+        x: 1124
+        y: 95
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: abd1545bc3ae71a90800000000000000
+      internalID: -7343143120944161350
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_229
+      rect:
+        serializedVersion: 2
+        x: 1145
+        y: 97
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7632c8bb966984620800000000000000
+      internalID: 2758620152626684775
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_230
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 57
+        width: 31
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 48ace53f87da36e00800000000000000
+      internalID: 1036863074216102532
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_231
+      rect:
+        serializedVersion: 2
+        x: 1415
+        y: 74
+        width: 30
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 789f1011ddd3fb720800000000000000
+      internalID: 2864075907713333639
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_232
+      rect:
+        serializedVersion: 2
+        x: 709
+        y: 36
+        width: 32
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ba7557c38dabe3460800000000000000
+      internalID: 7223416290238879659
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_233
+      rect:
+        serializedVersion: 2
+        x: 1354
+        y: 51
+        width: 31
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: db49b24b684b5e830800000000000000
+      internalID: 4099881526432076989
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_234
+      rect:
+        serializedVersion: 2
+        x: 772
+        y: 20
+        width: 32
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 49ee24f81089c7a60800000000000000
+      internalID: 7673174997598400148
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_235
+      rect:
+        serializedVersion: 2
+        x: 1291
+        y: 32
+        width: 32
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1751df7ab3ccf5c50800000000000000
+      internalID: 6656263330870400369
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_236
+      rect:
+        serializedVersion: 2
+        x: 837
+        y: 8
+        width: 32
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 51ad337c01f053c40800000000000000
+      internalID: 5491311885384145429
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_237
+      rect:
+        serializedVersion: 2
+        x: 1163
+        y: 5
+        width: 32
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0a86691c76e19bf30800000000000000
+      internalID: 4591734726059255968
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_238
+      rect:
+        serializedVersion: 2
+        x: 1227
+        y: 16
+        width: 32
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c4deb0f885973bfb0800000000000000
+      internalID: -4633226170370101940
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_239
+      rect:
+        serializedVersion: 2
+        x: 901
+        y: 0
+        width: 33
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 169b20a59df213240800000000000000
+      internalID: 4769646090926602593
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_240
+      rect:
+        serializedVersion: 2
+        x: 967
+        y: 0
+        width: 98
+        height: 5
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 41b6ab4935a5c4550800000000000000
+      internalID: 6146386906477914900
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: orbit_2_241
+      rect:
+        serializedVersion: 2
+        x: 1098
+        y: 0
+        width: 32
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bbf66426bbb8eafe0800000000000000
+      internalID: -1175848815773192261
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
@@ -162,6 +6187,247 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       orbit_2_0: 6843867007339870724
+      orbit_2_1: -952858597641611613
+      orbit_2_10: -6251411772446853207
+      orbit_2_100: -3881537357797099187
+      orbit_2_101: 127063615661634509
+      orbit_2_102: -7448861293174329933
+      orbit_2_103: 7092309636881398787
+      orbit_2_104: -4927172818405474249
+      orbit_2_105: 6767694389202048560
+      orbit_2_106: -1451071864079334131
+      orbit_2_107: 1614955478107280015
+      orbit_2_108: 7122356639878655610
+      orbit_2_109: 7097541302678150523
+      orbit_2_11: -8459681813408826787
+      orbit_2_110: 9170258093359875252
+      orbit_2_111: -7303665594167334519
+      orbit_2_112: 2598944447799796827
+      orbit_2_113: -8086960344643998036
+      orbit_2_114: -1799798670808502757
+      orbit_2_115: -7541806693026151532
+      orbit_2_116: 6784684925395862112
+      orbit_2_117: -5331474658448067518
+      orbit_2_118: 8333289924782609509
+      orbit_2_119: -8106066093073645036
+      orbit_2_12: -6131920190921745309
+      orbit_2_120: -3364300304910238474
+      orbit_2_121: 9027961803330555316
+      orbit_2_122: 5287049585997089695
+      orbit_2_123: -8512381502355017469
+      orbit_2_124: 5331041068804468884
+      orbit_2_125: 8461283130066391839
+      orbit_2_126: -1812473717450916786
+      orbit_2_127: 5968383320309053721
+      orbit_2_128: 7769447146634773655
+      orbit_2_129: 5140027985979446724
+      orbit_2_13: 1281550982975613190
+      orbit_2_130: 8692630723405053578
+      orbit_2_131: -4091509831365798229
+      orbit_2_132: -2420610228115170556
+      orbit_2_133: -4795931118773068770
+      orbit_2_134: 14752985268191187
+      orbit_2_135: 3621234416841031969
+      orbit_2_136: 4858128696909276372
+      orbit_2_137: -1659459313400456487
+      orbit_2_138: 6013470077507584686
+      orbit_2_139: -3100146604337641288
+      orbit_2_14: 6556558281863045836
+      orbit_2_140: -5003832486515656444
+      orbit_2_141: 277484261659505373
+      orbit_2_142: 5600508220431486117
+      orbit_2_143: 5460042601487014504
+      orbit_2_144: 908880567464258639
+      orbit_2_145: -8826238854522009246
+      orbit_2_146: -3598948540649393781
+      orbit_2_147: 1930398806125041782
+      orbit_2_148: 5857323945883455989
+      orbit_2_149: 8630110168164036220
+      orbit_2_15: 3726661983215920975
+      orbit_2_150: -7603173370930368515
+      orbit_2_151: -2369027454378599470
+      orbit_2_152: -8560478924782715992
+      orbit_2_153: 667364573352615042
+      orbit_2_154: 3853583872316427350
+      orbit_2_155: -678962862204200153
+      orbit_2_156: -7000913535801108615
+      orbit_2_157: -2184472093927711876
+      orbit_2_158: -4431792825029625744
+      orbit_2_159: 5892921243653771266
+      orbit_2_16: -4149608782360505872
+      orbit_2_160: -8704206826389865280
+      orbit_2_161: -299088645911547441
+      orbit_2_162: -5509192598392759176
+      orbit_2_163: 7698972042488232568
+      orbit_2_164: 58786670438564719
+      orbit_2_165: -6242741301319645957
+      orbit_2_166: -2982742418473155855
+      orbit_2_167: -7478591957095453417
+      orbit_2_168: 106541329794356471
+      orbit_2_169: 8017187006747413370
+      orbit_2_17: 4677262226015935805
+      orbit_2_170: 2820929440283301158
+      orbit_2_171: -950067745981594258
+      orbit_2_172: 6947380591991157339
+      orbit_2_173: -4297550886741253308
+      orbit_2_174: 5644311751817696594
+      orbit_2_175: -1605932446445234447
+      orbit_2_176: 7780961956721909372
+      orbit_2_177: 7166056050774164731
+      orbit_2_178: 4300525109634379678
+      orbit_2_179: -3147138280895087981
+      orbit_2_18: -1511666437767677717
+      orbit_2_180: -606519733829706148
+      orbit_2_181: 3462782909559236032
+      orbit_2_182: 8165546419927509624
+      orbit_2_183: -8445808772959873606
+      orbit_2_184: 4094735281761684004
+      orbit_2_185: 2707055160265328616
+      orbit_2_186: 1492500724894415312
+      orbit_2_187: -1057740853080497746
+      orbit_2_188: -2061065786721417762
+      orbit_2_189: 3004537088526348472
+      orbit_2_19: -3810232818381653143
+      orbit_2_190: 4542839530776937479
+      orbit_2_191: 8724318346238953217
+      orbit_2_192: 7880015839740217337
+      orbit_2_193: -9077238153656499804
+      orbit_2_194: -1996058792416438216
+      orbit_2_195: 3907303596750439790
+      orbit_2_196: 5617727401137802801
+      orbit_2_197: -8556886242091181288
+      orbit_2_198: -4995389897829782683
+      orbit_2_199: -611024428015266545
+      orbit_2_2: -2462956654732380298
+      orbit_2_20: -8757303284266917902
+      orbit_2_200: -7891025548728368510
+      orbit_2_201: -4573527855459854440
+      orbit_2_202: 2164893432322673786
+      orbit_2_203: -6175390323507829792
+      orbit_2_204: -3309213406623454634
+      orbit_2_205: 2793229818413931764
+      orbit_2_206: 5297549567802982725
+      orbit_2_207: -1663429125240213972
+      orbit_2_208: -1284477105912163758
+      orbit_2_209: -5902800817107113898
+      orbit_2_21: 422442232415554375
+      orbit_2_210: 3700643662965706535
+      orbit_2_211: -7970769319195970946
+      orbit_2_212: -2456147847321263096
+      orbit_2_213: 1560741306294769287
+      orbit_2_214: 8568143117965486394
+      orbit_2_215: 2411903914422077143
+      orbit_2_216: -3593356655291524263
+      orbit_2_217: -4504005480517594867
+      orbit_2_218: -3387637472447184790
+      orbit_2_219: 3237647534872696495
+      orbit_2_22: 5548030821540021336
+      orbit_2_220: 4511504998183385842
+      orbit_2_221: -8323543346426555271
+      orbit_2_222: -5400738064292945499
+      orbit_2_223: -6510755867383195587
+      orbit_2_224: -7528540311789308857
+      orbit_2_225: -4809325330540228513
+      orbit_2_226: -5806334554285386481
+      orbit_2_227: 4783887462521344731
+      orbit_2_228: -7343143120944161350
+      orbit_2_229: 2758620152626684775
+      orbit_2_23: 7049768668708151916
+      orbit_2_230: 1036863074216102532
+      orbit_2_231: 2864075907713333639
+      orbit_2_232: 7223416290238879659
+      orbit_2_233: 4099881526432076989
+      orbit_2_234: 7673174997598400148
+      orbit_2_235: 6656263330870400369
+      orbit_2_236: 5491311885384145429
+      orbit_2_237: 4591734726059255968
+      orbit_2_238: -4633226170370101940
+      orbit_2_239: 4769646090926602593
+      orbit_2_24: 4127550790124593236
+      orbit_2_240: 6146386906477914900
+      orbit_2_241: -1175848815773192261
+      orbit_2_25: -4091879779536663545
+      orbit_2_26: -8016611166351763664
+      orbit_2_27: 7788108026332059626
+      orbit_2_28: 2083713296566253238
+      orbit_2_29: 1244652191117389873
+      orbit_2_3: -2381089153468461989
+      orbit_2_30: -8169051577854132005
+      orbit_2_31: 2621761354667956801
+      orbit_2_32: 90903324086830337
+      orbit_2_33: 734871386587800803
+      orbit_2_34: -7895145972373188260
+      orbit_2_35: 868648623572008342
+      orbit_2_36: -7926011212986240498
+      orbit_2_37: -6880180132457222883
+      orbit_2_38: 9142015022436500742
+      orbit_2_39: -8078054118173185888
+      orbit_2_4: -1396264419080170808
+      orbit_2_40: 1635262653611094416
+      orbit_2_41: 1981927569777995099
+      orbit_2_42: 4338337336653782401
+      orbit_2_43: -5225943636299542851
+      orbit_2_44: 4266575697137643340
+      orbit_2_45: -3694119083977198397
+      orbit_2_46: 14147438763502403
+      orbit_2_47: 6469810354650210070
+      orbit_2_48: 7158220869949163135
+      orbit_2_49: -3249653159871928056
+      orbit_2_5: 5021824591141475183
+      orbit_2_50: -1112795282686826884
+      orbit_2_51: 8264826228976503851
+      orbit_2_52: -2899499123760103165
+      orbit_2_53: 2240574866075274677
+      orbit_2_54: -2693775876278344173
+      orbit_2_55: 6018312225579991634
+      orbit_2_56: 4821260606396822816
+      orbit_2_57: -3662135710778288451
+      orbit_2_58: -8265185479921933594
+      orbit_2_59: 3258701172625362001
+      orbit_2_6: 715034296588056824
+      orbit_2_60: -9105573862509100250
+      orbit_2_61: 5086070974087948455
+      orbit_2_62: 8938927011617521835
+      orbit_2_63: -3585954971189585211
+      orbit_2_64: 6285485952951380384
+      orbit_2_65: -179559632708390820
+      orbit_2_66: -6986112184518500295
+      orbit_2_67: 7776924170030404321
+      orbit_2_68: -4532644706232182234
+      orbit_2_69: -9220493845218402456
+      orbit_2_7: 5464208825692254772
+      orbit_2_70: -5402680653162961071
+      orbit_2_71: -1828921996537612928
+      orbit_2_72: 3870898886422438797
+      orbit_2_73: -4416747627394183934
+      orbit_2_74: 4854324848115990650
+      orbit_2_75: -2910230895391290886
+      orbit_2_76: 4165488950392581201
+      orbit_2_77: -8853875713629058582
+      orbit_2_78: -6520360652456316673
+      orbit_2_79: 6732390534016548195
+      orbit_2_8: -3237227695267787710
+      orbit_2_80: -8542695346652472475
+      orbit_2_81: 9172211992154081100
+      orbit_2_82: -976352371383085539
+      orbit_2_83: -1304150710803573912
+      orbit_2_84: -6920039497013318483
+      orbit_2_85: 3018811664846139418
+      orbit_2_86: 7273947358682853087
+      orbit_2_87: 1211015413430460168
+      orbit_2_88: -4843093793863735403
+      orbit_2_89: 1905984179420025130
+      orbit_2_9: 6183310165294733072
+      orbit_2_90: -4814638232915692354
+      orbit_2_91: 4897971385161641179
+      orbit_2_92: -2146936062088718755
+      orbit_2_93: -149240411140213818
+      orbit_2_94: 2127753686152635459
+      orbit_2_95: -2043001206385939161
+      orbit_2_96: 5075458814731699039
+      orbit_2_97: 3148437242854825666
+      orbit_2_98: -1885267465941664040
+      orbit_2_99: -7495168237160740604
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

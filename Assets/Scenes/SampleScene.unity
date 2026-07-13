@@ -672,7 +672,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 12.72, y: 12.72}
+  m_Size: {x: 20.48, y: 20.48}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -1033,7 +1033,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: -10
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 5447965833317663757, guid: 460e8c637c9be354aa8bf8b91c7673cf, type: 3}
+  m_Sprite: {fileID: 2262355309426814843, guid: a4d3b5051ea31d74d8df7761ce2149b6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -1717,12 +1717,12 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -2946541882515230462, guid: dee8d34e326f038429af1ee0bf337f58, type: 3}
+  m_Sprite: {fileID: -8049122380813686591, guid: 338fdd692b5630b40a7394849a0fe7ff, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 20.39, y: 20.39}
+  m_Size: {x: 20.48, y: 20.48}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -2129,7 +2129,7 @@ MonoBehaviour:
   vortexSinkholeAccel: 6
   vortexSwirlDegreesPerSecond: 240
   vortexSpinSpeed: 540
-  vortexSwallowRadius: 0.05
+  vortexSwallowRadius: 0.3
 --- !u!212 &1130355244
 SpriteRenderer:
   serializedVersion: 3
@@ -2779,6 +2779,7 @@ MonoBehaviour:
   goldText: {fileID: 396937739}
   gemText: {fileID: 168877910}
   titleMessage: LEVEL COMPLETED
+  popDuration: 0.45
 --- !u!114 &1241141962
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3082,11 +3083,16 @@ MonoBehaviour:
   lineWidth: 0.06
   lineColor: {r: 1, g: 0.35, b: 0.35, a: 0.8}
   visualBoundaryTransform: {fileID: 825841523}
-  spriteScaleMultiplier: 1.16
+  spriteScaleMultiplier: 1
   innerOrbitTransform: {fileID: 353449928}
-  innerOrbitScaleMultiplier: 0.75
+  innerOrbitScaleMultiplier: 1
   fallbackCenter: {fileID: 1114684055}
   fallbackRadius: 6
+  standardSourceTexturePixels: 2048
+  boundaryNormalColor: {r: 1, g: 1, b: 1, a: 0.4}
+  boundaryAlertColor: {r: 1, g: 0, b: 0, a: 0.4}
+  vortexRingSpinMultiplier: 1.5
+  vortexRingSpinRampUpTime: 1.2
 --- !u!120 &1553861134
 LineRenderer:
   serializedVersion: 3
@@ -3319,11 +3325,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1137333762}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0.5, y: 1}
+  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchoredPosition: {x: 0, y: -400}
   m_SizeDelta: {x: 351.6169, y: 50}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1827558355
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3354,7 +3360,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4278190335
-  m_fontColor: {r: 0.990566, g: 0.2756764, b: 0.2756764, a: 1}
+  m_fontColor: {r: 1, g: 1, b: 1, a: 0.47058824}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -3696,6 +3702,62 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1903465555}
   m_CullTransparentMesh: 1
+--- !u!1 &2000000001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2000000002}
+  - component: {fileID: 2000000003}
+  m_Layer: 0
+  m_Name: AudioManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2000000002
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2000000001}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2000000003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2000000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45bd5781e50d41ce8522dad17d7f1c24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AudioManager
+  launchClip: {fileID: 8300000, guid: 4d2ef94b99cba284ca9d0e6c430d2d0d, type: 3}
+  collisionClip: {fileID: 8300000, guid: 54a4304b6a3aefe438fd37ee9216f335, type: 3}
+  mergeClip: {fileID: 8300000, guid: ac670b8d1c0caab4d9c6a840047a9cb3, type: 3}
+  launchVolume: 0.9
+  minImpactSpeed: 0.6
+  fullVolumeImpactSpeed: 8
+  maxCollisionVolume: 0.8
+  collisionSoundCooldown: 0.07
+  comboResetWindow: 1.5
+  pitchStepPerCombo: 0.2
+  maxComboPitch: 2
+  mergeVolume: 1
 --- !u!1 &2042341099
 GameObject:
   m_ObjectHideFlags: 0
@@ -4069,62 +4131,6 @@ MonoBehaviour:
   - {fileID: 1228761277}
   planetPrefab: {fileID: 804950424806596201, guid: 603fc024be9b949468e2ed37b069c7b1, type: 3}
   achievedTint: {r: 0.45, g: 0.45, b: 0.45, a: 0.9}
---- !u!1 &2000000001
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2000000002}
-  - component: {fileID: 2000000003}
-  m_Layer: 0
-  m_Name: AudioManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2000000002
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2000000001}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2000000003
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2000000001}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 45bd5781e50d41ce8522dad17d7f1c24, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::AudioManager
-  launchClip: {fileID: 8300000, guid: 4d2ef94b99cba284ca9d0e6c430d2d0d, type: 3}
-  collisionClip: {fileID: 8300000, guid: 54a4304b6a3aefe438fd37ee9216f335, type: 3}
-  mergeClip: {fileID: 8300000, guid: ac670b8d1c0caab4d9c6a840047a9cb3, type: 3}
-  launchVolume: 0.9
-  minImpactSpeed: 0.6
-  fullVolumeImpactSpeed: 8
-  maxCollisionVolume: 0.8
-  collisionSoundCooldown: 0.07
-  comboResetWindow: 1.5
-  pitchStepPerCombo: 0.2
-  maxComboPitch: 2
-  mergeVolume: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

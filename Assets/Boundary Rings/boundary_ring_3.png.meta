@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 56e66f5de5e1fbd4cb9694f2a316a69e
+guid: 338fdd692b5630b40a7394849a0fe7ff
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2601831143814695113
-    second: orbit_1_0
+      213: -8049122380813686591
+    second: boundary_ring_3_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -126,7 +126,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: orbit_1_0
+      name: boundary_ring_3_0
       rect:
         serializedVersion: 2
         x: 0
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 737706b1c5074ebd0800000000000000
-      internalID: -2601831143814695113
+      spriteID: 1c824f937d5cb4090800000000000000
+      internalID: -8049122380813686591
       vertices: []
       indices: 
       edges: []
@@ -151,7 +151,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      orbit_1_0: -2601831143814695113
+      boundary_ring_3_0: -8049122380813686591
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

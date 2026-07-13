@@ -102,6 +102,10 @@ public class BlackHole : MonoBehaviour
     // LINEAR sideways speed (radius × angularSpeed) shrinks on its own as
     // the radius does — no inverse-distance term needed here either.
     [SerializeField] private float vortexSwirlDegreesPerSecond = 240f;
+    // Exposed so other cinematic-only visuals (BoundaryVisualizer's ring/orbit
+    // art) can sync their own spin to this exact rate instead of carrying a
+    // second speed knob that could drift out of sync with the planets.
+    public float VortexSwirlDegreesPerSecond => vortexSwirlDegreesPerSecond;
     // Visual spin of the black hole transform itself, degrees/second.
     [SerializeField] private float vortexSpinSpeed = 540f;
     // A body whose shrinking radius reaches this is swallowed: taken out of

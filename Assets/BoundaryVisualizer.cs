@@ -41,7 +41,42 @@ public class BoundaryVisualizer : MonoBehaviour
     [SerializeField] private Transform fallbackCenter;
     [SerializeField] private float fallbackRadius = 6f;
 
+    [Header("Source Art Standard")]
+    // The project's standard source-texture size for ring/orbit art going
+    // forward: every new Orbit/Ring PNG gets authored at this square
+    // resolution. The scale math below never actually reads this value — it
+    // already derives world size from sprite.bounds (real imported pixels ÷
+    // spritePixelsToUnits), so any texture size works without stretching.
+    // This is only a sanity check: it flags in the console if someone drops
+    // in art that doesn't match the agreed standard, before it becomes a
+    // subtle mis-scale bug.
+    [SerializeField] private int standardSourceTexturePixels = 2048;
+
+    [Header("Boundary Alert Color")]
+    // Outer ring's tint in normal play — instantly swapped for
+    // boundaryAlertColor the moment GameManager reports any planet beyond
+    // maxBoundaryRadius, and swapped back the instant none are. A hard switch
+    // (not a lerp) so the warning reads unmistakably the moment it happens.
+    [SerializeField] private Color boundaryNormalColor = new Color(1f, 1f, 1f, 0.4f);
+    [SerializeField] private Color boundaryAlertColor = new Color(1f, 0f, 0f, 0.4f);
+
+    [Header("Vortex Ring Spin")]
+    // Same rate the swirling planets use (BlackHole.VortexSwirlDegreesPerSecond)
+    // times this multiplier, so the rings visibly wind up together with the
+    // vortex instead of carrying a second, independently-tuned speed that can
+    // drift out of sync.
+    [SerializeField] private float vortexRingSpinMultiplier = 1.5f;
+    // Seconds to ramp from a standstill to full spin speed once the vortex
+    // begins, so the rings visibly pick up speed rather than snapping
+    // straight to a constant rate.
+    [SerializeField] private float vortexRingSpinRampUpTime = 1.2f;
+
     private LineRenderer lineRenderer;
+    private BlackHole blackHole;
+
+    // The outer ring's SpriteRenderer, cached once so the per-frame alert
+    // color check doesn't pay for a GetComponentInChildren every LateUpdate.
+    private SpriteRenderer visualBoundarySpriteRenderer;
 
     // World radius of each art piece at localScale 1, derived from its
     // sprite's own bounds (pixels ÷ pixels-per-unit). Captured once in Awake.
@@ -52,12 +87,21 @@ public class BoundaryVisualizer : MonoBehaviour
     private Vector3 builtCenter;
     private float builtRadius = -1f;
 
+    // How long the current vortex spin-up has been running; also doubles as
+    // "was the vortex active last frame" (>0 once spinning, reset to 0 the
+    // instant it stops) so LateUpdate can detect the active->inactive edge.
+    private float vortexSpinRampElapsed = 0f;
+
     void Awake()
     {
         lineRenderer = GetComponent<LineRenderer>();
         ConfigureLineRenderer();
+        blackHole = FindFirstObjectByType<BlackHole>();
         visualSpriteBaseRadius = ResolveSpriteBaseRadius(visualBoundaryTransform, "visualBoundaryTransform");
         innerOrbitBaseRadius = ResolveSpriteBaseRadius(innerOrbitTransform, "innerOrbitTransform");
+        visualBoundarySpriteRenderer = visualBoundaryTransform != null
+            ? visualBoundaryTransform.GetComponentInChildren<SpriteRenderer>()
+            : null;
     }
 
     // Reads an art piece's intrinsic size so the scale math can be exact: a
@@ -72,12 +116,32 @@ public class BoundaryVisualizer : MonoBehaviour
         SpriteRenderer sr = art.GetComponentInChildren<SpriteRenderer>();
         if (sr != null && sr.sprite != null)
         {
+            WarnIfNotStandardSize(sr, fieldName);
             return Mathf.Max(0.0001f, sr.sprite.bounds.extents.x);
         }
 
         Debug.LogWarning($"BoundaryVisualizer: {fieldName} has no SpriteRenderer/sprite — " +
                          "assuming 1 world-unit radius at scale 1; use its scale multiplier to fine-tune.");
         return 1f;
+    }
+
+    // Sanity check only, per standardSourceTexturePixels above — the scale
+    // math itself is resolution-independent, so a mismatch here won't break
+    // anything on its own, but it's the earliest signal that a dropped-in
+    // asset doesn't match the agreed 2048x2048 template.
+    private void WarnIfNotStandardSize(SpriteRenderer sr, string fieldName)
+    {
+        Texture texture = sr.sprite.texture;
+        if (texture == null)
+            return;
+
+        if (texture.width != standardSourceTexturePixels || texture.height != standardSourceTexturePixels)
+        {
+            Debug.LogWarning($"BoundaryVisualizer: {fieldName}'s source texture '{texture.name}' is " +
+                             $"{texture.width}x{texture.height}, not the standard " +
+                             $"{standardSourceTexturePixels}x{standardSourceTexturePixels} — still scales " +
+                             "correctly, but re-export to the standard size to keep future ring/orbit art consistent.");
+        }
     }
 
     void LateUpdate()
@@ -90,6 +154,9 @@ public class BoundaryVisualizer : MonoBehaviour
         {
             SyncVisualBoundary(center, radius);
         }
+
+        UpdateVortexRingSpin();
+        UpdateBoundaryAlertColor();
 
         if (!showGizmoLine || !hasBoundary)
         {
@@ -129,6 +196,69 @@ public class BoundaryVisualizer : MonoBehaviour
 
         float scale = radius / baseRadius * multiplier;
         art.localScale = new Vector3(scale, scale, 1f);
+    }
+
+    // The Level Complete cinematic (BlackHole.BeginVortex/EndVortex) spins
+    // the ring/orbit art along with the planets it's swallowing — this is
+    // purely a rotation layered on top of SyncRingArt's position/scale, so
+    // the two never fight over the same field.
+    private void UpdateVortexRingSpin()
+    {
+        bool vortexActive = blackHole != null && blackHole.IsVortexActive;
+
+        if (!vortexActive)
+        {
+            if (vortexSpinRampElapsed > 0f)
+            {
+                // Cinematic just ended: snap back to the authored upright
+                // orientation rather than leaving the art wherever the spin
+                // happened to stop, so the next level starts clean.
+                vortexSpinRampElapsed = 0f;
+                ResetRingRotation(visualBoundaryTransform);
+                ResetRingRotation(innerOrbitTransform);
+            }
+            return;
+        }
+
+        vortexSpinRampElapsed += Time.deltaTime;
+        float rampT = vortexRingSpinRampUpTime > 0f
+            ? Mathf.Clamp01(vortexSpinRampElapsed / vortexRingSpinRampUpTime)
+            : 1f;
+
+        float spinSpeed = blackHole.VortexSwirlDegreesPerSecond * vortexRingSpinMultiplier * rampT;
+        float delta = spinSpeed * Time.deltaTime;
+
+        RotateRing(visualBoundaryTransform, delta);
+        RotateRing(innerOrbitTransform, delta);
+    }
+
+    // Hard-switches the outer ring's tint the instant GameManager reports any
+    // planet beyond maxBoundaryRadius — a snap rather than a lerp, so the
+    // warning is unmistakable at the moment the line is crossed.
+    private void UpdateBoundaryAlertColor()
+    {
+        if (visualBoundarySpriteRenderer == null)
+            return;
+
+        GameManager manager = GameManager.Instance;
+        bool exceeded = manager != null && manager.IsAnyPlanetBeyondBoundary;
+        visualBoundarySpriteRenderer.color = exceeded ? boundaryAlertColor : boundaryNormalColor;
+    }
+
+    private static void RotateRing(Transform art, float degrees)
+    {
+        if (art != null)
+        {
+            art.Rotate(0f, 0f, degrees);
+        }
+    }
+
+    private static void ResetRingRotation(Transform art)
+    {
+        if (art != null)
+        {
+            art.localRotation = Quaternion.identity;
+        }
     }
 
     private void ApplyLineStyle()

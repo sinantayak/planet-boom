@@ -102,6 +102,12 @@ public class GameManager : MonoBehaviour
     public Transform BlackHoleCenter => blackHoleCenter;
     public float MaxBoundaryRadius => maxBoundaryRadius;
 
+    // True the instant any (non-absorbed) planet is beyond maxBoundaryRadius,
+    // false the instant none are — recomputed every FixedUpdate alongside the
+    // outside-timers below. BoundaryVisualizer polls this to flip the ring
+    // color, independent of the outsideTimeLimit countdown that triggers loss.
+    public bool IsAnyPlanetBeyondBoundary { get; private set; }
+
     // Runtime copy of the current level's targets plus per-target achieved
     // flags. The two lists are index-aligned with each other AND with the
     // MissionHUD's slots, so "slot i achieved" is unambiguous even when a
@@ -233,7 +239,10 @@ public class GameManager : MonoBehaviour
     void FixedUpdate()
     {
         if (State != GameState.Playing || blackHoleCenter == null)
+        {
+            IsAnyPlanetBeyondBoundary = false;
             return;
+        }
 
         // Destroyed planets leave fake-null keys behind; sweep them first so
         // the dictionary can't grow forever.
@@ -251,6 +260,7 @@ public class GameManager : MonoBehaviour
         // The countdown UI shows the single most endangered planet: the one
         // with the longest unbroken stretch outside, i.e. the least time left.
         float worstTimer = -1f;
+        bool anyBeyondBoundary = false;
 
         foreach (Planet planet in FindObjectsByType<Planet>(FindObjectsSortMode.None))
         {
@@ -272,6 +282,8 @@ public class GameManager : MonoBehaviour
                 continue;
             }
 
+            anyBeyondBoundary = true;
+
             outsideTimers.TryGetValue(planet, out float timer);
             timer += Time.fixedDeltaTime;
             outsideTimers[planet] = timer;
@@ -289,6 +301,7 @@ public class GameManager : MonoBehaviour
             }
         }
 
+        IsAnyPlanetBeyondBoundary = anyBeyondBoundary;
         UpdateCountdownUI(worstTimer);
     }
 
