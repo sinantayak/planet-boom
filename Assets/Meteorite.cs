@@ -252,6 +252,11 @@ public class Meteorite : MonoBehaviour
         Vector2 center = transform.position;
         Debug.Log($"Meteorite: Tier5 BIG POP at {center}.");
 
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayExplosion();
+        }
+
         // Take both detonators out of the merge/physics system first, so
         // OverlapCircleAll below can't pick up their own (about-to-be-
         // destroyed) colliders.

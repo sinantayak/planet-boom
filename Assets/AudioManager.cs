@@ -22,6 +22,9 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioClip launchClip;
     [SerializeField] private AudioClip collisionClip;
     [SerializeField] private AudioClip mergeClip;
+    // BOOM/Big Pop only (PlanetMerge.TriggerBoom, Meteorite.TriggerBigPop) —
+    // regular tier-up merges still ride PlayMerge's combo chain above.
+    public AudioClip SFX_Explosion;
 
     [Header("Launch")]
     [SerializeField] [Range(0f, 1f)] private float launchVolume = 0.9f;
@@ -37,6 +40,9 @@ public class AudioManager : MonoBehaviour
     // contact: both bodies fire OnCollisionEnter2D the same frame, and the
     // second call lands inside this window and is dropped.
     [SerializeField] private float collisionSoundCooldown = 0.07f;
+
+    [Header("Explosion (BOOM / Big Pop)")]
+    [SerializeField] [Range(0f, 1f)] private float explosionVolume = 1f;
 
     [Header("Merge Combo (pitch shifting)")]
     // Seconds without a merge before the combo chain resets to zero.
@@ -107,6 +113,16 @@ public class AudioManager : MonoBehaviour
         float volume = Mathf.InverseLerp(minImpactSpeed, fullVolumeImpactSpeed, impactSpeed)
                        * maxCollisionVolume;
         sfxSource.PlayOneShot(collisionClip, volume);
+    }
+
+    // PlayOneShot (not a dedicated source) so a rapid double-BOOM can overlap
+    // instead of the second explosion cutting the first one off.
+    public void PlayExplosion()
+    {
+        if (SFX_Explosion == null)
+            return;
+
+        sfxSource.PlayOneShot(SFX_Explosion, explosionVolume);
     }
 
     // One call per successful merge (PlanetMerge and Meteorite both report

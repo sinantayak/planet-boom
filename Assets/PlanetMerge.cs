@@ -228,6 +228,11 @@ public class PlanetMerge : MonoBehaviour
         PlanetTier boomTier = planet.CurrentTier;
         Debug.Log($"BOOM! {boomTier} chain explosion at {transform.position}.");
 
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayExplosion();
+        }
+
         // Take the two detonators out of the merge system immediately.
         BeginBeingAbsorbed();
         partner.BeginBeingAbsorbed();

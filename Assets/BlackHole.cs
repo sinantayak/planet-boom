@@ -120,8 +120,37 @@ public class BlackHole : MonoBehaviour
     // popping out of existence while still visibly off-core.
     [SerializeField] private float vortexSwallowRadius = 0.05f;
 
+    [Header("Vortex Audio")]
+    // Looping whirlpool bed: silent (volume 0) whenever the vortex isn't
+    // running, ramped in on BeginVortex and faded back out on EndVortex —
+    // never hard-cut, so the loop doesn't pop.
+    public AudioClip SFX_Vortex;
+    [SerializeField] [Range(0f, 1f)] private float vortexTargetVolume = 0.8f;
+    // Volume units/sec for both the ramp-up and the fade-out.
+    [SerializeField] private float vortexVolumeLerpSpeed = 1.5f;
+    [SerializeField] private float vortexBasePitch = 1f;
+    // Reached when the nearest infalling body is right on top of the core —
+    // sells the "getting sucked in faster" intensity as the swallow nears.
+    [SerializeField] private float vortexMaxPitch = 1.6f;
+    // Distance from the core at which proximity starts pushing the pitch up;
+    // reuses vortexSinkholeRadius's scale so it kicks in around the same
+    // "final drag" window the visual sinkhole boost does.
+    [SerializeField] private float vortexPitchProximityRadius = 2f;
+
+    private AudioSource vortexAudioSource;
+
     private bool isVortexActive;
     private bool vortexIncludesMeteorites;
+
+    void Awake()
+    {
+        vortexAudioSource = gameObject.AddComponent<AudioSource>();
+        vortexAudioSource.playOnAwake = false;
+        vortexAudioSource.loop = true;
+        vortexAudioSource.volume = 0f;
+        vortexAudioSource.pitch = vortexBasePitch;
+        vortexAudioSource.clip = SFX_Vortex;
+    }
 
     public bool IsVortexActive => isVortexActive;
     // Meteorite reads this (together with VortexIncludesMeteorites) so its
@@ -157,6 +186,11 @@ public class BlackHole : MonoBehaviour
     {
         isVortexActive = true;
         vortexIncludesMeteorites = includeMeteorites;
+
+        if (SFX_Vortex != null && !vortexAudioSource.isPlaying)
+        {
+            vortexAudioSource.Play();
+        }
 
         // Instantly take every affected body out of the physics simulation.
         // This is the actual fix for both prior bugs at once: with
@@ -209,6 +243,10 @@ public class BlackHole : MonoBehaviour
 
     void Update()
     {
+        // Runs even after isVortexActive drops back to false so the loop
+        // fades out instead of cutting off, then stops itself once silent.
+        UpdateVortexAudio();
+
         if (!isVortexActive)
             return;
 
@@ -221,6 +259,66 @@ public class BlackHole : MonoBehaviour
         {
             StepVortexTransform(FindObjectsByType<Meteorite>(FindObjectsSortMode.None));
         }
+    }
+
+    // Volume ramps toward vortexTargetVolume while active and back to 0 once
+    // the cinematic ends; pitch rides the proximity of the nearest infalling
+    // body while active, so the loop audibly tightens as bodies near the
+    // core, and resets to base once the vortex is off.
+    private void UpdateVortexAudio()
+    {
+        if (vortexAudioSource.clip == null)
+            return;
+
+        float targetVolume = isVortexActive ? vortexTargetVolume : 0f;
+        vortexAudioSource.volume = Mathf.MoveTowards(
+            vortexAudioSource.volume, targetVolume, vortexVolumeLerpSpeed * Time.deltaTime);
+
+        vortexAudioSource.pitch = isVortexActive ? ComputeVortexPitch() : vortexBasePitch;
+
+        if (!isVortexActive && vortexAudioSource.volume <= 0f && vortexAudioSource.isPlaying)
+        {
+            vortexAudioSource.Stop();
+        }
+    }
+
+    // Pitch climbs from vortexBasePitch to vortexMaxPitch as the closest
+    // still-falling body approaches the core, read off the same position
+    // data StepVortexTransform is already iterating this frame.
+    private float ComputeVortexPitch()
+    {
+        Vector2 core = transform.position;
+        float closestDistance = float.MaxValue;
+
+        closestDistance = Mathf.Min(closestDistance,
+            ClosestDistance(FindObjectsByType<Planet>(FindObjectsSortMode.None), core));
+
+        if (vortexIncludesMeteorites)
+        {
+            closestDistance = Mathf.Min(closestDistance,
+                ClosestDistance(FindObjectsByType<Meteorite>(FindObjectsSortMode.None), core));
+        }
+
+        if (closestDistance == float.MaxValue)
+            return vortexBasePitch;
+
+        float proximityT = Mathf.InverseLerp(vortexPitchProximityRadius, 0f, closestDistance);
+        return Mathf.Lerp(vortexBasePitch, vortexMaxPitch, proximityT);
+    }
+
+    private static float ClosestDistance<T>(T[] bodies, Vector2 core) where T : Component
+    {
+        float closest = float.MaxValue;
+        foreach (T body in bodies)
+        {
+            if (body == null || !body.gameObject.activeInHierarchy)
+                continue;
+
+            float distance = Vector2.Distance(body.transform.position, core);
+            if (distance < closest)
+                closest = distance;
+        }
+        return closest;
     }
 
     private void StepVortexTransform<T>(T[] bodies) where T : Component
