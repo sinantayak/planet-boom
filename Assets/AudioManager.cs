@@ -56,6 +56,10 @@ public class AudioManager : MonoBehaviour
     // Live combo length, readable by future UI ("COMBO x4!"). 0 = no chain.
     public int CurrentCombo { get; private set; }
 
+    // Readable by UI (e.g. MainMenuController) that wants to reflect the
+    // current state without keeping its own copy.
+    public bool IsMuted { get; private set; }
+
     // Two dedicated sources so the merge combo's pitch rides never bend the
     // launch/collision sounds: sfxSource stays at pitch 1 forever, only
     // mergeSource gets retuned.
@@ -80,6 +84,13 @@ public class AudioManager : MonoBehaviour
 
         mergeSource = gameObject.AddComponent<AudioSource>();
         mergeSource.playOnAwake = false;
+
+        // AudioManager is a scene-local singleton (re-created on every scene
+        // load, not DontDestroyOnLoad), so the mute preference set on the
+        // Main Menu wouldn't otherwise survive into the gameplay scene —
+        // re-apply it here every time a fresh instance wakes up. Key/values
+        // must stay in sync with MainMenuController.MuteStateKey.
+        SetMuted(PlayerPrefs.GetInt("MuteState", 1) == 0);
     }
 
     void OnDestroy()
@@ -88,6 +99,16 @@ public class AudioManager : MonoBehaviour
         {
             Instance = null;
         }
+    }
+
+    // Global instant mute: flips AudioListener.volume rather than gating
+    // each PlayXxx call, so it silences everything (including anything
+    // already playing) on the same frame it's called, with no per-source
+    // bookkeeping needed.
+    public void SetMuted(bool muted)
+    {
+        IsMuted = muted;
+        AudioListener.volume = muted ? 0f : 1f;
     }
 
     public void PlayLaunch()

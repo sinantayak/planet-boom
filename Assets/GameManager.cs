@@ -26,7 +26,7 @@ public class LevelDefinition
 }
 
 // Owns the mission/level state and the Suika-style lose condition. Merges
-// reach it through NotifyMergeCreated (called by PlanetMerge); everything
+// reach it through NotifyMergeCreated (called by PlanetMerge); everything<
 // else is self-driven.
 public class GameManager : MonoBehaviour
 {
@@ -42,7 +42,7 @@ public class GameManager : MonoBehaviour
     public int CurrentLevelNumber { get; private set; } = 1;
 
     // Seconds left on the current level's clock. Public for the timer text
-    // that will be added to the HUD later; already drives the star rating.
+    // that will be added to the HUD later; already drives the star rating.<<
     public float RemainingTime { get; private set; }
 
     // The MissionHUD has exactly 3 target slots; levels can't ask for more.
@@ -641,6 +641,35 @@ public class GameManager : MonoBehaviour
         // pushes the new level number and targets into the MissionHUD.
         State = GameState.Playing;
         LoadLevel(CurrentLevelNumber + 1);
+    }
+
+    // Wired to the win popup's BACK button: return to the level just before
+    // the one that was completed. Same teardown as AdvanceToNextLevel, but
+    // the level index moves down instead of up — clamped to 1 so it can
+    // never step below the first level. State-guarded so it only fires from
+    // the win popup.
+    public void ReturnToPreviousLevel()
+    {
+        if (State != GameState.LevelComplete)
+            return;
+
+        if (levelCompletePanel != null)
+        {
+            levelCompletePanel.Hide();
+        }
+        HideLevelCompleteScreen();
+
+        // Same belt-and-braces sweep as AdvanceToNextLevel; meteorites persist
+        // into the previous level exactly as they would going forward.
+        ClearBoard(clearMeteorites: false);
+
+        if (launcher != null)
+        {
+            launcher.ResetQueue();
+        }
+
+        State = GameState.Playing;
+        LoadLevel(Mathf.Max(1, CurrentLevelNumber - 1));
     }
 
     // Wired to the win popup's RESTART button: replay the level just

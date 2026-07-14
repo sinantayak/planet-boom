@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 67c2a07595d81e54b84e56506fc551d9
+guid: 86c68a07041fd09409204859b83e0cd0
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5675485582836920095
-    second: Gray-Star_0
+      213: -1478775196362488206
+    second: MainMenuImage_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Gray-Star_0
+      name: MainMenuImage_0
       rect:
         serializedVersion: 2
-        x: 0
+        x: 164
         y: 0
-        width: 125
-        height: 125
+        width: 1720
+        height: 2048
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f1f68dc411063ce40800000000000000
-      internalID: 5675485582836920095
+      spriteID: 276c7263bc55a7be0800000000000000
+      internalID: -1478775196362488206
       vertices: []
       indices: 
       edges: []
@@ -151,7 +151,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 4f91f61f3d9badd48b2d7a206b97d908
+    spriteID: eff10d6575bc63f41b5ae222840ca0b8
     internalID: 0
     vertices: []
     indices: 
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Gray-Star_0: 5675485582836920095
+      MainMenuImage_0: -1478775196362488206
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

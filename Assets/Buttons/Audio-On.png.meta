@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 67c2a07595d81e54b84e56506fc551d9
+guid: 21da4db9674bb3349bf41ffc7e687bdc
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5675485582836920095
-    second: Gray-Star_0
+      213: 2015744463811084458
+    second: Audio-On_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,23 +126,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Gray-Star_0
+      name: Audio-On_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 0
+        y: 7
         width: 125
-        height: 125
+        height: 110
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f1f68dc411063ce40800000000000000
-      internalID: 5675485582836920095
+      spriteID: aa08b63f8ec59fb10800000000000000
+      internalID: 2015744463811084458
       vertices: []
       indices: 
       edges: []
@@ -151,7 +151,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 4f91f61f3d9badd48b2d7a206b97d908
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Gray-Star_0: 5675485582836920095
+      Audio-On_0: 2015744463811084458
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 67c2a07595d81e54b84e56506fc551d9
+guid: c04e63c6abc734e43a8951d581bed877
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5675485582836920095
-    second: Gray-Star_0
+      213: -6710149970459612730
+    second: Back-Button_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Gray-Star_0
+      name: Back-Button_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 0
+        y: 8
         width: 125
-        height: 125
+        height: 108
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f1f68dc411063ce40800000000000000
-      internalID: 5675485582836920095
+      spriteID: 6c9282d5722c0e2a0800000000000000
+      internalID: -6710149970459612730
       vertices: []
       indices: 
       edges: []
@@ -151,7 +151,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 4f91f61f3d9badd48b2d7a206b97d908
+    spriteID: dbfa709099a3f054b93efb8181bbdf68
     internalID: 0
     vertices: []
     indices: 
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Gray-Star_0: 5675485582836920095
+      Back-Button_0: -6710149970459612730
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

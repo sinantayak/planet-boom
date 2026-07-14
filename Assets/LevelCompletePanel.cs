@@ -19,14 +19,16 @@ public class LevelCompletePanel : MonoBehaviour
     // every time the popup opens.
     [SerializeField] private TextMeshProUGUI titleText;
 
-    // NEXT advances to the following level, RESTART replays the level the
-    // player just completed (full reset back to level 1 belongs to the Game
-    // Over panel, not this popup). Both are wired in code in Awake (to
-    // GameManager.AdvanceToNextLevel and GameManager.ReplayCurrentLevel
+    // NEXT advances to the following level, BACK returns to the one before
+    // it, RESTART replays the level the player just completed (full reset
+    // back to level 1 belongs to the Game Over panel, not this popup). All
+    // three are wired in code in Awake (to GameManager.AdvanceToNextLevel,
+    // GameManager.ReturnToPreviousLevel, and GameManager.ReplayCurrentLevel
     // respectively), so no manual OnClick setup is needed — extra OnClick
     // entries added in the Inspector (e.g. a click sound) are harmless
     // alongside the code wiring.
     [SerializeField] private Button nextButton;
+    [SerializeField] private Button backButton;
     [SerializeField] private Button restartButton;
 
     [Header("Star Rating")]
@@ -77,6 +79,15 @@ public class LevelCompletePanel : MonoBehaviour
         else
         {
             Debug.LogWarning("LevelCompletePanel: no NEXT button assigned — the popup can't advance the game.", this);
+        }
+
+        if (backButton != null)
+        {
+            backButton.onClick.AddListener(OnBackClicked);
+        }
+        else
+        {
+            Debug.LogWarning("LevelCompletePanel: no BACK button assigned.", this);
         }
 
         if (restartButton != null)
@@ -210,6 +221,14 @@ public class LevelCompletePanel : MonoBehaviour
         if (GameManager.Instance != null)
         {
             GameManager.Instance.AdvanceToNextLevel();
+        }
+    }
+
+    private void OnBackClicked()
+    {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.ReturnToPreviousLevel();
         }
     }
 
