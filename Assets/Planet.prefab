@@ -191,6 +191,9 @@ MonoBehaviour:
   settleExitSpeedMultiplier: 2
   settledLinearDamping: 4
   settledAngularDamping: 8
+  flightMaterial: {fileID: 6200000, guid: 3e7b9a41c5d2f8e4a9b6c1d0e2f5a783, type: 2}
+  settledMaterial: {fileID: 6200000, guid: b1673646883d4950ad0da5c51ce11093, type: 2}
+  settledGravityFalloff: 0
   CurrentTier: 0
 --- !u!114 &630811434265461342
 MonoBehaviour:

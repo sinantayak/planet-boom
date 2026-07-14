@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -136,6 +137,31 @@ public class Planet : MonoBehaviour
     [SerializeField] private float settledLinearDamping = 4f;
     [SerializeField] private float settledAngularDamping = 8f;
 
+    // Swapped onto the CircleCollider2D the instant isSettled flips, so a
+    // flying planet keeps some slide (friction ~0.8, no bounce — see
+    // PlanetSurface.physicsMaterial2D) while a settled one grips hard enough
+    // that fresh shots can't wedge underneath it (friction 1, no bounce —
+    // see PlanetSettled.physicsMaterial2D). Leave either slot empty to keep
+    // whatever material the collider already has for that state.
+    [Header("Settling Materials")]
+    [SerializeField] private PhysicsMaterial2D flightMaterial;
+    [SerializeField] private PhysicsMaterial2D settledMaterial;
+
+    // How long BlackHole keeps applying a fading fraction of its pull after
+    // this planet settles, instead of cutting it instantly. 0 (default) means
+    // gravity disables the instant isSettled becomes true — the surest way to
+    // kill the jitter entirely. Raise toward ~1.5s only if the hard cutoff
+    // reads as too abrupt visually; the tradeoff is a residual pull that can
+    // keep nudging the planet against its neighbors for that whole window.
+    [Header("Gravity Falloff")]
+    [SerializeField] private float settledGravityFalloff = 0f;
+
+    // How long the settle transition takes to bleed residual velocity to
+    // zero, instead of snapping it instantly — an instant stop reads as
+    // hitting an invisible wall. See ApplySettleVelocityRamp.
+    [Header("Settle Transition")]
+    [SerializeField] private float settleVelocityDampDuration = 0.3f;
+
     // Old scenes/prefabs stored this as "CurrentColor"; the enum's int values
     // carry over (Red→Tier1, Blue→Tier2, Green→Tier3, Yellow→Tier4).
     [FormerlySerializedAs("CurrentColor")]
@@ -144,6 +170,7 @@ public class Planet : MonoBehaviour
     public int UniqueId { get; private set; }
 
     private Rigidbody2D rb;
+    private CircleCollider2D circleCollider;
     private BlackHole blackHole;
 
     // The tier-curve damping this planet flies with while NOT settled;
@@ -151,6 +178,41 @@ public class Planet : MonoBehaviour
     private float flightLinearDamping;
     private float flightAngularDamping;
     private bool isSettled;
+    private float settledSinceTime;
+
+    // Gate on the Flying->Settled transition: colliders CURRENTLY touching
+    // this planet that belong to an already-Settled planet/meteorite (see
+    // UpdatePileContact/OnCollisionExit2D below — added on contact, removed
+    // the instant contact ends or the neighbor stops being Settled). Combined
+    // live with BlackHole.IsTouchingCore (polled every step, since the core
+    // has no collider to fire a contact event) to decide "touching the pile
+    // right now" in FixedUpdate. Deliberately LIVE rather than a one-shot
+    // latch: without this, a shot's velocity naturally passes through zero at
+    // the apex of its arc — out in open space, nowhere near the pile — and
+    // the old speed-only check would freeze it there mid-air; a latch that
+    // never resets would only trade that bug for a subtler one (settling in
+    // open space after merely having touched something earlier, then
+    // drifting away before actually coming to rest).
+    private readonly HashSet<Collider2D> pileContacts = new HashSet<Collider2D>();
+
+    // Read by BlackHole so it knows whether — and how much — of its pull to
+    // apply this step. See settledGravityFalloff above for the decay option.
+    public bool IsSettled => isSettled;
+
+    private float WorldRadius => circleCollider != null ? circleCollider.radius * transform.lossyScale.x : 0f;
+
+    public float GravityMultiplier
+    {
+        get
+        {
+            if (!isSettled)
+                return 1f;
+            if (settledGravityFalloff <= 0f)
+                return 0f;
+            float elapsed = Time.time - settledSinceTime;
+            return 1f - Mathf.Clamp01(elapsed / settledGravityFalloff);
+        }
+    }
 
     void Awake()
     {
@@ -165,6 +227,8 @@ public class Planet : MonoBehaviour
         {
             rb.sleepMode = RigidbodySleepMode2D.NeverSleep;
         }
+        TryGetComponent(out circleCollider);
+        ApplyMaterial();
 
         // Scene-placed planets may never receive a SetTier call (the launcher and
         // merges always issue one), so make sure the serialized tier's physics
@@ -181,9 +245,17 @@ public class Planet : MonoBehaviour
         if (rb == null)
             return;
 
+        // Polled every step rather than event-driven: the core has no
+        // Collider2D, so this is the only way contact with it is ever
+        // detected (see BlackHole.IsTouchingCore).
+        bool touchingCoreNow = blackHole != null && blackHole.IsTouchingCore(rb.position, WorldRadius);
+        bool touchingPileNow = touchingCoreNow || pileContacts.Count > 0;
+
         float speed = rb.linearVelocity.magnitude;
         bool inOrbitArea = blackHole == null ||
             Vector2.Distance(rb.position, blackHole.transform.position) <= settleRadius;
+
+        bool wasSettled = isSettled;
 
         if (isSettled)
         {
@@ -192,12 +264,74 @@ public class Planet : MonoBehaviour
                 isSettled = false;
             }
         }
-        else if (inOrbitArea && speed <= settleSpeedThreshold)
+        else if (inOrbitArea && speed <= settleSpeedThreshold && touchingPileNow)
         {
             isSettled = true;
         }
 
+        if (isSettled != wasSettled)
+        {
+            OnSettleStateChanged();
+        }
+
+        if (isSettled)
+        {
+            ApplySettleVelocityRamp();
+        }
+
         ApplyDamping();
+    }
+
+    // Fires exactly once on each Flying<->Settled edge. BlackHole separately
+    // stops re-applying its pull once IsSettled is true (see
+    // GravityMultiplier), so the only remaining driver of jitter was the
+    // instant velocity snap this used to do — that's now handled gradually
+    // by ApplySettleVelocityRamp instead.
+    private void OnSettleStateChanged()
+    {
+        if (isSettled)
+        {
+            settledSinceTime = Time.time;
+        }
+
+        ApplyMaterial();
+    }
+
+    // Bleeds off residual velocity smoothly instead of snapping it to zero,
+    // which read as the planet hitting an invisible wall the instant it
+    // settled. Blends the CURRENT velocity toward zero each step — not a
+    // snapshot taken at settle time — so a genuine bump partway through the
+    // ramp (one too soft to trip the unsettle threshold above) still shows up
+    // before being damped away, instead of being silently overwritten. The
+    // per-step factor is sized to the time remaining in the window, so the
+    // ramp always lands on an exact zero right as settleVelocityDampDuration
+    // elapses rather than merely approaching it asymptotically forever.
+    private void ApplySettleVelocityRamp()
+    {
+        float elapsed = Time.time - settledSinceTime;
+        if (elapsed >= settleVelocityDampDuration)
+        {
+            rb.linearVelocity = Vector2.zero;
+            rb.angularVelocity = 0f;
+            return;
+        }
+
+        float remaining = settleVelocityDampDuration - elapsed;
+        float t = Mathf.Clamp01(Time.fixedDeltaTime / remaining);
+        rb.linearVelocity = Vector2.Lerp(rb.linearVelocity, Vector2.zero, t);
+        rb.angularVelocity = Mathf.Lerp(rb.angularVelocity, 0f, t);
+    }
+
+    private void ApplyMaterial()
+    {
+        if (circleCollider == null)
+            return;
+
+        PhysicsMaterial2D material = isSettled ? settledMaterial : flightMaterial;
+        if (material != null)
+        {
+            circleCollider.sharedMaterial = material;
+        }
     }
 
     // Impact SFX for any contact this planet is part of (planet-vs-planet,
@@ -210,6 +344,50 @@ public class Planet : MonoBehaviour
         {
             AudioManager.Instance.PlayCollision(collision.relativeVelocity.magnitude);
         }
+
+        UpdatePileContact(collision);
+    }
+
+    void OnCollisionStay2D(Collision2D collision)
+    {
+        UpdatePileContact(collision);
+    }
+
+    // Contact ending is exactly as informative as contact starting for a live
+    // "touching right now" gate — separating from a neighbor must clear it
+    // out of pileContacts even if this planet never itself settled.
+    void OnCollisionExit2D(Collision2D collision)
+    {
+        pileContacts.Remove(collision.collider);
+    }
+
+    // Part of the live settle-contact gate (see pileContacts): touching a
+    // neighbor only counts while that neighbor is itself currently Settled —
+    // two still-Flying planets bouncing off each other mid-air isn't a
+    // foundation to rest on. Meteorites count too: they're solid, physically
+    // blocking members of the same pile even though they're a separate merge
+    // system (see Meteorite.cs). Re-evaluated on every Stay callback, not
+    // just Enter, so a neighbor that settles (or wakes back up) mid-contact
+    // is reflected without waiting for a fresh collision.
+    private void UpdatePileContact(Collision2D collision)
+    {
+        if (IsSettledPileMember(collision.gameObject))
+        {
+            pileContacts.Add(collision.collider);
+        }
+        else
+        {
+            pileContacts.Remove(collision.collider);
+        }
+    }
+
+    private static bool IsSettledPileMember(GameObject other)
+    {
+        if (other.TryGetComponent(out Planet otherPlanet))
+            return otherPlanet.IsSettled;
+        if (other.TryGetComponent(out Meteorite otherMeteorite))
+            return otherMeteorite.IsSettled;
+        return false;
     }
 
     // Mass and damping for the given tier, per the curves configured above.

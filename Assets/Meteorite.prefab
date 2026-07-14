@@ -176,6 +176,17 @@ MonoBehaviour:
   moltenColor: {r: 1, g: 0.32, b: 0.05, a: 1}
   baseMass: 1.4
   massMultiplierPerTier: 1.8
+  baseLinearDamping: 0
+  linearDampingPerTier: 0.4
+  baseAngularDamping: 1.5
+  angularDampingPerTier: 0.5
   fusionDuration: 0.2
+  settleRadius: 4
+  settleSpeedThreshold: 0.8
+  settleExitSpeedMultiplier: 2
+  settledLinearDamping: 4
+  settledAngularDamping: 8
+  flightMaterial: {fileID: 6200000, guid: 3e7b9a41c5d2f8e4a9b6c1d0e2f5a783, type: 2}
+  settledMaterial: {fileID: 6200000, guid: b1673646883d4950ad0da5c51ce11093, type: 2}
   explosionRadius: 3.5
   explosionForce: 18

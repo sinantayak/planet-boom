@@ -2964,7 +2964,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LevelCompletePanel
   titleText: {fileID: 1052823254}
   nextButton: {fileID: 1193891236}
-  backButton: {fileID: 0}
+  backButton: {fileID: 575100902}
   restartButton: {fileID: 1850298764}
   starSlots:
   - {fileID: 1903465557}

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 // Dead-rock obstacle tier, separate from PlanetTier: meteorites cap at Tier5
@@ -76,6 +77,32 @@ public class Meteorite : MonoBehaviour
     [Header("Fusion Feel")]
     [SerializeField] private float fusionDuration = 0.2f;
 
+    [Header("Settling Stabilization")]
+    // Mirrors Planet's settle mechanism exactly (see Planet.cs) — without it,
+    // a meteorite resting in the pile would keep receiving BlackHole's full
+    // pull forever and jitter in place just like planets used to.
+    [SerializeField] private float settleRadius = 4f;
+    [SerializeField] private float settleSpeedThreshold = 0.8f;
+    [SerializeField] private float settleExitSpeedMultiplier = 2f;
+    [SerializeField] private float settledLinearDamping = 4f;
+    [SerializeField] private float settledAngularDamping = 8f;
+    [SerializeField] private PhysicsMaterial2D flightMaterial;
+    [SerializeField] private PhysicsMaterial2D settledMaterial;
+    // How long the settle transition takes to bleed residual velocity to
+    // zero, instead of snapping it instantly. Mirrors
+    // Planet.settleVelocityDampDuration exactly — see ApplySettleVelocityRamp.
+    [SerializeField] private float settleVelocityDampDuration = 0.3f;
+
+    private bool isSettled;
+    public bool IsSettled => isSettled;
+    private float settledSinceTime;
+
+    // Mirrors Planet.pileContacts exactly: gates the Flying->Settled
+    // transition on LIVE contact with the core or an already-Settled
+    // neighbor, so a meteorite can't freeze mid-air at the apex of its arc
+    // just because its velocity happens to pass through zero there.
+    private readonly HashSet<Collider2D> pileContacts = new HashSet<Collider2D>();
+
     [Header("The Big Pop")]
     // Two Tier5s don't make a Tier6 — they detonate. Every Rigidbody2D
     // (planets AND other meteorites) within explosionRadius gets shoved away,
@@ -108,6 +135,14 @@ public class Meteorite : MonoBehaviour
     // is computed relative to this, same convention as PlanetMerge.tierOneScale.
     private float tierOneScale;
 
+    // The tier-curve damping this meteorite rolls with while NOT settled;
+    // recomputed by ApplyTierPhysics on every tier change, same split as
+    // Planet's flightLinearDamping/flightAngularDamping.
+    private float flightLinearDamping;
+    private float flightAngularDamping;
+
+    private float WorldRadius => circleCollider != null ? circleCollider.radius * transform.lossyScale.x : 0f;
+
     void Awake()
     {
         UniqueId = nextUniqueId++;
@@ -123,6 +158,7 @@ public class Meteorite : MonoBehaviour
 
         tierOneScale = transform.localScale.x > 0f ? transform.localScale.x : 1f;
         ApplyTierVisuals();
+        ApplyMaterial();
     }
 
     void FixedUpdate()
@@ -131,6 +167,8 @@ public class Meteorite : MonoBehaviour
 
         if (IsBeingAbsorbed)
             return;
+
+        UpdateSettleState();
 
         // Meteorites are full citizens of the arena: pulled toward the core
         // and orbit-braked exactly like a planet, via BlackHole's public
@@ -143,11 +181,16 @@ public class Meteorite : MonoBehaviour
         // entirely (including the swallow check), so this ambient pull must
         // stand down. Two systems both steering one velocity every frame is
         // exactly what caused the vortex's original outward-fling bug.
+        //
+        // Settled meteorites stop receiving this pull entirely — same fix as
+        // Planet.GravityMultiplier: a constant pull opposed only by damping
+        // never reaches true zero velocity, which is what caused the
+        // infinite jitter in a resting pile.
         bool vortexOwnsThisBody = blackHole != null
             && blackHole.IsVortexActive
             && blackHole.VortexIncludesMeteorites;
 
-        if (blackHole != null && rb.simulated && !vortexOwnsThisBody)
+        if (blackHole != null && rb.simulated && !vortexOwnsThisBody && !isSettled)
         {
             Vector2 pullAccel = blackHole.GetPullForce(rb.position);
             if (pullAccel != Vector2.zero)
@@ -163,6 +206,87 @@ public class Meteorite : MonoBehaviour
         }
     }
 
+    // Mirrors Planet's settle bookkeeping exactly: swap damping/material
+    // profiles based on proximity to the core and current speed, with
+    // hysteresis on the wake-up threshold so grazing hits don't re-liquefy
+    // a resting rock. Residual velocity is bled off smoothly rather than
+    // snapped to zero — see ApplySettleVelocityRamp below.
+    private void UpdateSettleState()
+    {
+        // Polled every step rather than event-driven: the core has no
+        // Collider2D, so this is the only way contact with it is ever
+        // detected (see BlackHole.IsTouchingCore).
+        bool touchingCoreNow = blackHole != null && blackHole.IsTouchingCore(rb.position, WorldRadius);
+        bool touchingPileNow = touchingCoreNow || pileContacts.Count > 0;
+
+        float speed = rb.linearVelocity.magnitude;
+        bool inOrbitArea = blackHole == null ||
+            Vector2.Distance(rb.position, blackHole.transform.position) <= settleRadius;
+
+        bool wasSettled = isSettled;
+
+        if (isSettled)
+        {
+            if (!inOrbitArea || speed > settleSpeedThreshold * settleExitSpeedMultiplier)
+            {
+                isSettled = false;
+            }
+        }
+        else if (inOrbitArea && speed <= settleSpeedThreshold && touchingPileNow)
+        {
+            isSettled = true;
+        }
+
+        if (isSettled != wasSettled)
+        {
+            if (isSettled)
+            {
+                settledSinceTime = Time.time;
+            }
+            ApplyMaterial();
+        }
+
+        if (isSettled)
+        {
+            ApplySettleVelocityRamp();
+        }
+
+        rb.linearDamping = isSettled ? settledLinearDamping : flightLinearDamping;
+        rb.angularDamping = isSettled ? settledAngularDamping : flightAngularDamping;
+    }
+
+    // Mirrors Planet.ApplySettleVelocityRamp exactly: blends the CURRENT
+    // velocity toward zero each step (not a snapshot taken at settle time),
+    // landing on an exact zero right as settleVelocityDampDuration elapses
+    // instead of just approaching it asymptotically forever.
+    private void ApplySettleVelocityRamp()
+    {
+        float elapsed = Time.time - settledSinceTime;
+        if (elapsed >= settleVelocityDampDuration)
+        {
+            rb.linearVelocity = Vector2.zero;
+            rb.angularVelocity = 0f;
+            return;
+        }
+
+        float remaining = settleVelocityDampDuration - elapsed;
+        float t = Mathf.Clamp01(Time.fixedDeltaTime / remaining);
+        rb.linearVelocity = Vector2.Lerp(rb.linearVelocity, Vector2.zero, t);
+        rb.angularVelocity = Mathf.Lerp(rb.angularVelocity, 0f, t);
+    }
+
+    private void ApplyMaterial()
+    {
+        if (circleCollider == null)
+            return;
+
+        PhysicsMaterial2D material = isSettled ? settledMaterial : flightMaterial;
+        if (material != null)
+        {
+            circleCollider.sharedMaterial = material;
+        }
+    }
+
     void OnCollisionEnter2D(Collision2D collision)
     {
         // Impact SFX first (volume damped by hit speed inside AudioManager;
@@ -173,12 +297,45 @@ public class Meteorite : MonoBehaviour
             AudioManager.Instance.PlayCollision(collision.relativeVelocity.magnitude);
         }
 
+        UpdatePileContact(collision);
         TryMergeWith(collision.gameObject);
     }
 
     void OnCollisionStay2D(Collision2D collision)
     {
+        UpdatePileContact(collision);
         TryMergeWith(collision.gameObject);
+    }
+
+    void OnCollisionExit2D(Collision2D collision)
+    {
+        pileContacts.Remove(collision.collider);
+    }
+
+    // Mirrors Planet.UpdatePileContact: only touching an already-Settled
+    // neighbor (planet or meteorite) counts toward the live settle-contact
+    // gate — two still-Flying bodies bouncing off each other isn't a
+    // foundation, and a neighbor that stops being Settled mid-contact drops
+    // back out on the next Stay callback.
+    private void UpdatePileContact(Collision2D collision)
+    {
+        if (IsSettledPileMember(collision.gameObject))
+        {
+            pileContacts.Add(collision.collider);
+        }
+        else
+        {
+            pileContacts.Remove(collision.collider);
+        }
+    }
+
+    private static bool IsSettledPileMember(GameObject other)
+    {
+        if (other.TryGetComponent(out Meteorite otherMeteorite))
+            return otherMeteorite.IsSettled;
+        if (other.TryGetComponent(out Planet otherPlanet))
+            return otherPlanet.IsSettled;
+        return false;
     }
 
     // Same "bypass collision events, check world distance" approach as
@@ -386,8 +543,10 @@ public class Meteorite : MonoBehaviour
     {
         int tierSteps = (int)tier;
         rb.mass = MassForTier(tier);
-        rb.linearDamping = baseLinearDamping + linearDampingPerTier * tierSteps;
-        rb.angularDamping = baseAngularDamping + angularDampingPerTier * tierSteps;
+        flightLinearDamping = baseLinearDamping + linearDampingPerTier * tierSteps;
+        flightAngularDamping = baseAngularDamping + angularDampingPerTier * tierSteps;
+        rb.linearDamping = isSettled ? settledLinearDamping : flightLinearDamping;
+        rb.angularDamping = isSettled ? settledAngularDamping : flightAngularDamping;
     }
 
     private float ScaleForTier(MeteoriteTier tier)

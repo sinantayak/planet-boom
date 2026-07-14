@@ -33,6 +33,15 @@ public class BlackHole : MonoBehaviour
     [Range(0f, 1f)]
     [SerializeField] private float settlingDownwardMix = 0.25f;
 
+    [Header("Core Contact")]
+    // The core itself has no Collider2D — nothing ever physically bumps into
+    // it, gravity just pulls bodies toward this transform's position — so
+    // OnCollisionEnter2D can never fire for it. Planet/Meteorite poll
+    // IsTouchingCore every physics step instead, as the substitute for "the
+    // core" in their settle-contact gate (see Planet.hasCollidedWithPile).
+    // Tune this to roughly match the core sprite's visual radius.
+    [SerializeField] private float coreContactRadius = 0.6f;
+
     [Header("Skills")]
     // Skill hook: while true, the black hole's pull is fully suspended (effective
     // strength multiplied by zero) and planets float freely.
@@ -446,29 +455,45 @@ public class BlackHole : MonoBehaviour
             if (!planet.TryGetComponent(out Rigidbody2D rb))
                 continue;
 
-            // GetPullForce is really an ACCELERATION (the trajectory preview
-            // has always integrated it that way); multiplying by mass here
-            // makes the pull mass-independent, like real gravity. Without
-            // this, ForceMode2D.Force divides by mass and heavy planets get a
-            // fraction of a Tier1's pull — which is exactly how big planets
-            // ended up parked at the top of the cluster.
-            Vector2 pullAccel = GetPullForce(rb.position);
-            if (pullAccel != Vector2.zero)
+            // Settled planets (Planet.IsSettled) stop receiving the primary
+            // pull entirely by default — GravityMultiplier is 0 the instant a
+            // planet settles unless Planet.settledGravityFalloff opts into a
+            // decay instead. This is what stops a resting pile from jittering
+            // forever: without it, every settled planet was fighting a
+            // constant ~15 u/s^2 pull against damping alone, which bleeds
+            // speed down to a small nonzero residual but never to true zero.
+            float gravityMultiplier = planet.GravityMultiplier;
+            if (gravityMultiplier > 0f)
             {
-                rb.AddForce(pullAccel * rb.mass, ForceMode2D.Force);
+                // GetPullForce is really an ACCELERATION (the trajectory preview
+                // has always integrated it that way); multiplying by mass here
+                // makes the pull mass-independent, like real gravity. Without
+                // this, ForceMode2D.Force divides by mass and heavy planets get a
+                // fraction of a Tier1's pull — which is exactly how big planets
+                // ended up parked at the top of the cluster.
+                Vector2 pullAccel = GetPullForce(rb.position);
+                if (pullAccel != Vector2.zero)
+                {
+                    rb.AddForce(pullAccel * rb.mass * gravityMultiplier, ForceMode2D.Force);
+                }
+
+                rb.linearVelocity = ApplyOrbitBrake(rb.position, rb.linearVelocity, Time.fixedDeltaTime);
             }
 
-            // Heavy-tier settling: a gentle, tier-scaled drift that walks
-            // high-mass planets around the cluster to its lowest point, so
-            // the big merge target ends up at the BOTTOM and straight shots
-            // from below can't reach it.
+            // Heavy-tier settling drift is deliberately NOT gated by
+            // GravityMultiplier: it's capped far below the primary pull
+            // (<=2 u/s^2 vs ~15) and self-limiting — GetSettlingAccel already
+            // fades to zero as the planet nears the bottom of the cluster —
+            // so it reads as a slow, intentional sink rather than the jitter
+            // the primary pull caused. It still runs on planets marked
+            // "settled", since that's the mechanism that keeps walking heavy
+            // planets to the bottom over time even after they've stopped
+            // vibrating.
             Vector2 settlingAccel = GetSettlingAccel(planet, rb.position);
             if (settlingAccel != Vector2.zero)
             {
                 rb.AddForce(settlingAccel * rb.mass, ForceMode2D.Force);
             }
-
-            rb.linearVelocity = ApplyOrbitBrake(rb.position, rb.linearVelocity, Time.fixedDeltaTime);
         }
     }
 
@@ -554,5 +579,14 @@ public class BlackHole : MonoBehaviour
             return Vector2.zero;
 
         return direction.normalized * pullStrength;
+    }
+
+    // Circle-vs-point "contact" check standing in for a real collider: true
+    // once a body's edge (bodyRadius out from its center) reaches
+    // coreContactRadius from the core. Used only to gate the Flying->Settled
+    // transition — the actual pull/orbit-brake physics above are untouched.
+    public bool IsTouchingCore(Vector2 bodyPosition, float bodyRadius)
+    {
+        return Vector2.Distance(transform.position, bodyPosition) <= coreContactRadius + bodyRadius;
     }
 }
