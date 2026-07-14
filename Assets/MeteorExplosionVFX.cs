@@ -87,14 +87,23 @@ public static class MeteorExplosionVFX
     // dead-center behind the (large, still-on-screen) sprite — this plus the
     // absolute particle sizes and the toward-camera Z nudge are what make the
     // effect actually visible during a normal merge.
-    public static void SpawnMergeBurst(Vector3 position, Color color, float bodyWorldRadius)
+    // glowColor/shadowColor let a caller pin the sparkle's bright/dark
+    // gradient endpoints to exact art-palette colors (PlanetTierPalette)
+    // instead of the procedural lighten/darken of a single color — used by
+    // PlanetMerge so each tier's sparkle matches its glow-particle hex
+    // exactly. Left null (Meteorite's call), the endpoints fall back to the
+    // original lighten/darken-of-color behavior.
+    public static void SpawnMergeBurst(Vector3 position, Color color, float bodyWorldRadius, Color? glowColor = null, Color? shadowColor = null)
     {
         Color visibleColor = ResolveVisibleMergeColor(color);
         Vector3 spawnPosition = new Vector3(position.x, position.y, position.z - MergeCameraZOffset);
         GameObject vfxObject = CreateVfxObject("MergeSparkleVFX", spawnPosition);
 
+        Color lightEndpoint = glowColor ?? LightenTowardsWhite(visibleColor, 0.35f);
+        Color darkEndpoint = shadowColor ?? DarkenTowardsBlack(visibleColor, 0.2f);
+
         var ps = vfxObject.AddComponent<ParticleSystem>();
-        ConfigureMergeParticleSystem(ps, visibleColor, bodyWorldRadius);
+        ConfigureMergeParticleSystem(ps, lightEndpoint, darkEndpoint, bodyWorldRadius);
 
         var renderer = ps.GetComponent<ParticleSystemRenderer>();
         renderer.material = GetMergeMaterial();
@@ -182,7 +191,7 @@ public static class MeteorExplosionVFX
     // body's ~0.15 localScale — that multiplication is exactly what used to
     // shrink these to invisible sub-pixel dust. Only the EMISSION RING scales
     // with the body, so the sparkles ring the perimeter at any tier.
-    private static void ConfigureMergeParticleSystem(ParticleSystem ps, Color color, float bodyWorldRadius)
+    private static void ConfigureMergeParticleSystem(ParticleSystem ps, Color lightColor, Color darkColor, float bodyWorldRadius)
     {
         var main = ps.main;
         main.loop = false;
@@ -192,11 +201,9 @@ public static class MeteorExplosionVFX
         main.startSpeed = new ParticleSystem.MinMaxCurve(MergeParticleMinSpeed, MergeParticleMaxSpeed);
         main.startSize = new ParticleSystem.MinMaxCurve(MergeParticleMinSize, MergeParticleMaxSize);
         main.startRotation = new ParticleSystem.MinMaxCurve(0f, 360f * Mathf.Deg2Rad);
-        // A touch of light/dark variance around the sampled color instead of
-        // one flat tint, same "random point on a small gradient" trick as
-        // the explosion palette.
-        main.startColor = new ParticleSystem.MinMaxGradient(
-            LightenTowardsWhite(color, 0.35f), DarkenTowardsBlack(color, 0.2f));
+        // A touch of light/dark variance instead of one flat tint, same
+        // "random point on a small gradient" trick as the explosion palette.
+        main.startColor = new ParticleSystem.MinMaxGradient(lightColor, darkColor);
         main.simulationSpace = ParticleSystemSimulationSpace.World;
         main.gravityModifier = 0f;
 

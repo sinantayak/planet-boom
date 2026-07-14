@@ -17,25 +17,60 @@ public enum PlanetTier
     Tier8
 }
 
-// Per-tier accent colors matching each planet's actual sprite art (lava,
-// earth, sand, ...) — consumed by PlanetMerge's merge-sparkle VFX (which
-// can't read a real color off the sprite itself, see below) and available
-// for HUD accents. Planet sprites themselves are pre-rendered and must
-// NEVER be tinted with these — Planet.SetTier forces sr.color to pure white
-// for exactly that reason; these colors exist for effects/UI that sit
-// alongside the sprite, not on top of it.
+// Per-tier colors matching each planet's actual sprite art — consumed by
+// PlanetMerge's merge-sparkle VFX (which can't read a real color off the
+// sprite itself, see below) and available for HUD accents. Planet sprites
+// themselves are pre-rendered and must NEVER be tinted with these —
+// Planet.SetTier forces sr.color to pure white for exactly that reason;
+// these colors exist for effects/UI that sit alongside the sprite, not on
+// top of it. Three colors per tier, straight from the art palette:
+// Main (base sparkle tint), Secondary (shadow/accent/crystal/ring/base
+// depending on the tier's art — the sparkle's dark gradient endpoint), and
+// Glow (the sparkle's bright gradient endpoint).
+//
+// NOTE: a Tier9 (Cosmic Dark Blue: Main #3C4A8F, Base #1C162E,
+// Glow #7B90FF) sprite is sitting in Assets/Planet Icons/Planet9.png (now
+// imported — it has a .meta) but isn't wired into the tier ladder: it's not
+// in Planet.prefab's planetSprites list, and PlanetTier has no Tier9
+// member. Wiring it for real also touches PlanetMerge.maxTier and the
+// GameManager level ramp, so it's left out here pending a deliberate
+// "add Tier9" pass rather than folded silently into a color update.
 public static class PlanetTierPalette
 {
-    private static readonly Color[] Accents =
+    private static readonly Color[] MainColors =
     {
-        new Color(1.0f, 0.6f, 0.0f),    // Tier1 — Lava: fiery yellow/orange
-        new Color(0.2f, 0.65f, 1.0f),   // Tier2 — Earth: soft ocean blue/green
-        new Color(0.9f, 0.75f, 0.55f),  // Tier3 — Sand: beige/sandy brown
-        new Color(1.0f, 0.0f, 0.8f),    // Tier4 — Pink/Magenta: vibrant magenta
-        new Color(0.35f, 0.2f, 0.9f),   // Tier5 — Dark Blue: deep violet/indigo
-        new Color(0.75f, 0.75f, 0.75f), // Tier6 — Moon/Grey: ash grey
-        new Color(0.4f, 1.0f, 0.1f),    // Tier7 — Lime Green: acid lime green
-        new Color(0.6f, 0.85f, 1.0f),   // Tier8 — Ice Blue: cool frost ice blue
+        new Color32(0x8A, 0x8E, 0x8F, 255), // Tier1 — Gray Moon
+        new Color32(0x2A, 0x75, 0xD3, 255), // Tier2 — Earth Blue/Green
+        new Color32(0x75, 0xBD, 0xF2, 255), // Tier3 — Ice/Light Blue
+        new Color32(0xC6, 0x2D, 0x99, 255), // Tier4 — Magenta/Purple
+        new Color32(0x20, 0xBF, 0xA8, 255), // Tier5 — Turquoise/Purple Crystals
+        new Color32(0xE6, 0x3B, 0x72, 255), // Tier6 — Pink/Orange Gas
+        new Color32(0xE5, 0xA9, 0x6A, 255), // Tier7 — Caramel Desert
+        new Color32(0x6B, 0xE8, 0x3D, 255), // Tier8 — Neon Green Ring
+    };
+
+    private static readonly Color[] SecondaryColors =
+    {
+        new Color32(0x5A, 0x5D, 0x5E, 255), // Tier1 — Shadow
+        new Color32(0x44, 0xB7, 0x46, 255), // Tier2 — Accent
+        new Color32(0x33, 0x6B, 0x9E, 255), // Tier3 — Shadow
+        new Color32(0x75, 0x1E, 0x6E, 255), // Tier4 — Shadow
+        new Color32(0x9B, 0x3C, 0xE3, 255), // Tier5 — Crystal
+        new Color32(0xFF, 0xB8, 0x5C, 255), // Tier6 — Ring
+        new Color32(0x8E, 0x56, 0x33, 255), // Tier7 — Shadow
+        new Color32(0x29, 0x7B, 0x15, 255), // Tier8 — Ring
+    };
+
+    private static readonly Color[] GlowColors =
+    {
+        new Color32(0xD1, 0xD5, 0xD6, 255), // Tier1
+        new Color32(0x7C, 0xE8, 0x95, 255), // Tier2
+        new Color32(0xC3, 0xE6, 0xFC, 255), // Tier3
+        new Color32(0xFF, 0x63, 0xD8, 255), // Tier4
+        new Color32(0x5E, 0xF2, 0xDF, 255), // Tier5
+        new Color32(0xFF, 0xA3, 0x75, 255), // Tier6
+        new Color32(0xF7, 0xD2, 0xA3, 255), // Tier7
+        new Color32(0xA2, 0xFF, 0x75, 255), // Tier8
     };
 
     // Asteroid/base-meteor lava red-orange — fallback for a tier index
@@ -43,10 +78,14 @@ public static class PlanetTierPalette
     // keeps this defensive rather than silently going white/invisible).
     private static readonly Color DefaultColor = new Color(1.0f, 0.35f, 0.0f);
 
-    public static Color GetAccentColor(PlanetTier tier)
+    public static Color GetAccentColor(PlanetTier tier) => Lookup(MainColors, tier);
+    public static Color GetSecondaryColor(PlanetTier tier) => Lookup(SecondaryColors, tier);
+    public static Color GetGlowColor(PlanetTier tier) => Lookup(GlowColors, tier);
+
+    private static Color Lookup(Color[] colors, PlanetTier tier)
     {
         int index = (int)tier;
-        return (index >= 0 && index < Accents.Length) ? Accents[index] : DefaultColor;
+        return (index >= 0 && index < colors.Length) ? colors[index] : DefaultColor;
     }
 }
 
