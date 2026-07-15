@@ -456,10 +456,35 @@ public class Meteorite : MonoBehaviour
         BeginBeingAbsorbed();
         partner.BeginBeingAbsorbed();
 
-        Collider2D[] hits = Physics2D.OverlapCircleAll(center, explosionRadius);
+        ApplyExplosionImpulse(center);
+
+        Destroy(gameObject);
+        Destroy(partner.gameObject);
+    }
+
+    // Shared by both the natural Tier5 Big Pop and Meteor Strike destruction,
+    // so visual/audio entry paths cannot drift away from the same physics.
+    // Settled bodies keep their own state; the impulse gives them enough speed
+    // for their normal settle-state check to wake them naturally next step.
+    private void ApplyExplosionImpulse(Vector2 center)
+    {
+        float radius = Mathf.Max(0.01f, explosionRadius);
+        float force = Mathf.Max(0f, explosionForce);
+        var affectedBodies = new HashSet<Rigidbody2D>();
+        Collider2D[] hits = Physics2D.OverlapCircleAll(center, radius);
         foreach (Collider2D hit in hits)
         {
-            if (!hit.TryGetComponent(out Rigidbody2D otherRb))
+            Rigidbody2D otherRb = hit.attachedRigidbody;
+            if (otherRb == null || !otherRb.simulated ||
+                otherRb.bodyType != RigidbodyType2D.Dynamic ||
+                !affectedBodies.Add(otherRb))
+                continue;
+
+            if (otherRb.TryGetComponent(out PlanetMerge planetMerge) &&
+                (planetMerge.IsBeingAbsorbed || planetMerge.IsAbsorbing))
+                continue;
+            if (otherRb.TryGetComponent(out Meteorite meteorite) &&
+                (meteorite.IsBeingAbsorbed || meteorite.IsAbsorbing))
                 continue;
 
             Vector2 offset = otherRb.position - center;
@@ -467,13 +492,11 @@ public class Meteorite : MonoBehaviour
             // Directly-overhead hits (distance ~0) still get shoved — pick an
             // arbitrary direction rather than dividing by zero.
             Vector2 direction = distance > 0.01f ? offset / distance : Random.insideUnitCircle.normalized;
-            float falloff = 1f - Mathf.Clamp01(distance / explosionRadius);
+            float falloff = 1f - Mathf.Clamp01(distance / radius);
 
-            otherRb.AddForce(direction * (explosionForce * falloff), ForceMode2D.Impulse);
+            otherRb.WakeUp();
+            otherRb.AddForce(direction * (force * falloff), ForceMode2D.Impulse);
         }
-
-        Destroy(gameObject);
-        Destroy(partner.gameObject);
     }
 
     // External hook (GameManager's full board wipe on a hard restart —
@@ -498,7 +521,9 @@ public class Meteorite : MonoBehaviour
         }
 
         MeteorExplosionVFX.Spawn(transform.position, transform.localScale.x);
+        Vector2 explosionCenter = transform.position;
         PrepareForDespawn();
+        ApplyExplosionImpulse(explosionCenter);
         Destroy(gameObject);
         return true;
     }

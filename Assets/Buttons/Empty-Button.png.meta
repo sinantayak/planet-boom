@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: e93b864f71c5c76419530aeb8c49a349
+guid: f379e518c58a741449adc2204734baf8
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4473551675245651988
-    second: CosmicMimic_0
+      213: -7223175044574203196
+    second: Empty-Button_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,23 +126,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: CosmicMimic_0
+      name: Empty-Button_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 0
-        width: 125
-        height: 125
+        y: 179
+        width: 512
+        height: 153
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 418ee57fb8f351e30800000000000000
-      internalID: 4473551675245651988
+      spriteID: 4c230b5219022cb90800000000000000
+      internalID: -7223175044574203196
       vertices: []
       indices: 
       edges: []
@@ -151,7 +151,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: f038979bbb897b74c98ac7d032a71160
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      CosmicMimic_0: 4473551675245651988
+      Empty-Button_0: -7223175044574203196
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

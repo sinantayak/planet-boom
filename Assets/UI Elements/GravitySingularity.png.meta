@@ -129,12 +129,12 @@ TextureImporter:
       name: GravitySingularity_0
       rect:
         serializedVersion: 2
-        x: 9
-        y: 6
-        width: 104
-        height: 113
+        x: 0
+        y: 0
+        width: 125
+        height: 125
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -151,7 +151,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 76eff40e29f18da47ad08829f6a4cbd5
     internalID: 0
     vertices: []
     indices: 

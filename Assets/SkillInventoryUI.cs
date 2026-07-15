@@ -5,9 +5,9 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-// Phase 3B presentation layer. It creates a deterministic UI hierarchy under
-// the existing Canvas/SafeArea and reads every count/assignment from
-// SkillInventoryManager; no inventory data is cached here.
+// Phase 3B presentation controller. Every visual object is authored in
+// GameScene; this component only binds behavior and reads counts/assignments
+// from SkillInventoryManager. No UI hierarchy or inventory data is created here.
 public class SkillInventoryUI : MonoBehaviour
 {
     [Header("Existing Scene Wiring")]
@@ -15,19 +15,16 @@ public class SkillInventoryUI : MonoBehaviour
     [SerializeField] private RectTransform safeAreaRoot;
     [SerializeField] private Button chestButton;
 
-    [Header("Optional Art Overrides")]
-    [SerializeField] private Sprite quickSlotFrame;
+    [Header("Scene UI Content")]
     [SerializeField] private Sprite selectedSlotHighlight;
-    [SerializeField] private Sprite popupBackground;
-    [SerializeField] private Sprite skillEntryBackground;
     [SerializeField] private Sprite emptySlotSprite;
     [SerializeField] private Sprite[] skillIcons = Array.Empty<Sprite>();
 
-    [Header("Fallback Colors (used when sprites are empty)")]
-    [SerializeField] private Color slotColor = new Color(0.08f, 0.10f, 0.20f, 0.92f);
-    [SerializeField] private Color popupColor = new Color(0.05f, 0.06f, 0.14f, 0.98f);
-    [SerializeField] private Color selectedColor = new Color(0.25f, 0.75f, 1f, 0.8f);
     [SerializeField] private Color unavailableIconColor = new Color(0.35f, 0.35f, 0.35f, 0.75f);
+
+    [Header("Selected Popup Slot Feedback")]
+    [SerializeField] private float selectedSlotScale = 1.08f;
+    [SerializeField] private Color selectedSlotTint = new Color(0.55f, 0.95f, 1f, 1f);
 
     // Hooks for Phase 3C feedback (shake/toast/audio). UI does not invent a
     // failure animation yet, but callers receive the exact failed operation.
@@ -37,6 +34,8 @@ public class SkillInventoryUI : MonoBehaviour
     private sealed class SlotView
     {
         public Button button;
+        public RectTransform root;
+        public Image frame;
         public Image icon;
         public GameObject badgeRoot;
         public TextMeshProUGUI countText;
@@ -49,22 +48,30 @@ public class SkillInventoryUI : MonoBehaviour
         public TextMeshProUGUI countText;
     }
 
+    private sealed class ButtonBinding
+    {
+        public Button button;
+        public UnityAction action;
+    }
+
     private readonly List<SlotView> hudSlots = new List<SlotView>();
     private readonly List<SlotView> popupSlots = new List<SlotView>();
     private readonly Dictionary<SkillType, EntryView> entries = new Dictionary<SkillType, EntryView>();
+    private readonly List<ButtonBinding> buttonBindings = new List<ButtonBinding>();
 
     private SkillInventoryManager inventory;
     private GameObject popupRoot;
     private TextMeshProUGUI chestCountText;
+    private Button popupCloseButton;
+    private Button clearSlotButton;
     private int selectedSlotIndex;
     private bool popupOpen;
 
     void Awake()
     {
         ResolveSceneReferences();
-        BuildUI();
-        if (chestButton != null)
-            chestButton.onClick.AddListener(OpenPopup);
+        ResolveAuthoredUI();
+        WireButtons();
     }
 
     void Start()
@@ -85,8 +92,7 @@ public class SkillInventoryUI : MonoBehaviour
 
     void OnDestroy()
     {
-        if (chestButton != null)
-            chestButton.onClick.RemoveListener(OpenPopup);
+        UnwireButtons();
     }
 
     public void OpenPopup()
@@ -247,7 +253,11 @@ public class SkillInventoryUI : MonoBehaviour
         view.countText.text = count.ToString();
         view.button.interactable = popupSlot || (assigned && count > 0);
         if (view.selectedHighlight != null)
-            view.selectedHighlight.gameObject.SetActive(popupSlot && selectedSlotIndex == index);
+            view.selectedHighlight.gameObject.SetActive(
+                selectedSlotHighlight != null && popupSlot && selectedSlotIndex == index);
+        bool selected = popupSlot && selectedSlotIndex == index;
+        view.root.localScale = Vector3.one * (selected ? Mathf.Max(1f, selectedSlotScale) : 1f);
+        view.frame.color = selected ? selectedSlotTint : Color.white;
     }
 
     private void RefreshEntry(SkillType type)
@@ -277,258 +287,118 @@ public class SkillInventoryUI : MonoBehaviour
         }
     }
 
-    private void BuildUI()
+    private void ResolveAuthoredUI()
     {
-        if (canvasRoot == null || safeAreaRoot == null || chestButton == null)
-        {
-            Debug.LogWarning("SkillInventoryUI: Canvas, SafeAreaRoot or chest Button is missing; UI was not built.", this);
+        hudSlots.Clear();
+        popupSlots.Clear();
+        entries.Clear();
+
+        if (canvasRoot == null || safeAreaRoot == null)
             return;
-        }
 
-        BuildChestBadge();
-        BuildHudSlots();
-        BuildPopup();
-        popupRoot.SetActive(false);
-    }
-
-    private void BuildChestBadge()
-    {
-        RectTransform badge = CreateRect("TotalSkillBadge", chestButton.transform);
-        badge.anchorMin = badge.anchorMax = new Vector2(1f, 1f);
-        badge.pivot = new Vector2(1f, 1f);
-        badge.anchoredPosition = new Vector2(8f, -8f);
-        badge.sizeDelta = new Vector2(64f, 48f);
-        Image bg = badge.gameObject.AddComponent<Image>();
-        bg.color = new Color(0.85f, 0.12f, 0.2f, 0.95f);
-        bg.raycastTarget = false;
-        chestCountText = CreateText("Count", badge, "0", 30f);
-    }
-
-    private void BuildHudSlots()
-    {
-        RectTransform bar = CreateRect("QuickSlotBar", safeAreaRoot);
-        bar.anchorMin = bar.anchorMax = new Vector2(0.5f, 0f);
-        bar.pivot = new Vector2(0.5f, 0f);
-        bar.anchoredPosition = new Vector2(0f, 120f);
-        bar.sizeDelta = new Vector2(420f, 120f);
-        HorizontalLayoutGroup layout = bar.gameObject.AddComponent<HorizontalLayoutGroup>();
-        layout.spacing = 20f;
-        layout.childAlignment = TextAnchor.MiddleCenter;
-        layout.childControlWidth = layout.childControlHeight = false;
-
-        for (int i = 0; i < SkillInventoryManager.QuickSlotCount; i++)
+        Transform hudBar = safeAreaRoot.Find("QuickSlotBar");
+        if (hudBar != null)
         {
-            int index = i;
-            hudSlots.Add(CreateSlotView(bar, false, () => UseQuickSlot(index)));
+            for (int i = 0; i < SkillInventoryManager.QuickSlotCount && i < hudBar.childCount; i++)
+                hudSlots.Add(ResolveSlotView(hudBar.GetChild(i)));
         }
-    }
 
-    private void BuildPopup()
-    {
-        RectTransform overlay = CreateRect("SkillInventoryPopup", canvasRoot);
-        Stretch(overlay);
-        popupRoot = overlay.gameObject;
-        Image dimmer = overlay.gameObject.AddComponent<Image>();
-        dimmer.color = new Color(0f, 0f, 0f, 0.72f);
+        Transform popup = canvasRoot.Find("SkillInventoryPopup");
+        popupRoot = popup != null ? popup.gameObject : null;
+        if (popup == null)
+            return;
 
-        RectTransform panel = CreateRect("Panel", overlay);
-        panel.anchorMin = panel.anchorMax = new Vector2(0.5f, 0.5f);
-        panel.pivot = new Vector2(0.5f, 0.5f);
-        panel.sizeDelta = new Vector2(900f, 1260f);
-        Image panelImage = panel.gameObject.AddComponent<Image>();
-        panelImage.sprite = popupBackground;
-        panelImage.color = popupBackground != null ? Color.white : popupColor;
+        Transform panel = popup.Find("Panel");
+        if (panel == null)
+            return;
 
-        TextMeshProUGUI title = CreateText("Title", panel, "SKILL INVENTORY", 48f);
-        SetRect(title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -55f), new Vector2(620f, 80f));
+        popupCloseButton = panel.Find("CloseButton")?.GetComponent<Button>();
+        clearSlotButton = panel.Find("ClearSelectedSlot")?.GetComponent<Button>();
 
-        Button close = CreateTextButton("CloseButton", panel, "X", new Vector2(90f, 80f));
-        SetRect(close.transform as RectTransform, new Vector2(1f, 1f), new Vector2(-60f, -55f), new Vector2(90f, 80f));
-        close.onClick.AddListener(ClosePopup);
-
-        RectTransform slotRow = CreateRect("PopupQuickSlots", panel);
-        SetRect(slotRow, new Vector2(0.5f, 1f), new Vector2(0f, -180f), new Vector2(500f, 130f));
-        HorizontalLayoutGroup slotLayout = slotRow.gameObject.AddComponent<HorizontalLayoutGroup>();
-        slotLayout.spacing = 30f;
-        slotLayout.childAlignment = TextAnchor.MiddleCenter;
-        slotLayout.childControlWidth = slotLayout.childControlHeight = false;
-        for (int i = 0; i < SkillInventoryManager.QuickSlotCount; i++)
+        Transform popupRow = panel.Find("PopupQuickSlots");
+        if (popupRow != null)
         {
-            int index = i;
-            popupSlots.Add(CreateSlotView(slotRow, true, () => SelectPopupSlot(index)));
+            for (int i = 0; i < SkillInventoryManager.QuickSlotCount && i < popupRow.childCount; i++)
+                popupSlots.Add(ResolveSlotView(popupRow.GetChild(i)));
         }
 
-        Button clear = CreateTextButton("ClearSelectedSlot", panel, "CLEAR SLOT", new Vector2(250f, 65f));
-        SetRect(clear.transform as RectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -285f), new Vector2(250f, 65f));
-        clear.onClick.AddListener(ClearSelectedSlot);
+        Transform content = panel.Find("SkillGridViewport/Content");
+        if (content != null)
+        {
+            foreach (SkillType type in Enum.GetValues(typeof(SkillType)))
+            {
+                Transform entry = content.Find(type.ToString());
+                if (entry == null)
+                    continue;
+                entries[type] = new EntryView
+                {
+                    icon = entry.Find("Icon")?.GetComponent<Image>(),
+                    countText = entry.Find("Count")?.GetComponent<TextMeshProUGUI>()
+                };
+            }
+        }
 
-        RectTransform viewport = CreateRect("SkillGridViewport", panel);
-        viewport.anchorMin = new Vector2(0f, 0f);
-        viewport.anchorMax = new Vector2(1f, 1f);
-        viewport.offsetMin = new Vector2(55f, 70f);
-        viewport.offsetMax = new Vector2(-55f, -350f);
-        viewport.gameObject.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.18f);
-        viewport.gameObject.AddComponent<RectMask2D>();
-
-        RectTransform content = CreateRect("Content", viewport);
-        content.anchorMin = new Vector2(0f, 1f);
-        content.anchorMax = new Vector2(1f, 1f);
-        content.pivot = new Vector2(0.5f, 1f);
-        content.anchoredPosition = Vector2.zero;
-        content.sizeDelta = Vector2.zero;
-        GridLayoutGroup grid = content.gameObject.AddComponent<GridLayoutGroup>();
-        grid.cellSize = new Vector2(230f, 245f);
-        grid.spacing = new Vector2(25f, 25f);
-        grid.padding = new RectOffset(25, 25, 25, 25);
-        grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-        grid.constraintCount = 3;
-        ContentSizeFitter fitter = content.gameObject.AddComponent<ContentSizeFitter>();
-        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-        ScrollRect scroll = viewport.gameObject.AddComponent<ScrollRect>();
-        scroll.viewport = viewport;
-        scroll.content = content;
-        scroll.horizontal = false;
-        scroll.vertical = true;
-        scroll.movementType = ScrollRect.MovementType.Clamped;
-
-        foreach (SkillType type in Enum.GetValues(typeof(SkillType)))
-            entries[type] = CreateSkillEntry(content, type);
+        Transform badge = chestButton != null ? chestButton.transform.Find("TotalSkillBadge/Count") : null;
+        chestCountText = badge != null ? badge.GetComponent<TextMeshProUGUI>() : null;
     }
 
-    private SlotView CreateSlotView(Transform parent, bool popupSlot, UnityAction onClick)
+    private static SlotView ResolveSlotView(Transform root)
     {
-        RectTransform root = CreateRect(popupSlot ? "PopupSlot" : "QuickSlot", parent);
-        root.sizeDelta = new Vector2(120f, 120f);
-        Image frame = root.gameObject.AddComponent<Image>();
-        frame.sprite = quickSlotFrame;
-        frame.color = quickSlotFrame != null ? Color.white : slotColor;
-        Button button = root.gameObject.AddComponent<Button>();
-        button.targetGraphic = frame;
-        button.onClick.AddListener(onClick);
-
-        RectTransform iconRect = CreateRect("Icon", root);
-        Stretch(iconRect, 14f);
-        Image icon = iconRect.gameObject.AddComponent<Image>();
-        icon.preserveAspect = true;
-        icon.raycastTarget = false;
-
-        RectTransform highlightRect = CreateRect("Selected", root);
-        Stretch(highlightRect, -5f);
-        Image highlight = highlightRect.gameObject.AddComponent<Image>();
-        highlight.sprite = selectedSlotHighlight;
-        highlight.color = selectedSlotHighlight != null ? Color.white : selectedColor;
-        highlight.raycastTarget = false;
-        highlight.gameObject.SetActive(false);
-
-        RectTransform badge = CreateRect("CountBadge", root);
-        badge.anchorMin = badge.anchorMax = new Vector2(1f, 0f);
-        badge.pivot = new Vector2(1f, 0f);
-        badge.anchoredPosition = new Vector2(6f, -4f);
-        badge.sizeDelta = new Vector2(52f, 40f);
-        Image badgeBg = badge.gameObject.AddComponent<Image>();
-        badgeBg.color = new Color(0.05f, 0.05f, 0.08f, 0.95f);
-        badgeBg.raycastTarget = false;
-        TextMeshProUGUI count = CreateText("Count", badge, "0", 25f);
-
+        Transform badge = root.Find("CountBadge");
         return new SlotView
         {
-            button = button,
-            icon = icon,
-            badgeRoot = badge.gameObject,
-            countText = count,
-            selectedHighlight = highlight
+            root = root as RectTransform,
+            button = root.GetComponent<Button>(),
+            frame = root.GetComponent<Image>(),
+            icon = root.Find("Icon")?.GetComponent<Image>(),
+            selectedHighlight = root.Find("Selected")?.GetComponent<Image>(),
+            badgeRoot = badge != null ? badge.gameObject : null,
+            countText = badge != null ? badge.Find("Count")?.GetComponent<TextMeshProUGUI>() : null
         };
     }
 
-    private EntryView CreateSkillEntry(Transform parent, SkillType type)
+    private void WireButtons()
     {
-        RectTransform root = CreateRect(type.ToString(), parent);
-        Image background = root.gameObject.AddComponent<Image>();
-        background.sprite = skillEntryBackground;
-        background.color = skillEntryBackground != null ? Color.white : slotColor;
-        Button button = root.gameObject.AddComponent<Button>();
-        button.targetGraphic = background;
-        button.onClick.AddListener(() => AssignSelectedSlot(type));
+        AddButtonBinding(chestButton, OpenPopup);
+        AddButtonBinding(popupCloseButton, ClosePopup);
+        AddButtonBinding(clearSlotButton, ClearSelectedSlot);
 
-        RectTransform iconRect = CreateRect("Icon", root);
-        iconRect.anchorMin = iconRect.anchorMax = new Vector2(0.5f, 1f);
-        iconRect.pivot = new Vector2(0.5f, 1f);
-        iconRect.anchoredPosition = new Vector2(0f, -18f);
-        iconRect.sizeDelta = new Vector2(140f, 140f);
-        Image icon = iconRect.gameObject.AddComponent<Image>();
-        icon.sprite = IconFor(type);
-        icon.preserveAspect = true;
-        icon.raycastTarget = false;
-
-        TextMeshProUGUI name = CreateText("Name", root, SplitName(type.ToString()), 23f);
-        SetRect(name.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 42f), new Vector2(210f, 55f));
-        TextMeshProUGUI count = CreateText("Count", root, "0", 30f);
-        SetRect(count.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 10f), new Vector2(120f, 40f));
-
-        return new EntryView { icon = icon, countText = count };
-    }
-
-    private static RectTransform CreateRect(string name, Transform parent)
-    {
-        var go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer));
-        go.layer = 5;
-        RectTransform rect = (RectTransform)go.transform;
-        rect.SetParent(parent, false);
-        return rect;
-    }
-
-    private static TextMeshProUGUI CreateText(string name, Transform parent, string value, float size)
-    {
-        RectTransform rect = CreateRect(name, parent);
-        Stretch(rect);
-        TextMeshProUGUI text = rect.gameObject.AddComponent<TextMeshProUGUI>();
-        if (TMP_Settings.defaultFontAsset != null)
-            text.font = TMP_Settings.defaultFontAsset;
-        text.text = value;
-        text.fontSize = size;
-        text.alignment = TextAlignmentOptions.Center;
-        text.color = Color.white;
-        text.raycastTarget = false;
-        return text;
-    }
-
-    private Button CreateTextButton(string name, Transform parent, string label, Vector2 size)
-    {
-        RectTransform rect = CreateRect(name, parent);
-        rect.sizeDelta = size;
-        Image image = rect.gameObject.AddComponent<Image>();
-        image.sprite = quickSlotFrame;
-        image.color = quickSlotFrame != null ? Color.white : slotColor;
-        Button button = rect.gameObject.AddComponent<Button>();
-        button.targetGraphic = image;
-        CreateText("Label", rect, label, 28f);
-        return button;
-    }
-
-    private static void Stretch(RectTransform rect, float inset = 0f)
-    {
-        rect.anchorMin = Vector2.zero;
-        rect.anchorMax = Vector2.one;
-        rect.offsetMin = new Vector2(inset, inset);
-        rect.offsetMax = new Vector2(-inset, -inset);
-    }
-
-    private static void SetRect(RectTransform rect, Vector2 anchor, Vector2 position, Vector2 size)
-    {
-        rect.anchorMin = rect.anchorMax = anchor;
-        rect.pivot = anchor;
-        rect.anchoredPosition = position;
-        rect.sizeDelta = size;
-    }
-
-    private static string SplitName(string value)
-    {
-        for (int i = value.Length - 1; i > 0; i--)
+        for (int i = 0; i < hudSlots.Count; i++)
         {
-            if (char.IsUpper(value[i]) && !char.IsUpper(value[i - 1]))
-                value = value.Insert(i, " ");
+            int index = i;
+            AddButtonBinding(hudSlots[i].button, () => UseQuickSlot(index));
         }
-        return value;
+        for (int i = 0; i < popupSlots.Count; i++)
+        {
+            int index = i;
+            AddButtonBinding(popupSlots[i].button, () => SelectPopupSlot(index));
+        }
+        foreach (KeyValuePair<SkillType, EntryView> pair in entries)
+        {
+            Transform entry = pair.Value.icon != null ? pair.Value.icon.transform.parent : null;
+            SkillType type = pair.Key;
+            AddButtonBinding(entry != null ? entry.GetComponent<Button>() : null,
+                () => AssignSelectedSlot(type));
+        }
     }
+
+    private void AddButtonBinding(Button button, UnityAction action)
+    {
+        if (button == null || action == null)
+            return;
+        button.onClick.AddListener(action);
+        buttonBindings.Add(new ButtonBinding { button = button, action = action });
+    }
+
+    private void UnwireButtons()
+    {
+        foreach (ButtonBinding binding in buttonBindings)
+        {
+            if (binding.button != null)
+                binding.button.onClick.RemoveListener(binding.action);
+        }
+        buttonBindings.Clear();
+    }
+
+
 }
