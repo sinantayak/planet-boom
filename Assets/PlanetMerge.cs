@@ -212,6 +212,18 @@ public class PlanetMerge : MonoBehaviour
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.PlayMerge();
+
+            // Combo popup + skill-drop roll, both keyed off the same shared
+            // combo count AudioManager just advanced above.
+            int combo = AudioManager.Instance.CurrentCombo;
+            if (ComboTextSpawner.Instance != null)
+            {
+                ComboTextSpawner.Instance.Spawn(transform.position, combo);
+            }
+            if (SkillDropManager.Instance != null)
+            {
+                SkillDropManager.Instance.TryDropOnMerge(combo, transform.position);
+            }
         }
 
         // Subtle sparkle around the planet's perimeter, distinct from the big
