@@ -60,6 +60,12 @@ public class ComboTextSpawner : MonoBehaviour
     // Above MeteorExplosionVFX's merge sparkle (95) and BOOM burst (100) so
     // the popup always reads on top of both.
     [SerializeField] private int sortingOrder = 110;
+    // Extra gap between the tier word and the "COMBO xN" line beneath it, in
+    // TMP's line-spacing units (roughly % of font size). The two lines use
+    // different <size> tags, which shrinks TMP's own auto leading and reads
+    // as cramped/overlapping at 0 — positive values push them apart; go
+    // negative instead if a different font asset ever reads too loose.
+    [SerializeField] private float lineSpacing = 25f;
 
     void Awake()
     {
@@ -93,6 +99,7 @@ public class ComboTextSpawner : MonoBehaviour
         tmp.text = $"<size=115%>{tier.label}</size>\n<size=65%>COMBO x{combo}</size>";
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.fontSize = baseFontSize;
+        tmp.lineSpacing = lineSpacing;
         tmp.color = tier.color;
         tmp.outlineWidth = 0.2f;
         tmp.outlineColor = new Color(0f, 0f, 0f, 0.6f);
