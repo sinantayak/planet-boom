@@ -2335,7 +2335,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: -10
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: 77e61be9f7048e447b99287573ca1dc2, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 4fbd5edda4e984c43b13c0fe25a348e5, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -4856,8 +4856,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 6}
-  m_SizeDelta: {x: 0, y: 12}
+  m_AnchoredPosition: {x: 0, y: 8}
+  m_SizeDelta: {x: 0, y: 16}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1078429663
 MonoBehaviour:
@@ -5151,7 +5151,7 @@ MonoBehaviour:
   shootingStarScale: 0.3
   entryViewportPosition: {x: 1.08, y: 1.08}
   spriteRotationOffset: 165
-  travelDuration: 0.75
+  travelDuration: 0.46
   trajectoryArc: 0.05
   fallbackSpawnDistance: 9
   impactFlashDuration: 0.07
@@ -5969,7 +5969,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -50, y: 50}
+  m_AnchoredPosition: {x: -70, y: 50}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 1, y: 0}
 --- !u!1 &1220110992
@@ -9364,7 +9364,7 @@ MonoBehaviour:
   hoverDuration: 0.6
   hoverBobAmplitude: 6
   hoverBobFrequency: 4
-  flightDuration: 1
+  flightDuration: 0.6
   arcHeight: 220
   pulseScale: 1.05
   pulseDuration: 0.25
@@ -9408,6 +9408,13 @@ MonoBehaviour:
   unavailableIconColor: {r: 0.35, g: 0.35, b: 0.35, a: 0.75}
   selectedSlotScale: 1.08
   selectedSlotTint: {r: 0.55, g: 0.95, b: 1, a: 1}
+  successPulseDuration: 0.22
+  successPulseScale: 1.14
+  successFlashColor: {r: 0.55, g: 1, b: 0.8, a: 1}
+  failureShakeDuration: 0.28
+  failureShakeDistance: 10
+  failureShakeCycles: 4
+  failureFlashColor: {r: 1, g: 0.3, b: 0.3, a: 1}
 --- !u!1 &1928186843
 GameObject:
   m_ObjectHideFlags: 0
@@ -9681,6 +9688,17 @@ MonoBehaviour:
   collisionClip: {fileID: 8300000, guid: 54a4304b6a3aefe438fd37ee9216f335, type: 3}
   mergeClip: {fileID: 8300000, guid: ac670b8d1c0caab4d9c6a840047a9cb3, type: 3}
   SFX_Explosion: {fileID: 8300000, guid: 24144f4f137cf0542840238a971232e7, type: 3}
+  skillCollectedClip: {fileID: 8300000, guid: 4260e69f8721224418f0e1e88506f66b, type: 3}
+  skillUseSuccessClip: {fileID: 0}
+  skillUseFailedClip: {fileID: 8300000, guid: b90b0035cec785b4bbd89e1827b20158, type: 3}
+  gravitySingularityClip: {fileID: 8300000, guid: c31bc02e3135f1f4390588f8fd215ef0, type: 3}
+  meteorStrikeImpactClip: {fileID: 8300000, guid: dd6f3f3bcc1f1b24f968ead768ce176b, type: 3}
+  timeWarpClip: {fileID: 8300000, guid: 461db31c291582c4f934e8ec9ffc499c, type: 3}
+  cosmicMimicClip: {fileID: 8300000, guid: ccc191096c16a2c44b9b850684fd7027, type: 3}
+  skillCollectedVolume: 0.9
+  skillFeedbackVolume: 0.9
+  specificSkillVolume: 1
+  playGenericSuccessWithSpecific: 0
   launchVolume: 0.9
   minImpactSpeed: 0.6
   fullVolumeImpactSpeed: 8
@@ -10103,7 +10121,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.85, g: 0.12, b: 0.2, a: 0.95}
+  m_Color: {r: 0.1579299, g: 0.5846391, b: 0.8584906, a: 0.95}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

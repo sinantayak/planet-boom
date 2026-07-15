@@ -698,6 +698,7 @@ public class GameManager : MonoBehaviour
         // the moment State leaves Playing, so this reads the true finish time
         // no matter how long the cinematic runs.
         int starsEarned = CalculateStarRating();
+        PlayerDataPersistenceManager.Instance?.RecordLevelCompleted(CurrentLevelNumber, starsEarned);
         Debug.Log($"GameManager: LEVEL {CurrentLevelNumber} COMPLETE! " +
                   $"Cleared in {currentTimeLimit - RemainingTime:F1}s of {currentTimeLimit:F0}s " +
                   $"(3-star pace: {currentThreeStarThreshold:F0}s) — {starsEarned} star(s).");

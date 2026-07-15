@@ -36,6 +36,7 @@ public class SkillInventoryManager : MonoBehaviour
 
         Instance = this;
         LoadFromPlayerPrefs();
+        PlayerDataPersistenceManager.RegisterSkillInventory(this);
     }
 
     void OnEnable()
@@ -55,6 +56,7 @@ public class SkillInventoryManager : MonoBehaviour
     {
         if (Instance == this)
         {
+            PlayerDataPersistenceManager.UnregisterSkillInventory(this);
             Instance = null;
         }
     }
@@ -73,6 +75,7 @@ public class SkillInventoryManager : MonoBehaviour
         counts[type] = newCount;
         SaveCount(type, newCount);
         InventoryCountChanged?.Invoke(type, newCount);
+        PlayerDataPersistenceManager.NotifySkillInventoryChanged(this);
     }
 
     // This is the only public consumption path. Execution is synchronous, so
@@ -96,6 +99,7 @@ public class SkillInventoryManager : MonoBehaviour
         counts[type] = newCount;
         SaveCount(type, newCount);
         InventoryCountChanged?.Invoke(type, newCount);
+        PlayerDataPersistenceManager.NotifySkillInventoryChanged(this);
         AudioManager.Instance?.PlaySkillUseSucceeded(type);
         return true;
     }
@@ -129,6 +133,7 @@ public class SkillInventoryManager : MonoBehaviour
         quickSlots[slotIndex] = type;
         SaveQuickSlot(slotIndex);
         QuickSlotChanged?.Invoke(slotIndex, type);
+        PlayerDataPersistenceManager.NotifySkillInventoryChanged(this);
         return true;
     }
 
@@ -143,6 +148,7 @@ public class SkillInventoryManager : MonoBehaviour
         quickSlots[slotIndex] = null;
         SaveQuickSlot(slotIndex);
         QuickSlotChanged?.Invoke(slotIndex, null);
+        PlayerDataPersistenceManager.NotifySkillInventoryChanged(this);
         return true;
     }
 
@@ -199,6 +205,63 @@ public class SkillInventoryManager : MonoBehaviour
     private static bool IsValidSlotIndex(int slotIndex)
     {
         return slotIndex >= 0 && slotIndex < QuickSlotCount;
+    }
+
+    internal void WriteToPlayerData(PlayerData data)
+    {
+        data.skillInventory.Clear();
+        foreach (SkillType type in Enum.GetValues(typeof(SkillType)))
+        {
+            data.skillInventory.Add(new SkillQuantityData
+            {
+                skillType = type.ToString(),
+                quantity = GetCount(type)
+            });
+        }
+
+        data.quickSlots.Clear();
+        for (int i = 0; i < QuickSlotCount; i++)
+            data.quickSlots.Add(quickSlots[i]?.ToString() ?? string.Empty);
+    }
+
+    internal void ApplyPlayerData(PlayerData data)
+    {
+        counts.Clear();
+        foreach (SkillType type in Enum.GetValues(typeof(SkillType)))
+            counts[type] = 0;
+
+        foreach (SkillQuantityData entry in data.skillInventory)
+        {
+            if (entry != null && Enum.TryParse(entry.skillType, out SkillType type) &&
+                IsValidSkillType(type))
+            {
+                counts[type] = Mathf.Max(0, entry.quantity);
+            }
+        }
+
+        var assigned = new HashSet<SkillType>();
+        for (int i = 0; i < QuickSlotCount; i++)
+        {
+            string saved = i < data.quickSlots.Count ? data.quickSlots[i] : string.Empty;
+            if (!string.IsNullOrEmpty(saved) && Enum.TryParse(saved, out SkillType type) &&
+                IsValidSkillType(type) && assigned.Add(type))
+                quickSlots[i] = type;
+            else
+                quickSlots[i] = null;
+        }
+
+        foreach (SkillType type in Enum.GetValues(typeof(SkillType)))
+        {
+            int count = GetCount(type);
+            PlayerPrefs.SetInt(CountKey(type), count);
+            InventoryCountChanged?.Invoke(type, count);
+        }
+        for (int i = 0; i < QuickSlotCount; i++)
+        {
+            PlayerPrefs.SetString(QuickSlotKey(i), quickSlots[i]?.ToString() ?? string.Empty);
+            QuickSlotChanged?.Invoke(i, quickSlots[i]);
+        }
+        PlayerPrefs.Save();
     }
 
     private static string CountKey(SkillType type) => CountKeyPrefix + type;
@@ -312,6 +375,7 @@ public class SkillInventoryManager : MonoBehaviour
         }
 
         PlayerPrefs.Save();
+        PlayerDataPersistenceManager.NotifySkillInventoryChanged(this);
         Debug.Log("TEMP INVENTORY: all Phase-3A inventory data reset.", this);
     }
 
