@@ -71,6 +71,11 @@ public class BoundaryVisualizer : MonoBehaviour
     // straight to a constant rate.
     [SerializeField] private float vortexRingSpinRampUpTime = 1.2f;
 
+    [Header("Gravity Singularity Inner Orbit")]
+    [SerializeField] private float singularityOrbitRotationSpeed = 75f;
+    [Range(0.1f, 1f)]
+    [SerializeField] private float singularityOrbitMinimumScale = 0.58f;
+
     private LineRenderer lineRenderer;
     private BlackHole blackHole;
 
@@ -91,6 +96,9 @@ public class BoundaryVisualizer : MonoBehaviour
     // "was the vortex active last frame" (>0 once spinning, reset to 0 the
     // instant it stops) so LateUpdate can detect the active->inactive edge.
     private float vortexSpinRampElapsed = 0f;
+    private Quaternion visualBoundaryInitialRotation;
+    private Quaternion innerOrbitInitialRotation;
+    private float singularityOrbitRotation;
 
     void Awake()
     {
@@ -102,6 +110,12 @@ public class BoundaryVisualizer : MonoBehaviour
         visualBoundarySpriteRenderer = visualBoundaryTransform != null
             ? visualBoundaryTransform.GetComponentInChildren<SpriteRenderer>()
             : null;
+        visualBoundaryInitialRotation = visualBoundaryTransform != null
+            ? visualBoundaryTransform.localRotation
+            : Quaternion.identity;
+        innerOrbitInitialRotation = innerOrbitTransform != null
+            ? innerOrbitTransform.localRotation
+            : Quaternion.identity;
     }
 
     // Reads an art piece's intrinsic size so the scale math can be exact: a
@@ -183,7 +197,10 @@ public class BoundaryVisualizer : MonoBehaviour
     private void SyncVisualBoundary(Vector3 center, float radius)
     {
         SyncRingArt(visualBoundaryTransform, visualSpriteBaseRadius, spriteScaleMultiplier, center, radius);
-        SyncRingArt(innerOrbitTransform, innerOrbitBaseRadius, innerOrbitScaleMultiplier, center, radius);
+        float singularityIntensity = blackHole != null ? blackHole.GravitySingularityIntensity : 0f;
+        float singularityScale = Mathf.Lerp(1f, singularityOrbitMinimumScale, singularityIntensity);
+        SyncRingArt(innerOrbitTransform, innerOrbitBaseRadius,
+            innerOrbitScaleMultiplier * singularityScale, center, radius);
     }
 
     private void SyncRingArt(Transform art, float baseRadius, float multiplier, Vector3 center, float radius)
@@ -214,10 +231,19 @@ public class BoundaryVisualizer : MonoBehaviour
                 // orientation rather than leaving the art wherever the spin
                 // happened to stop, so the next level starts clean.
                 vortexSpinRampElapsed = 0f;
-                ResetRingRotation(visualBoundaryTransform);
-                ResetRingRotation(innerOrbitTransform);
+                RestoreRingRotation(visualBoundaryTransform, visualBoundaryInitialRotation);
+                RestoreRingRotation(innerOrbitTransform, innerOrbitInitialRotation);
             }
+
+            UpdateSingularityOrbitVisual();
             return;
+        }
+
+        singularityOrbitRotation = 0f;
+        if (vortexSpinRampElapsed <= 0f)
+        {
+            RestoreRingRotation(visualBoundaryTransform, visualBoundaryInitialRotation);
+            RestoreRingRotation(innerOrbitTransform, innerOrbitInitialRotation);
         }
 
         vortexSpinRampElapsed += Time.deltaTime;
@@ -230,6 +256,28 @@ public class BoundaryVisualizer : MonoBehaviour
 
         RotateRing(visualBoundaryTransform, delta);
         RotateRing(innerOrbitTransform, delta);
+    }
+
+    private void UpdateSingularityOrbitVisual()
+    {
+        if (innerOrbitTransform == null)
+            return;
+
+        float intensity = blackHole != null ? blackHole.GravitySingularityIntensity : 0f;
+        if (intensity <= 0f)
+        {
+            if (!Mathf.Approximately(singularityOrbitRotation, 0f))
+            {
+                singularityOrbitRotation = 0f;
+                innerOrbitTransform.localRotation = innerOrbitInitialRotation;
+            }
+            return;
+        }
+
+        singularityOrbitRotation += singularityOrbitRotationSpeed * Time.deltaTime;
+        float displayedRotation = singularityOrbitRotation * intensity;
+        innerOrbitTransform.localRotation = innerOrbitInitialRotation *
+            Quaternion.Euler(0f, 0f, displayedRotation);
     }
 
     // Hard-switches the outer ring's tint the instant GameManager reports any
@@ -253,12 +301,20 @@ public class BoundaryVisualizer : MonoBehaviour
         }
     }
 
-    private static void ResetRingRotation(Transform art)
+    private static void RestoreRingRotation(Transform art, Quaternion rotation)
     {
         if (art != null)
         {
-            art.localRotation = Quaternion.identity;
+            art.localRotation = rotation;
         }
+    }
+
+    void OnDisable()
+    {
+        vortexSpinRampElapsed = 0f;
+        singularityOrbitRotation = 0f;
+        RestoreRingRotation(visualBoundaryTransform, visualBoundaryInitialRotation);
+        RestoreRingRotation(innerOrbitTransform, innerOrbitInitialRotation);
     }
 
     private void ApplyLineStyle()

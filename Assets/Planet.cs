@@ -98,6 +98,9 @@ public class Planet : MonoBehaviour
     [Header("Cosmic Visuals")]
     // Pre-colored planet sprites, indexed by tier: Tier1 = 0, Tier2 = 1, ... Tier8 = 7.
     [SerializeField] private Sprite[] planetSprites;
+    // Dedicated wildcard art shared by live planets and launcher previews.
+    // Future aura/VFX code can use CosmicMimicStateChanged independently.
+    [SerializeField] private Sprite cosmicMimicSprite;
 
     [Header("Tier Physics")]
     // Mass grows exponentially: mass = baseMass * massMultiplierPerTier^(tier - 1).
@@ -274,12 +277,27 @@ public class Planet : MonoBehaviour
             OnSettleStateChanged();
         }
 
-        if (isSettled)
+        if (isSettled && (blackHole == null || !blackHole.IsGravitySingularityActive))
         {
             ApplySettleVelocityRamp();
         }
 
         ApplyDamping();
+    }
+
+    // Visual systems can subscribe to this state change later to swap a
+    // rainbow sprite/material/VFX without coupling art to merge logic.
+    public bool IsCosmicMimic { get; private set; }
+    public event System.Action<bool> CosmicMimicStateChanged;
+
+    public void SetCosmicMimic(bool active)
+    {
+        if (IsCosmicMimic == active)
+            return;
+
+        IsCosmicMimic = active;
+        ApplyCurrentVisual();
+        CosmicMimicStateChanged?.Invoke(active);
     }
 
     // Fires exactly once on each Flying<->Settled edge. BlackHole separately
@@ -425,6 +443,11 @@ public class Planet : MonoBehaviour
         return null;
     }
 
+    public Sprite GetCosmicMimicSprite()
+    {
+        return cosmicMimicSprite;
+    }
+
     public void SetTier(PlanetTier tier)
     {
         CurrentTier = tier;
@@ -435,15 +458,24 @@ public class Planet : MonoBehaviour
             // pure white means "no tint" so they display exactly as authored.
             sr.color = Color.white;
 
-            Sprite tierSprite = GetSpriteForTier(tier);
-            if (tierSprite != null)
+            Sprite visualSprite = IsCosmicMimic && cosmicMimicSprite != null
+                ? cosmicMimicSprite
+                : GetSpriteForTier(tier);
+            if (visualSprite != null)
             {
-                sr.sprite = tierSprite;
+                sr.sprite = visualSprite;
             }
             else
             {
                 Debug.LogWarning($"Planet: no sprite assigned for {tier} (index {(int)tier}) — keeping the current sprite.", this);
             }
         }
+    }
+
+    private void ApplyCurrentVisual()
+    {
+        // SetTier is already the single visual/physics application path. Reuse
+        // it so leaving Mimic state always restores the exact current tier art.
+        SetTier(CurrentTier);
     }
 }

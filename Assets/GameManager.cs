@@ -34,7 +34,7 @@ public class GameManager : MonoBehaviour
     // popup — the black hole spins up and swallows the board while all input
     // and lose checks are frozen (every gameplay system already gates on
     // State == Playing, so the new state disables them for free).
-    public enum GameState { Playing, LevelComplete, GameOver, CinematicVortex }
+    public enum GameState { Playing, LevelComplete, GameOver, CinematicVortex, InventoryPaused }
 
     public static GameManager Instance { get; private set; }
 
@@ -82,6 +82,15 @@ public class GameManager : MonoBehaviour
     // Top-right live level clock, rendered MM:SS ("08:20"). Optional — when
     // left unassigned the timer float still runs, it just isn't displayed.
     [SerializeField] private TextMeshProUGUI gameplayTimerText;
+
+    [Header("Time Warp Feedback")]
+    [SerializeField] private Vector2 timeWarpPopupOffset = new Vector2(0f, -55f);
+    [SerializeField] private float timeWarpPopupDuration = 0.65f;
+    [SerializeField] private float timeWarpPopupRiseDistance = 35f;
+    [SerializeField] private float timeWarpPopupStartScale = 0.65f;
+    [SerializeField] private float timeWarpPopupPeakScale = 1.15f;
+    [SerializeField] private float timeWarpTimerPulseScale = 1.16f;
+    [SerializeField] private float timeWarpTimerPulseDuration = 0.28f;
 
     // Panel switched on when the state flips to GameOver. Wire its Restart
     // button's OnClick to GameManager.RestartGame.
@@ -158,6 +167,10 @@ public class GameManager : MonoBehaviour
     // LoadLevel so ticking and star math never index back into the list.
     private float currentTimeLimit;
     private float currentThreeStarThreshold;
+    private float timeScaleBeforeInventoryPause = 1f;
+    private Vector3 gameplayTimerBaseScale = Vector3.one;
+    private Coroutine timeWarpFeedbackRoutine;
+    private TextMeshProUGUI activeTimeWarpPopup;
 
     // Seconds each planet has spent continuously outside the boundary. Entries
     // are dropped the moment a planet comes back inside, so the timer measures
@@ -200,6 +213,9 @@ public class GameManager : MonoBehaviour
 
         launcher = FindFirstObjectByType<PlanetLauncher>();
 
+        if (gameplayTimerText != null)
+            gameplayTimerBaseScale = gameplayTimerText.rectTransform.localScale;
+
         // Start hidden; FixedUpdate re-shows it whenever a planet is outside.
         if (countdownText != null)
         {
@@ -225,6 +241,11 @@ public class GameManager : MonoBehaviour
 
     void OnDestroy()
     {
+        ResetTimeWarpFeedback();
+        if (State == GameState.InventoryPaused)
+        {
+            Time.timeScale = timeScaleBeforeInventoryPause;
+        }
         if (Instance == this)
         {
             Instance = null;
@@ -262,6 +283,145 @@ public class GameManager : MonoBehaviour
         lastDisplayedTimerSeconds = totalSeconds;
 
         gameplayTimerText.text = totalSeconds.ToString();
+    }
+
+    public bool TryPauseForInventory()
+    {
+        if (State != GameState.Playing || Time.timeScale <= 0f)
+            return false;
+
+        timeScaleBeforeInventoryPause = Time.timeScale;
+        State = GameState.InventoryPaused;
+        Time.timeScale = 0f;
+        return true;
+    }
+
+    public bool TryResumeFromInventory()
+    {
+        if (State != GameState.InventoryPaused)
+            return false;
+
+        Time.timeScale = timeScaleBeforeInventoryPause;
+        State = GameState.Playing;
+        return true;
+    }
+
+    public bool TryAddBonusTime(float seconds)
+    {
+        if (State != GameState.Playing || seconds <= 0f)
+            return false;
+
+        // Keep elapsed-time/star calculations stable: currentTimeLimit is the
+        // reference total used by CalculateStarRating, so both sides grow by
+        // the same bonus and already-spent time does not become negative.
+        RemainingTime += seconds;
+        currentTimeLimit += seconds;
+        lastDisplayedTimerSeconds = -1;
+        UpdateTimerUI();
+        PlayTimeWarpFeedback(seconds);
+        return true;
+    }
+
+    private void PlayTimeWarpFeedback(float bonusSeconds)
+    {
+        if (gameplayTimerText == null)
+            return;
+
+        ResetTimeWarpFeedback();
+
+        RectTransform timerRect = gameplayTimerText.rectTransform;
+        GameObject popupObject = new GameObject("TimeWarpBonusPopup", typeof(RectTransform),
+            typeof(CanvasRenderer), typeof(TextMeshProUGUI), typeof(CanvasGroup));
+        RectTransform popupRect = popupObject.GetComponent<RectTransform>();
+        popupRect.SetParent(timerRect.parent, false);
+        popupRect.anchorMin = timerRect.anchorMin;
+        popupRect.anchorMax = timerRect.anchorMax;
+        popupRect.pivot = timerRect.pivot;
+        popupRect.sizeDelta = timerRect.sizeDelta;
+        popupRect.anchoredPosition = timerRect.anchoredPosition + timeWarpPopupOffset;
+        popupRect.localScale = Vector3.one * Mathf.Max(0.01f, timeWarpPopupStartScale);
+        popupRect.SetSiblingIndex(timerRect.GetSiblingIndex() + 1);
+
+        activeTimeWarpPopup = popupObject.GetComponent<TextMeshProUGUI>();
+        activeTimeWarpPopup.font = gameplayTimerText.font;
+        activeTimeWarpPopup.fontSharedMaterial = gameplayTimerText.fontSharedMaterial;
+        activeTimeWarpPopup.fontSize = gameplayTimerText.fontSize;
+        activeTimeWarpPopup.fontStyle = FontStyles.Bold;
+        activeTimeWarpPopup.alignment = TextAlignmentOptions.Center;
+        activeTimeWarpPopup.color = gameplayTimerText.color;
+        activeTimeWarpPopup.raycastTarget = false;
+        activeTimeWarpPopup.text = FormatBonusTime(bonusSeconds);
+
+        timeWarpFeedbackRoutine = StartCoroutine(AnimateTimeWarpFeedback(
+            timerRect, popupRect, popupObject.GetComponent<CanvasGroup>()));
+    }
+
+    private IEnumerator AnimateTimeWarpFeedback(
+        RectTransform timerRect, RectTransform popupRect, CanvasGroup popupCanvasGroup)
+    {
+        Vector2 popupStartPosition = popupRect.anchoredPosition;
+        float popupDuration = Mathf.Max(0.05f, timeWarpPopupDuration);
+        float pulseDuration = Mathf.Clamp(timeWarpTimerPulseDuration, 0.05f, popupDuration);
+        float elapsed = 0f;
+
+        while (elapsed < popupDuration && popupRect != null)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float popupT = Mathf.Clamp01(elapsed / popupDuration);
+            float popT = Mathf.Clamp01(popupT / 0.25f);
+            float popupScale = popupT < 0.25f
+                ? Mathf.Lerp(timeWarpPopupStartScale, timeWarpPopupPeakScale, SmoothStep01(popT))
+                : Mathf.Lerp(timeWarpPopupPeakScale, 1f, SmoothStep01((popupT - 0.25f) / 0.75f));
+            popupRect.localScale = Vector3.one * Mathf.Max(0.01f, popupScale);
+            popupRect.anchoredPosition = popupStartPosition + Vector2.up * (timeWarpPopupRiseDistance * popupT);
+            popupCanvasGroup.alpha = 1f - SmoothStep01(Mathf.InverseLerp(0.45f, 1f, popupT));
+
+            if (timerRect != null)
+            {
+                float pulseT = Mathf.Clamp01(elapsed / pulseDuration);
+                float pulse = Mathf.Sin(pulseT * Mathf.PI);
+                timerRect.localScale = gameplayTimerBaseScale * Mathf.Lerp(1f, timeWarpTimerPulseScale, pulse);
+            }
+
+            yield return null;
+        }
+
+        timeWarpFeedbackRoutine = null;
+        if (timerRect != null)
+            timerRect.localScale = gameplayTimerBaseScale;
+        if (activeTimeWarpPopup != null)
+            Destroy(activeTimeWarpPopup.gameObject);
+        activeTimeWarpPopup = null;
+    }
+
+    private void ResetTimeWarpFeedback()
+    {
+        if (timeWarpFeedbackRoutine != null)
+        {
+            StopCoroutine(timeWarpFeedbackRoutine);
+            timeWarpFeedbackRoutine = null;
+        }
+
+        if (gameplayTimerText != null)
+            gameplayTimerText.rectTransform.localScale = gameplayTimerBaseScale;
+
+        if (activeTimeWarpPopup != null)
+            Destroy(activeTimeWarpPopup.gameObject);
+        activeTimeWarpPopup = null;
+    }
+
+    private static float SmoothStep01(float value)
+    {
+        value = Mathf.Clamp01(value);
+        return value * value * (3f - 2f * value);
+    }
+
+    private static string FormatBonusTime(float seconds)
+    {
+        float rounded = Mathf.Round(seconds);
+        return Mathf.Approximately(seconds, rounded)
+            ? $"+{rounded:0}s"
+            : $"+{seconds:0.#}s";
     }
 
     void FixedUpdate()
@@ -810,6 +970,14 @@ public class GameManager : MonoBehaviour
     public void RestartGame()
     {
         Debug.Log("GameManager: restarting game.");
+
+        // RestartGame is intentionally callable from any state. If a future
+        // menu invokes it while the inventory popup owns the pause, release
+        // that ownership first so the restarted level cannot inherit scale 0.
+        if (State == GameState.InventoryPaused)
+        {
+            Time.timeScale = timeScaleBeforeInventoryPause;
+        }
 
         // RestartGame is public and unguarded by design; if it fires while
         // the win cinematic is mid-swallow, shut the vortex down cleanly so

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class PlanetLauncher : MonoBehaviour
@@ -131,6 +132,17 @@ public class PlanetLauncher : MonoBehaviour
     // Skill hook: while true, the next launched planet is a wildcard that adopts
     // the tier of whatever planet it touches first. Consumed on launch.
     public bool isRainbowActive;
+    public bool IsCosmicMimicQueued => isRainbowActive;
+
+    public bool TryQueueCosmicMimic()
+    {
+        if (isRainbowActive)
+            return false;
+
+        isRainbowActive = true;
+        RefreshPreviews();
+        return true;
+    }
 
     // Preview state: CurrentTier is what the next click fires; NextTier is what
     // follows it (shown in UI later). Both readable by UI code, set only here.
@@ -203,6 +215,11 @@ public class PlanetLauncher : MonoBehaviour
     // Off-screen/non-finite frames are skipped, so the delta stream never
     // contains garbage and the aim freezes instead of jumping.
     private Vector2 lastPointerScreenPosition;
+
+    // Reused by the EventSystem raycast performed only on pointer-down. This
+    // catches every current/future raycastable UI element without allocating
+    // a fresh results list or hardcoding specific buttons.
+    private readonly List<RaycastResult> uiRaycastResults = new List<RaycastResult>();
 
     void Awake()
     {
@@ -308,6 +325,15 @@ public class PlanetLauncher : MonoBehaviour
         if (!TryGetPointerScreenPosition(out Vector2 pointer))
             return;
 
+        // The launcher reads the legacy mouse stream (which Unity also
+        // synthesizes from the primary mobile touch), while the Canvas is
+        // driven by InputSystemUIInputModule. Raycast the actual press position
+        // through their shared EventSystem so either backend sees the same UI
+        // ownership decision. If UI owns the press, no aim state is created;
+        // therefore its later release can never launch a planet either.
+        if (PointerIsOverUI(pointer))
+            return;
+
         if (requirePressOnPlanet && !PressIsOnPlanet(pointer))
             return;
 
@@ -321,6 +347,24 @@ public class PlanetLauncher : MonoBehaviour
         lastPullRatio = defaultPowerRatio;
 
         DrawTrajectory();
+    }
+
+    private bool PointerIsOverUI(Vector2 screenPosition)
+    {
+        EventSystem eventSystem = EventSystem.current;
+        if (eventSystem == null)
+            return false;
+
+        var eventData = new PointerEventData(eventSystem)
+        {
+            position = screenPosition
+        };
+
+        uiRaycastResults.Clear();
+        eventSystem.RaycastAll(eventData, uiRaycastResults);
+        bool hitUI = uiRaycastResults.Count > 0;
+        uiRaycastResults.Clear();
+        return hitUI;
     }
 
     // Optional press gate: converts the press to world space and accepts it
@@ -379,8 +423,7 @@ public class PlanetLauncher : MonoBehaviour
 
             if (isRainbowActive)
             {
-                // Skill hook: mark the spawned planet as a wildcard here once
-                // Planet/PlanetMerge grow rainbow support (adopt tier on first touch).
+                planet.SetCosmicMimic(true);
                 isRainbowActive = false;
             }
         }
@@ -472,7 +515,9 @@ public class PlanetLauncher : MonoBehaviour
         {
             Sprite loadedSprite = isWaitingForCooldown
                 ? null
-                : (CurrentIsMeteorite ? MeteoritePreviewSprite() : SpriteForTier(CurrentTier));
+                : (CurrentIsMeteorite
+                    ? MeteoritePreviewSprite()
+                    : (isRainbowActive ? CosmicMimicPreviewSprite(CurrentTier) : SpriteForTier(CurrentTier)));
             loadedPlanetRenderer.sprite = loadedSprite;
             // Meteorite preview keeps the prefab's own dead-grey tint (its
             // color IS the tier signal, unlike planet sprites which must stay
@@ -518,7 +563,15 @@ public class PlanetLauncher : MonoBehaviour
             // real diverse scale once actually launched/merged in the arena
             // — see loadedPlanetRenderer above and PlanetMerge/Meteorite's
             // own tier-growth curves.)
-            Sprite nextSprite = NextIsMeteorite ? MeteoritePreviewSprite() : SpriteForTier(NextTier);
+            // Pending Mimic belongs to the earliest visible NORMAL queue entry.
+            // A current meteor keeps its own art; Next shows Mimic only when it
+            // is normal. If both are meteors, the wildcard remains pending.
+            bool nextIsPendingMimic = isRainbowActive
+                && !NextIsMeteorite
+                && (isWaitingForCooldown || CurrentIsMeteorite);
+            Sprite nextSprite = NextIsMeteorite
+                ? MeteoritePreviewSprite()
+                : (nextIsPendingMimic ? CosmicMimicPreviewSprite(NextTier) : SpriteForTier(NextTier));
             nextPlanetUIImg.sprite = nextSprite;
             nextPlanetUIImg.color = NextIsMeteorite && prefabMeteoriteRenderer != null
                 ? prefabMeteoriteRenderer.color
@@ -569,6 +622,15 @@ public class PlanetLauncher : MonoBehaviour
     private Sprite SpriteForTier(PlanetTier tier)
     {
         return prefabPlanet != null ? prefabPlanet.GetSpriteForTier(tier) : null;
+    }
+
+    private Sprite CosmicMimicPreviewSprite(PlanetTier fallbackTier)
+    {
+        if (prefabPlanet == null)
+            return null;
+
+        Sprite mimicSprite = prefabPlanet.GetCosmicMimicSprite();
+        return mimicSprite != null ? mimicSprite : prefabPlanet.GetSpriteForTier(fallbackTier);
     }
 
     private Sprite MeteoritePreviewSprite()

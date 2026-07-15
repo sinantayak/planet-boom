@@ -190,9 +190,10 @@ public class Meteorite : MonoBehaviour
             && blackHole.IsVortexActive
             && blackHole.VortexIncludesMeteorites;
 
-        if (blackHole != null && rb.simulated && !vortexOwnsThisBody && !isSettled)
+        bool singularityActive = blackHole != null && blackHole.IsGravitySingularityActive;
+        if (blackHole != null && rb.simulated && !vortexOwnsThisBody && (!isSettled || singularityActive))
         {
-            Vector2 pullAccel = blackHole.GetPullForce(rb.position);
+            Vector2 pullAccel = blackHole.GetPullForce(rb.position) * blackHole.GravitySingularityMultiplier;
             if (pullAccel != Vector2.zero)
             {
                 rb.AddForce(pullAccel * rb.mass, ForceMode2D.Force);
@@ -246,7 +247,7 @@ public class Meteorite : MonoBehaviour
             ApplyMaterial();
         }
 
-        if (isSettled)
+        if (isSettled && (blackHole == null || !blackHole.IsGravitySingularityActive))
         {
             ApplySettleVelocityRamp();
         }
@@ -484,6 +485,22 @@ public class Meteorite : MonoBehaviour
     public void PrepareForDespawn()
     {
         BeginBeingAbsorbed();
+    }
+
+    public bool TryDestroyBySkill()
+    {
+        if (IsBeingAbsorbed || isAbsorbing || !gameObject.activeInHierarchy)
+            return false;
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayExplosion();
+        }
+
+        MeteorExplosionVFX.Spawn(transform.position, transform.localScale.x);
+        PrepareForDespawn();
+        Destroy(gameObject);
+        return true;
     }
 
     // Loser side of a fusion: freeze physics immediately, same guarantee

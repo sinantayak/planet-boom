@@ -18,6 +18,19 @@ public class SkillFlightManager : MonoBehaviour
 {
     public static SkillFlightManager Instance { get; private set; }
 
+    // Reward boundary for the inventory backend: fired only after the icon's
+    // full animation actually reaches the chest. A flight interrupted by a
+    // disable/scene unload never emits this event and therefore cannot reward.
+    public static event Action<SkillType> OnSkillArrivedAtChest;
+
+    public Sprite GetSkillIcon(SkillType type)
+    {
+        int index = (int)type;
+        return skillIcons != null && index >= 0 && index < skillIcons.Length
+            ? skillIcons[index]
+            : null;
+    }
+
     [Header("Wiring")]
     // Full-screen RectTransform the flying icons get parented under — make
     // it the LAST sibling under the root Canvas so nothing else in the UI
@@ -164,7 +177,7 @@ public class SkillFlightManager : MonoBehaviour
         };
 
         var flightIcon = go.AddComponent<SkillDropFlightIcon>();
-        flightIcon.Play(rect, startPos, endPos, settings, OnChestShouldOpen, OnFlightArrived);
+        flightIcon.Play(rect, startPos, endPos, settings, OnChestShouldOpen, () => OnFlightArrived(skill));
     }
 
     // Fired once, partway through the flight (see chestOpenAtProgress) —
@@ -174,10 +187,11 @@ public class SkillFlightManager : MonoBehaviour
         SetChestOpen(true);
     }
 
-    private void OnFlightArrived()
+    private void OnFlightArrived(SkillType skill)
     {
         SetChestOpen(false);
         StartPulse();
+        OnSkillArrivedAtChest?.Invoke(skill);
     }
 
     // Stops any pulse already in flight and snaps the scale back to the

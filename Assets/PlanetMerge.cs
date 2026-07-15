@@ -130,7 +130,7 @@ public class PlanetMerge : MonoBehaviour
             if (otherPlanet == planet || !otherPlanet.gameObject.activeInHierarchy)
                 continue;
 
-            if (otherPlanet.CurrentTier != planet.CurrentTier)
+            if (otherPlanet.CurrentTier != planet.CurrentTier && !planet.IsCosmicMimic)
                 continue;
 
             if (!otherPlanet.TryGetComponent(out CircleCollider2D otherCollider))
@@ -153,8 +153,22 @@ public class PlanetMerge : MonoBehaviour
         if (!other.TryGetComponent(out Planet otherPlanet))
             return false;
 
-        // 2048/Suika rule: only an exact tier match can merge.
-        if (otherPlanet.CurrentTier != planet.CurrentTier)
+        // A normal planet never consumes a Mimic; the Mimic side owns the
+        // mirrored collision so it can copy exactly once before merging.
+        if (!planet.IsCosmicMimic && otherPlanet.IsCosmicMimic)
+            return false;
+
+        // Mimic-vs-Mimic has no reliable source tier, so it remains a normal
+        // physical collision and both wildcard states are preserved.
+        if (planet.IsCosmicMimic && otherPlanet.IsCosmicMimic)
+            return false;
+
+        bool shouldCopyTier = planet.IsCosmicMimic;
+        PlanetTier mergeTier = shouldCopyTier ? otherPlanet.CurrentTier : planet.CurrentTier;
+
+        // 2048/Suika rule: only an exact tier match can merge after a Mimic
+        // has selected the normal planet's tier.
+        if (!shouldCopyTier && otherPlanet.CurrentTier != planet.CurrentTier)
             return false;
 
         // Mission ceiling: if merging this tier wouldn't serve any open
@@ -165,7 +179,7 @@ public class PlanetMerge : MonoBehaviour
         // existed at all. (This also gates the max-tier BOOM: while a level
         // caps merges below PlanetMerge.maxTier, booms can't occur — fine, as
         // booms no longer drive missions.)
-        if (GameManager.Instance != null && !GameManager.Instance.CanMerge(planet.CurrentTier))
+        if (GameManager.Instance != null && !GameManager.Instance.CanMerge(mergeTier))
             return false;
 
         // A planet already melting into someone (or busy pulling one in) is spoken
@@ -174,10 +188,16 @@ public class PlanetMerge : MonoBehaviour
             otherMerge.IsBeingAbsorbed || otherMerge.isAbsorbing)
             return false;
 
+        if (shouldCopyTier)
+        {
+            planet.SetTier(mergeTier);
+            planet.SetCosmicMimic(false);
+        }
+
         // Only the planet with the lower UniqueId performs the merge, so a single
         // contact between two matching planets doesn't get processed from both
         // sides (which would destroy both instead of merging them into one).
-        if (planet.UniqueId > otherPlanet.UniqueId)
+        if (!shouldCopyTier && planet.UniqueId > otherPlanet.UniqueId)
             return false;
 
         hasMerged = true;

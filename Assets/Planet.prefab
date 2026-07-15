@@ -180,6 +180,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 4fd2b47c4a7e3004f953ce24f46be5c0, type: 3}
   - {fileID: 21300000, guid: 6c15182f96844c14f8d7b9d378fb381b, type: 3}
   - {fileID: 21300000, guid: 0f8cb7e347387dc48b47f0609cdd2846, type: 3}
+  cosmicMimicSprite: {fileID: -4943143935859130788, guid: 8564c1a5b3e912c478738abdd6284290, type: 3}
   baseMass: 1
   massMultiplierPerTier: 2.7
   baseLinearDamping: 0
@@ -194,6 +195,7 @@ MonoBehaviour:
   flightMaterial: {fileID: 6200000, guid: 3e7b9a41c5d2f8e4a9b6c1d0e2f5a783, type: 2}
   settledMaterial: {fileID: 6200000, guid: b1673646883d4950ad0da5c51ce11093, type: 2}
   settledGravityFalloff: 0
+  settleVelocityDampDuration: 0.3
   CurrentTier: 0
 --- !u!114 &630811434265461342
 MonoBehaviour:

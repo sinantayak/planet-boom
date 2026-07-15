@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class BlackHole : MonoBehaviour
@@ -46,6 +47,10 @@ public class BlackHole : MonoBehaviour
     // Skill hook: while true, the black hole's pull is fully suspended (effective
     // strength multiplied by zero) and planets float freely.
     public bool isBlackHoleFrozen;
+
+    [Header("Gravity Singularity Shape")]
+    [SerializeField] private float gravitySingularityRampUpDuration = 0.3f;
+    [SerializeField] private float gravitySingularityRampDownDuration = 0.4f;
 
     [Header("Level Complete Vortex")]
     // The win cinematic (GameManager drives it via BeginVortex/EndVortex):
@@ -150,6 +155,12 @@ public class BlackHole : MonoBehaviour
 
     private bool isVortexActive;
     private bool vortexIncludesMeteorites;
+    private Coroutine gravitySingularityRoutine;
+    private float gravitySingularityMultiplier = 1f;
+
+    public bool IsGravitySingularityActive => gravitySingularityRoutine != null;
+    public float GravitySingularityMultiplier => IsGravitySingularityActive ? gravitySingularityMultiplier : 1f;
+    public float GravitySingularityIntensity { get; private set; }
 
     void Awake()
     {
@@ -168,6 +179,82 @@ public class BlackHole : MonoBehaviour
     // false, since AddForce/velocity writes on a non-simulated body are
     // no-ops anyway, but this keeps Meteorite's FixedUpdate from bothering.
     public bool VortexIncludesMeteorites => vortexIncludesMeteorites;
+
+    public bool TryBeginGravitySingularity(float duration, float forceMultiplier)
+    {
+        if (isVortexActive || isBlackHoleFrozen || duration <= 0f || forceMultiplier <= 0f)
+            return false;
+
+        if (gravitySingularityRoutine != null)
+        {
+            StopCoroutine(gravitySingularityRoutine);
+        }
+
+        float startIntensity = GravitySingularityIntensity;
+        gravitySingularityRoutine = StartCoroutine(RunGravitySingularity(
+            Mathf.Max(0.01f, duration), Mathf.Max(1f, forceMultiplier), startIntensity));
+        return true;
+    }
+
+    private IEnumerator RunGravitySingularity(float duration, float forceMultiplier, float startIntensity)
+    {
+        float rampUp = Mathf.Min(Mathf.Max(0f, gravitySingularityRampUpDuration), duration);
+        float rampDown = Mathf.Min(Mathf.Max(0f, gravitySingularityRampDownDuration), duration - rampUp);
+        float hold = Mathf.Max(0f, duration - rampUp - rampDown);
+
+        yield return RampGravitySingularity(startIntensity, 1f, rampUp, forceMultiplier);
+
+        GravitySingularityIntensity = 1f;
+        gravitySingularityMultiplier = forceMultiplier;
+        if (hold > 0f)
+            yield return new WaitForSeconds(hold);
+
+        yield return RampGravitySingularity(1f, 0f, rampDown, forceMultiplier);
+        ResetGravitySingularity();
+    }
+
+    private IEnumerator RampGravitySingularity(
+        float fromIntensity, float toIntensity, float duration, float forceMultiplier)
+    {
+        if (duration <= 0f)
+        {
+            SetGravitySingularityIntensity(toIntensity, forceMultiplier);
+            yield break;
+        }
+
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            float smoothT = t * t * (3f - 2f * t);
+            SetGravitySingularityIntensity(
+                Mathf.Lerp(fromIntensity, toIntensity, smoothT), forceMultiplier);
+            yield return null;
+        }
+
+        SetGravitySingularityIntensity(toIntensity, forceMultiplier);
+    }
+
+    private void SetGravitySingularityIntensity(float intensity, float forceMultiplier)
+    {
+        GravitySingularityIntensity = Mathf.Clamp01(intensity);
+        gravitySingularityMultiplier = Mathf.Lerp(1f, forceMultiplier, GravitySingularityIntensity);
+    }
+
+    private void ResetGravitySingularity()
+    {
+        GravitySingularityIntensity = 0f;
+        gravitySingularityMultiplier = 1f;
+        gravitySingularityRoutine = null;
+    }
+
+    void OnDisable()
+    {
+        if (gravitySingularityRoutine != null)
+            StopCoroutine(gravitySingularityRoutine);
+        ResetGravitySingularity();
+    }
 
     // GameManager polls this each frame during the cinematic instead of
     // always waiting out the full vortexDuration — the popup can appear the
@@ -193,6 +280,15 @@ public class BlackHole : MonoBehaviour
     // their own ambient gravity keeps driving them unchanged throughout.
     public void BeginVortex(bool includeMeteorites)
     {
+        // A merge triggered by the skill can complete the level before the
+        // two-second window expires. The cinematic becomes the sole physics
+        // owner, so end the temporary multiplier immediately and cleanly.
+        if (gravitySingularityRoutine != null)
+        {
+            StopCoroutine(gravitySingularityRoutine);
+            ResetGravitySingularity();
+        }
+
         isVortexActive = true;
         vortexIncludesMeteorites = includeMeteorites;
 
@@ -252,6 +348,13 @@ public class BlackHole : MonoBehaviour
 
     void Update()
     {
+        if (gravitySingularityRoutine != null && GameManager.Instance != null &&
+            GameManager.Instance.State != GameManager.GameState.Playing)
+        {
+            StopCoroutine(gravitySingularityRoutine);
+            ResetGravitySingularity();
+        }
+
         // Runs even after isVortexActive drops back to false so the loop
         // fades out instead of cutting off, then stops itself once silent.
         UpdateVortexAudio();
@@ -462,7 +565,7 @@ public class BlackHole : MonoBehaviour
             // forever: without it, every settled planet was fighting a
             // constant ~15 u/s^2 pull against damping alone, which bleeds
             // speed down to a small nonzero residual but never to true zero.
-            float gravityMultiplier = planet.GravityMultiplier;
+            float gravityMultiplier = IsGravitySingularityActive ? gravitySingularityMultiplier : planet.GravityMultiplier;
             if (gravityMultiplier > 0f)
             {
                 // GetPullForce is really an ACCELERATION (the trajectory preview

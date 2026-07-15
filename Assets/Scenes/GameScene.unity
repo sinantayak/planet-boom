@@ -2231,6 +2231,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1114684055}
   - component: {fileID: 1114684054}
+  - component: {fileID: 1114684056}
+  - component: {fileID: 1114684057}
+  - component: {fileID: 1114684058}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -2258,6 +2261,13 @@ MonoBehaviour:
   vortexSwallowsMeteorites: 0
   countdownText: {fileID: 1827558355}
   gameplayTimerText: {fileID: 2134406812}
+  timeWarpPopupOffset: {x: -50, y: -120}
+  timeWarpPopupDuration: 0.65
+  timeWarpPopupRiseDistance: 35
+  timeWarpPopupStartScale: 0.7
+  timeWarpPopupPeakScale: 0.7
+  timeWarpTimerPulseScale: 1.1
+  timeWarpTimerPulseDuration: 0.28
   gameOverPanel: {fileID: 1862289739}
   missionHUD: {fileID: 2137465999}
   levelCompletePanel: {fileID: 1241141961}
@@ -2282,6 +2292,57 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1114684056
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1114684053}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c16cc48d75d4a3f9d61f95d42af2301, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SkillManager
+  gravitySingularityDuration: 2
+  gravitySingularityForceMultiplier: 2.5
+  timeWarpBonusSeconds: 30
+  blackHole: {fileID: 1130355243}
+  launcher: {fileID: 1153348842}
+--- !u!114 &1114684057
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1114684053}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93f2dc950c234ab1b5dbb167c29209d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SkillInventoryManager
+--- !u!114 &1114684058
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1114684053}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9357d58d05d45f7a3a41e9bbfb97554, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeteorStrikeVisualController
+  shootingStarSprite: {fileID: -383702440973192737, guid: 79ab622789e587548ace5f1a49a75d23, type: 3}
+  shootingStarScale: 0.3
+  entryViewportPosition: {x: 1.08, y: 1.08}
+  spriteRotationOffset: 165
+  travelDuration: 0.75
+  trajectoryArc: 0.05
+  fallbackSpawnDistance: 9
+  impactFlashDuration: 0.07
+  impactColor: {r: 1, g: 0.35, b: 0.08, a: 1}
+  optionalImpactVfxPrefab: {fileID: 0}
 --- !u!1 &1130355242
 GameObject:
   m_ObjectHideFlags: 0
@@ -2321,6 +2382,8 @@ MonoBehaviour:
   settlingDownwardMix: 0.25
   coreContactRadius: 0.6
   isBlackHoleFrozen: 0
+  gravitySingularityRampUpDuration: 0.3
+  gravitySingularityRampDownDuration: 0.4
   vortexOuterCloseTimeConstant: 3.6
   vortexCoreSpeedFloor: 0.2
   vortexSinkholeRadius: 0.9
@@ -3448,6 +3511,8 @@ MonoBehaviour:
   boundaryAlertColor: {r: 1, g: 0, b: 0, a: 0.4}
   vortexRingSpinMultiplier: 1.5
   vortexRingSpinRampUpTime: 1.2
+  singularityOrbitRotationSpeed: 50
+  singularityOrbitMinimumScale: 0.85
 --- !u!120 &1553861134
 LineRenderer:
   serializedVersion: 3
@@ -4202,6 +4267,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1910278151}
   - component: {fileID: 1910278150}
+  - component: {fileID: 1910278152}
   m_Layer: 0
   m_Name: SkillFlightManager
   m_TagString: Untagged
@@ -4228,7 +4294,7 @@ MonoBehaviour:
   - {fileID: -4888399323542012093, guid: a2ff56318602c2440bdd10258f98566f, type: 3}
   - {fileID: -5968496845031216954, guid: f2393217de5173341a01233d06d720f7, type: 3}
   - {fileID: 4473551675245651988, guid: e93b864f71c5c76419530aeb8c49a349, type: 3}
-  iconSize: {x: 100, y: 100}
+  iconSize: {x: 150, y: 150}
   chestImage: {fileID: 10489188}
   chestClosedSprite: {fileID: 8236747691623286190, guid: 656695e10cbbee947ab6f7c8470d03f8, type: 3}
   chestOpenSprite: {fileID: -3146708328962853808, guid: f9728eaf4bc5c514bae0aa317cdb9f1f, type: 3}
@@ -4257,6 +4323,31 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1910278152
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1910278149}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15ff7c7eaeeb488d94a764b904450fe2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SkillInventoryUI
+  canvasRoot: {fileID: 784801118}
+  safeAreaRoot: {fileID: 1137333762}
+  chestButton: {fileID: 10489187}
+  quickSlotFrame: {fileID: 0}
+  selectedSlotHighlight: {fileID: 0}
+  popupBackground: {fileID: 0}
+  skillEntryBackground: {fileID: 0}
+  emptySlotSprite: {fileID: 0}
+  skillIcons: []
+  slotColor: {r: 0.08, g: 0.1, b: 0.2, a: 0.92}
+  popupColor: {r: 0.05, g: 0.06, b: 0.14, a: 0.98}
+  selectedColor: {r: 0.25, g: 0.75, b: 1, a: 0.8}
+  unavailableIconColor: {r: 0.35, g: 0.35, b: 0.35, a: 0.75}
 --- !u!1 &2000000001
 GameObject:
   m_ObjectHideFlags: 0
@@ -4510,6 +4601,7 @@ MonoBehaviour:
   maxLifetime: 1.2
   baseFontSize: 3.5
   sortingOrder: 110
+  lineSpacing: 16
 --- !u!4 &2097887988
 Transform:
   m_ObjectHideFlags: 0

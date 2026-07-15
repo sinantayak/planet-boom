@@ -3,18 +3,17 @@ using UnityEngine;
 
 // Rolls whether a merge drops a collectible skill, and if so, which of the
 // four SkillType values. Purely probabilistic bookkeeping — actual
-// pickup/inventory storage is a later phase; for now a successful roll fires
-// OnSkillDropped (so a future inventory system can subscribe without this
-// manager needing to know it exists yet) and hands the drop straight to
-// SkillFlightManager for the world-to-UI flight visual.
+// OnSkillDropped remains an immediate analytics/presentation hook. Inventory
+// intentionally does NOT subscribe here: it rewards only from
+// SkillFlightManager.OnSkillArrivedAtChest after the visual completes.
 //
 // Scene-local singleton, same shape as AudioManager/GameManager.
 public class SkillDropManager : MonoBehaviour
 {
     public static SkillDropManager Instance { get; private set; }
 
-    // Fired the instant a drop roll succeeds, after the flight visual has
-    // already been kicked off.
+    // Fired the instant a drop roll succeeds. This is not a reward event;
+    // interrupted/misconfigured flights must not add inventory.
     public static event Action<SkillType> OnSkillDropped;
 
     [Header("Drop Chance by Combo")]
