@@ -26,6 +26,21 @@ public class AudioManager : MonoBehaviour
     // regular tier-up merges still ride PlayMerge's combo chain above.
     public AudioClip SFX_Explosion;
 
+    [Header("Skill Feedback Clips")]
+    [SerializeField] private AudioClip skillCollectedClip;
+    [SerializeField] private AudioClip skillUseSuccessClip;
+    [SerializeField] private AudioClip skillUseFailedClip;
+    [SerializeField] private AudioClip gravitySingularityClip;
+    [SerializeField] private AudioClip meteorStrikeImpactClip;
+    [SerializeField] private AudioClip timeWarpClip;
+    [SerializeField] private AudioClip cosmicMimicClip;
+
+    [Header("Skill Feedback Mix")]
+    [SerializeField] [Range(0f, 1f)] private float skillCollectedVolume = 0.9f;
+    [SerializeField] [Range(0f, 1f)] private float skillFeedbackVolume = 0.9f;
+    [SerializeField] [Range(0f, 1f)] private float specificSkillVolume = 1f;
+    [SerializeField] private bool playGenericSuccessWithSpecific = true;
+
     [Header("Launch")]
     [SerializeField] [Range(0f, 1f)] private float launchVolume = 0.9f;
 
@@ -144,6 +159,51 @@ public class AudioManager : MonoBehaviour
             return;
 
         sfxSource.PlayOneShot(SFX_Explosion, explosionVolume);
+    }
+
+    public void PlaySkillCollected()
+    {
+        PlayOptionalOneShot(skillCollectedClip, skillCollectedVolume);
+    }
+
+    public void PlaySkillUseFailed()
+    {
+        PlayOptionalOneShot(skillUseFailedClip, skillFeedbackVolume);
+    }
+
+    public void PlaySkillUseSucceeded(SkillType type)
+    {
+        AudioClip specificClip = null;
+        switch (type)
+        {
+            case SkillType.GravitySingularity:
+                specificClip = gravitySingularityClip;
+                break;
+            case SkillType.TimeWarp:
+                specificClip = timeWarpClip;
+                break;
+            case SkillType.CosmicMimic:
+                specificClip = cosmicMimicClip;
+                break;
+            // Meteor Strike's themed sound belongs to the later visual impact.
+            case SkillType.MeteorStrike:
+                break;
+        }
+
+        if (playGenericSuccessWithSpecific || specificClip == null)
+            PlayOptionalOneShot(skillUseSuccessClip, skillFeedbackVolume);
+        PlayOptionalOneShot(specificClip, specificSkillVolume);
+    }
+
+    public void PlayMeteorStrikeSequence()
+    {
+        PlayOptionalOneShot(meteorStrikeImpactClip, specificSkillVolume);
+    }
+
+    private void PlayOptionalOneShot(AudioClip clip, float volume)
+    {
+        if (clip != null && sfxSource != null)
+            sfxSource.PlayOneShot(clip, Mathf.Clamp01(volume));
     }
 
     // One call per successful merge (PlanetMerge and Meteorite both report

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -26,10 +27,29 @@ public class SkillInventoryUI : MonoBehaviour
     [SerializeField] private float selectedSlotScale = 1.08f;
     [SerializeField] private Color selectedSlotTint = new Color(0.55f, 0.95f, 1f, 1f);
 
+    [Header("HUD Skill Use Feedback")]
+    [SerializeField] private float successPulseDuration = 0.22f;
+    [SerializeField] private float successPulseScale = 1.14f;
+    [SerializeField] private Color successFlashColor = new Color(0.55f, 1f, 0.8f, 1f);
+    [SerializeField] private float failureShakeDuration = 0.28f;
+    [SerializeField] private float failureShakeDistance = 10f;
+    [SerializeField] private float failureShakeCycles = 4f;
+    [SerializeField] private Color failureFlashColor = new Color(1f, 0.3f, 0.3f, 1f);
+
     // Hooks for Phase 3C feedback (shake/toast/audio). UI does not invent a
     // failure animation yet, but callers receive the exact failed operation.
     public event Action<int, SkillType?> QuickSlotUseFailed;
+    public event Action<int, SkillType> QuickSlotUseSucceeded;
+    public event Action<int, SkillType?, QuickSlotFailureReason> QuickSlotUseFailureDetailed;
     public event Action<int, SkillType> QuickSlotAssignmentFailed;
+
+    public enum QuickSlotFailureReason
+    {
+        EmptySlot,
+        NoInventoryCount,
+        ExecutionRejected,
+        InventoryUnavailable
+    }
 
     private sealed class SlotView
     {
@@ -40,6 +60,10 @@ public class SkillInventoryUI : MonoBehaviour
         public GameObject badgeRoot;
         public TextMeshProUGUI countText;
         public Image selectedHighlight;
+        public Vector3 baseScale;
+        public Vector2 basePosition;
+        public Color baseFrameColor;
+        public Coroutine feedbackRoutine;
     }
 
     private sealed class EntryView
@@ -86,6 +110,7 @@ public class SkillInventoryUI : MonoBehaviour
 
     void OnDisable()
     {
+        ResetAllHudFeedback();
         UnbindInventory();
         ClosePopup();
     }
@@ -171,12 +196,30 @@ public class SkillInventoryUI : MonoBehaviour
         SkillType? assignment = inventory != null && inventory.TryGetQuickSlot(slotIndex, out SkillType type)
             ? type
             : (SkillType?)null;
+        int countBeforeUse = assignment.HasValue && inventory != null
+            ? inventory.GetCount(assignment.Value)
+            : 0;
         bool succeeded = inventory != null && inventory.TryUseQuickSlot(slotIndex);
-        if (!succeeded)
+        if (succeeded && assignment.HasValue)
         {
+            PlayHudSlotFeedback(slotIndex, true);
+            QuickSlotUseSucceeded?.Invoke(slotIndex, assignment.Value);
+        }
+        else
+        {
+            PlayHudSlotFeedback(slotIndex, false);
             QuickSlotUseFailed?.Invoke(slotIndex, assignment);
+            QuickSlotFailureReason reason = inventory == null
+                ? QuickSlotFailureReason.InventoryUnavailable
+                : !assignment.HasValue
+                    ? QuickSlotFailureReason.EmptySlot
+                    : countBeforeUse <= 0
+                        ? QuickSlotFailureReason.NoInventoryCount
+                        : QuickSlotFailureReason.ExecutionRejected;
+            QuickSlotUseFailureDetailed?.Invoke(slotIndex, assignment, reason);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            Debug.Log($"QUICK SLOT UI: slot {slotIndex + 1} use failed ({assignment?.ToString() ?? "Empty"}).", this);
+            Debug.Log($"QUICK SLOT UI: slot {slotIndex + 1} use failed " +
+                      $"({assignment?.ToString() ?? "Empty"}, reason={reason}).", this);
 #endif
         }
     }
@@ -256,8 +299,10 @@ public class SkillInventoryUI : MonoBehaviour
             view.selectedHighlight.gameObject.SetActive(
                 selectedSlotHighlight != null && popupSlot && selectedSlotIndex == index);
         bool selected = popupSlot && selectedSlotIndex == index;
-        view.root.localScale = Vector3.one * (selected ? Mathf.Max(1f, selectedSlotScale) : 1f);
-        view.frame.color = selected ? selectedSlotTint : Color.white;
+        view.root.localScale = selected
+            ? view.baseScale * Mathf.Max(1f, selectedSlotScale)
+            : view.baseScale;
+        view.frame.color = selected ? selectedSlotTint : view.baseFrameColor;
     }
 
     private void RefreshEntry(SkillType type)
@@ -345,16 +390,92 @@ public class SkillInventoryUI : MonoBehaviour
     private static SlotView ResolveSlotView(Transform root)
     {
         Transform badge = root.Find("CountBadge");
+        RectTransform rect = root as RectTransform;
+        Image frame = root.GetComponent<Image>();
         return new SlotView
         {
-            root = root as RectTransform,
+            root = rect,
             button = root.GetComponent<Button>(),
-            frame = root.GetComponent<Image>(),
+            frame = frame,
             icon = root.Find("Icon")?.GetComponent<Image>(),
             selectedHighlight = root.Find("Selected")?.GetComponent<Image>(),
             badgeRoot = badge != null ? badge.gameObject : null,
-            countText = badge != null ? badge.Find("Count")?.GetComponent<TextMeshProUGUI>() : null
+            countText = badge != null ? badge.Find("Count")?.GetComponent<TextMeshProUGUI>() : null,
+            baseScale = rect != null ? rect.localScale : Vector3.one,
+            basePosition = rect != null ? rect.anchoredPosition : Vector2.zero,
+            baseFrameColor = frame != null ? frame.color : Color.white
         };
+    }
+
+    private void PlayHudSlotFeedback(int slotIndex, bool succeeded)
+    {
+        if (slotIndex < 0 || slotIndex >= hudSlots.Count)
+            return;
+
+        SlotView view = hudSlots[slotIndex];
+        ResetSlotFeedback(view);
+        // LayoutGroups may resolve anchored positions after Awake; capture the
+        // actual authored/layout position at the moment feedback begins.
+        view.basePosition = view.root.anchoredPosition;
+        view.feedbackRoutine = StartCoroutine(AnimateHudSlotFeedback(view, succeeded));
+    }
+
+    private IEnumerator AnimateHudSlotFeedback(SlotView view, bool succeeded)
+    {
+        float duration = Mathf.Max(0.05f, succeeded ? successPulseDuration : failureShakeDuration);
+        float elapsed = 0f;
+        while (elapsed < duration && view.root != null)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            float envelope = Mathf.Sin(t * Mathf.PI);
+
+            if (succeeded)
+            {
+                view.root.localScale = view.baseScale * Mathf.Lerp(1f, successPulseScale, envelope);
+                if (view.frame != null)
+                    view.frame.color = Color.Lerp(view.baseFrameColor, successFlashColor, envelope);
+            }
+            else
+            {
+                float shake = Mathf.Sin(t * Mathf.PI * 2f * failureShakeCycles) *
+                              failureShakeDistance * (1f - t);
+                view.root.anchoredPosition = view.basePosition + Vector2.right * shake;
+                if (view.frame != null)
+                    view.frame.color = Color.Lerp(view.baseFrameColor, failureFlashColor, envelope);
+            }
+            yield return null;
+        }
+
+        view.feedbackRoutine = null;
+        RestoreSlotFeedback(view);
+    }
+
+    private void ResetAllHudFeedback()
+    {
+        foreach (SlotView view in hudSlots)
+            ResetSlotFeedback(view);
+    }
+
+    private void ResetSlotFeedback(SlotView view)
+    {
+        if (view.feedbackRoutine == null)
+            return;
+
+        StopCoroutine(view.feedbackRoutine);
+        view.feedbackRoutine = null;
+        RestoreSlotFeedback(view);
+    }
+
+    private static void RestoreSlotFeedback(SlotView view)
+    {
+        if (view.root != null)
+        {
+            view.root.localScale = view.baseScale;
+            view.root.anchoredPosition = view.basePosition;
+        }
+        if (view.frame != null)
+            view.frame.color = view.baseFrameColor;
     }
 
     private void WireButtons()

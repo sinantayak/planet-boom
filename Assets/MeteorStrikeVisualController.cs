@@ -83,6 +83,7 @@ public class MeteorStrikeVisualController : MonoBehaviour
 
         strike.projectile = CreateProjectile(strike);
         activeStrikes.Add(target, strike);
+        AudioManager.Instance?.PlayMeteorStrikeSequence();
         StartCoroutine(PlaySequence(strike));
         return true;
     }

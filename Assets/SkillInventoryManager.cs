@@ -81,15 +81,22 @@ public class SkillInventoryManager : MonoBehaviour
     {
         int currentCount = GetCount(type);
         if (currentCount <= 0 || SkillManager.Instance == null)
+        {
+            AudioManager.Instance?.PlaySkillUseFailed();
             return false;
+        }
 
         if (!SkillManager.Instance.TryExecuteSkill(type))
+        {
+            AudioManager.Instance?.PlaySkillUseFailed();
             return false;
+        }
 
         int newCount = currentCount - 1;
         counts[type] = newCount;
         SaveCount(type, newCount);
         InventoryCountChanged?.Invoke(type, newCount);
+        AudioManager.Instance?.PlaySkillUseSucceeded(type);
         return true;
     }
 
@@ -147,6 +154,7 @@ public class SkillInventoryManager : MonoBehaviour
     private void HandleSkillArrivedAtChest(SkillType type)
     {
         AddSkill(type);
+        AudioManager.Instance?.PlaySkillCollected();
         Debug.Log($"SkillInventoryManager: {type} reached chest; count={GetCount(type)}.", this);
     }
 
