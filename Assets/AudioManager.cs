@@ -17,6 +17,7 @@ using UnityEngine;
 public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance { get; private set; }
+    public static event System.Action<int> MergeRegistered;
 
     [Header("SFX Clips")]
     [SerializeField] private AudioClip launchClip;
@@ -235,6 +236,7 @@ public class AudioManager : MonoBehaviour
         }
         lastMergeTime = Time.time;
         CurrentCombo++;
+        MergeRegistered?.Invoke(CurrentCombo);
 
         if (mergeClip == null)
             return;

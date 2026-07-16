@@ -458,6 +458,8 @@ public class Meteorite : MonoBehaviour
 
         ApplyExplosionImpulse(center);
 
+        GameManager.Instance?.NotifyMeteorDestroyed(2);
+
         Destroy(gameObject);
         Destroy(partner.gameObject);
     }
@@ -524,6 +526,7 @@ public class Meteorite : MonoBehaviour
         Vector2 explosionCenter = transform.position;
         PrepareForDespawn();
         ApplyExplosionImpulse(explosionCenter);
+        GameManager.Instance?.NotifyMeteorDestroyed(1);
         Destroy(gameObject);
         return true;
     }

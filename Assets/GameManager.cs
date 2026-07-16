@@ -16,6 +16,10 @@ public class LevelDefinition
 {
     public List<PlanetTier> targetTiers = new List<PlanetTier>();
 
+    // Optional reusable objective configuration. Empty keeps existing levels
+    // fully compatible by converting targetTiers into ReachTier objectives.
+    public List<LevelObjectiveDefinition> objectives = new List<LevelObjectiveDefinition>();
+
     // Seconds on this level's clock; the level fails when it runs out.
     public float timeLimit = 60f;
 
@@ -49,6 +53,9 @@ public class GameManager : MonoBehaviour
     public long LevelEarnedCoins { get; private set; }
     public bool IsLevelRewardCommitted { get; private set; }
     public event System.Action<long> LevelEarnedCoinsChanged;
+    public event System.Action<IReadOnlyList<LevelObjectiveProgress>> ObjectivesInitialized;
+    public event System.Action<LevelObjectiveProgress> ObjectiveProgressChanged;
+    public IReadOnlyList<LevelObjective> ActiveObjectives => activeObjectives;
 
     // The MissionHUD has exactly 3 target slots; levels can't ask for more.
     public const int MaxTargetsPerLevel = 3;
@@ -58,6 +65,13 @@ public class GameManager : MonoBehaviour
     // configuration (BuildDefaultLevels). Levels past the end of this list
     // replay the last authored one so the game never runs out.
     [SerializeField] private List<LevelDefinition> levels = new List<LevelDefinition>();
+
+    [Header("Objective Debug (Editor / Development)")]
+    [SerializeField] private bool useDebugObjectiveOverride;
+    [SerializeField] private List<LevelObjectiveDefinition> debugObjectives = new List<LevelObjectiveDefinition>();
+    [SerializeField] private PlanetTier debugReachTier = PlanetTier.Tier5;
+    [SerializeField] [Min(1)] private int debugComboValue = 4;
+    [SerializeField] [Min(0.1f)] private float debugSurvivalSeconds = 10f;
 
     [Header("Boundary / Lose Condition")]
     // Defaults to the BlackHole's transform when left unassigned.
@@ -155,6 +169,8 @@ public class GameManager : MonoBehaviour
     // level contains duplicate tiers.
     private readonly List<PlanetTier> activeTargets = new List<PlanetTier>();
     private readonly List<bool> achievedTargets = new List<bool>();
+    private readonly List<LevelObjective> activeObjectives = new List<LevelObjective>();
+    private readonly List<LevelObjective> missionReachObjectives = new List<LevelObjective>();
 
     // For resetting the shot queue on level transitions and restarts.
     private PlanetLauncher launcher;
@@ -213,7 +229,9 @@ public class GameManager : MonoBehaviour
         // old BoomTarget schema, whose serialized data doesn't survive the
         // switch to flat tier lists and would deserialize as empty levels — an
         // empty target list would otherwise count as instantly complete.
-        levels.RemoveAll(level => level == null || level.targetTiers == null || level.targetTiers.Count == 0);
+        levels.RemoveAll(level => level == null ||
+            ((level.targetTiers == null || level.targetTiers.Count == 0) &&
+             (level.objectives == null || level.objectives.Count == 0)));
         if (levels.Count == 0)
         {
             BuildDefaultLevels();
@@ -247,6 +265,16 @@ public class GameManager : MonoBehaviour
         LoadLevel(1);
     }
 
+    void OnEnable()
+    {
+        AudioManager.MergeRegistered += HandleMergeRegistered;
+    }
+
+    void OnDisable()
+    {
+        AudioManager.MergeRegistered -= HandleMergeRegistered;
+    }
+
     void OnDestroy()
     {
         ResetTimeWarpFeedback();
@@ -262,6 +290,11 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
+        // Survival advances only during live gameplay. Resolve it before the
+        // fail clock so a 90-second objective can complete at 90s exactly.
+        if (State == GameState.Playing)
+            ApplyObjectiveSignal(LevelObjectiveType.Survival, Time.deltaTime);
+
         // The level clock only runs while actually playing — frozen during the
         // win popup and after a game over. Running out fails the level.
         if (State == GameState.Playing && RemainingTime > 0f)
@@ -685,44 +718,30 @@ public class GameManager : MonoBehaviour
         if (State != GameState.Playing)
             return;
 
-        int slot = -1;
-        for (int i = 0; i < activeTargets.Count; i++)
+        foreach (LevelObjective objective in activeObjectives)
         {
-            if (!achievedTargets[i] && activeTargets[i] == createdTier)
+            if (objective.Type == LevelObjectiveType.ReachTier &&
+                !objective.IsCompleted && objective.TargetTier > createdTier)
             {
-                slot = i;
-                break;
+                Debug.Log($"GameManager: {createdTier} created but not counted; " +
+                          $"{objective.TargetTier} must be achieved first.");
+                return;
             }
         }
-
-        if (slot < 0)
-            return;
 
         // The created tier matches an open target — but defer it while any
         // higher-tier target remains unfulfilled, because this planet is
         // (presumptively) a building block that will be consumed on the way
         // to that bigger goal.
-        for (int i = 0; i < activeTargets.Count; i++)
+        foreach (LevelObjective objective in activeObjectives)
         {
-            if (!achievedTargets[i] && activeTargets[i] > createdTier)
-            {
-                Debug.Log($"GameManager: {createdTier} created but not counted — " +
-                          $"{activeTargets[i]} must be achieved first (higher targets before lower).");
-                return;
-            }
-        }
+            if (objective.Type != LevelObjectiveType.ReachTier ||
+                objective.IsCompleted || objective.TargetTier != createdTier)
+                continue;
 
-        achievedTargets[slot] = true;
-        Debug.Log($"GameManager: target {slot + 1} ({createdTier}) achieved! Mission: {DescribeTargets()}");
-
-        if (missionHUD != null)
-        {
-            missionHUD.MarkAchieved(slot);
-        }
-
-        if (!achievedTargets.Contains(false))
-        {
-            CompleteLevel();
+            if (objective.Apply(LevelObjectiveType.ReachTier, 1f, 0, createdTier))
+                PublishObjectiveProgress(objective);
+            return;
         }
     }
 
@@ -742,16 +761,92 @@ public class GameManager : MonoBehaviour
         if (State != GameState.Playing)
             return false;
 
-        // No mission authored (sandbox): no ceiling to enforce.
-        if (activeTargets.Count == 0)
+        if (activeObjectives.Count == 0)
             return true;
 
-        for (int i = 0; i < activeTargets.Count; i++)
+        bool hasIncompleteReachTier = false;
+        foreach (LevelObjective objective in activeObjectives)
         {
-            if (!achievedTargets[i] && activeTargets[i] > tier)
+            if (objective.Type != LevelObjectiveType.ReachTier || objective.IsCompleted)
+                continue;
+            hasIncompleteReachTier = true;
+            if (objective.TargetTier > tier)
                 return true;
         }
-        return false;
+
+        return !hasIncompleteReachTier && !AreAllRequiredObjectivesCompleted();
+    }
+
+    private void HandleMergeRegistered(int combo)
+    {
+        if (State != GameState.Playing)
+            return;
+        ApplyObjectiveSignal(LevelObjectiveType.MergeCount, 1f);
+        if (State == GameState.Playing)
+            ApplyObjectiveSignal(LevelObjectiveType.ComboTarget, 0f, combo);
+    }
+
+    public void NotifyMeteorDestroyed(int amount)
+    {
+        if (State == GameState.Playing && amount > 0)
+            ApplyObjectiveSignal(LevelObjectiveType.MeteorObjective, amount);
+    }
+
+    private void ApplyObjectiveSignal(LevelObjectiveType type, float amount,
+        int combo = 0, PlanetTier createdTier = default)
+    {
+        if (State != GameState.Playing)
+            return;
+
+        // Snapshot iteration is unnecessary: publishing never mutates the
+        // active list, and completion changes state only after the loop.
+        bool changed = false;
+        foreach (LevelObjective objective in activeObjectives)
+        {
+            if (!objective.IsCompleted &&
+                objective.Apply(type, amount, combo, createdTier))
+            {
+                ObjectiveProgressChanged?.Invoke(objective.Snapshot);
+                changed = true;
+            }
+        }
+
+        if (changed)
+            TryCompleteObjectives();
+    }
+
+    private void PublishObjectiveProgress(LevelObjective objective)
+    {
+        ObjectiveProgressChanged?.Invoke(objective.Snapshot);
+
+        int missionSlot = missionReachObjectives.IndexOf(objective);
+        if (missionSlot >= 0 && objective.IsCompleted)
+        {
+            achievedTargets[missionSlot] = true;
+            missionHUD?.MarkAchieved(missionSlot);
+        }
+
+        TryCompleteObjectives();
+    }
+
+    private bool AreAllRequiredObjectivesCompleted()
+    {
+        bool hasRequired = false;
+        foreach (LevelObjective objective in activeObjectives)
+        {
+            if (!objective.IsRequired)
+                continue;
+            hasRequired = true;
+            if (!objective.IsCompleted)
+                return false;
+        }
+        return hasRequired;
+    }
+
+    private void TryCompleteObjectives()
+    {
+        if (State == GameState.Playing && AreAllRequiredObjectivesCompleted())
+            CompleteLevel();
     }
 
     // The win no longer snaps the popup open: it enters the CinematicVortex
@@ -943,6 +1038,8 @@ public class GameManager : MonoBehaviour
         CurrentLevelNumber = levelNumber;
         activeTargets.Clear();
         achievedTargets.Clear();
+        activeObjectives.Clear();
+        missionReachObjectives.Clear();
 
         if (levels.Count == 0)
         {
@@ -965,23 +1062,63 @@ public class GameManager : MonoBehaviour
         RemainingTime = currentTimeLimit;
         UpdateTimerUI();
 
-        foreach (PlanetTier tier in source.targetTiers)
-        {
-            if (activeTargets.Count >= MaxTargetsPerLevel)
-            {
-                Debug.LogWarning($"GameManager: level {levelNumber} defines more than {MaxTargetsPerLevel} targets — extras ignored (the MissionHUD has {MaxTargetsPerLevel} slots).");
-                break;
-            }
-            activeTargets.Add(tier);
-            achievedTargets.Add(false);
-        }
+        BuildObjectives(source);
 
         if (missionHUD != null)
         {
             missionHUD.ShowLevel(levelNumber, activeTargets);
         }
 
+        var initialProgress = new List<LevelObjectiveProgress>(activeObjectives.Count);
+        foreach (LevelObjective objective in activeObjectives)
+            initialProgress.Add(objective.Snapshot);
+        ObjectivesInitialized?.Invoke(initialProgress);
+
         Debug.Log($"GameManager: Level {levelNumber} started. Mission: {DescribeTargets()}");
+    }
+
+    private void BuildObjectives(LevelDefinition source)
+    {
+        IReadOnlyList<LevelObjectiveDefinition> configured =
+            useDebugObjectiveOverride && debugObjectives != null && debugObjectives.Count > 0
+                ? debugObjectives
+                : source.objectives;
+
+        if (configured != null && configured.Count > 0)
+        {
+            for (int i = 0; i < configured.Count; i++)
+            {
+                if (configured[i] != null)
+                    activeObjectives.Add(LevelObjective.Create(activeObjectives.Count, configured[i]));
+            }
+        }
+        else
+        {
+            foreach (PlanetTier tier in source.targetTiers)
+            {
+                var legacy = new LevelObjectiveDefinition
+                {
+                    type = LevelObjectiveType.ReachTier,
+                    targetTier = tier,
+                    targetProgress = 1f,
+                    required = true
+                };
+                activeObjectives.Add(LevelObjective.Create(activeObjectives.Count, legacy));
+            }
+        }
+
+        // The current MissionHUD remains the compact tier-icon view. It shows
+        // the first three ReachTier objectives; all objective types are still
+        // exposed through the runtime list/events for the future objective UI.
+        foreach (LevelObjective objective in activeObjectives)
+        {
+            if (objective.Type != LevelObjectiveType.ReachTier ||
+                activeTargets.Count >= MaxTargetsPerLevel)
+                continue;
+            activeTargets.Add(objective.TargetTier);
+            achievedTargets.Add(false);
+            missionReachObjectives.Add(objective);
+        }
     }
 
     // Meteorites are persistent obstacles by design (see Meteorite.cs's
@@ -1213,20 +1350,95 @@ public class GameManager : MonoBehaviour
 
     private string DescribeTargets()
     {
-        if (activeTargets.Count == 0)
+        if (activeObjectives.Count == 0)
             return "(none)";
 
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < activeTargets.Count; i++)
+        for (int i = 0; i < activeObjectives.Count; i++)
         {
             if (i > 0)
                 sb.Append(", ");
-            sb.Append(activeTargets[i]);
-            if (achievedTargets[i])
+            LevelObjective objective = activeObjectives[i];
+            sb.Append(objective.Type);
+            if (objective.Type == LevelObjectiveType.ReachTier)
+                sb.Append($" {objective.TargetTier}");
+            sb.Append($" {objective.CurrentProgress:0.#}/{objective.TargetProgress:0.#}");
+            if (objective.IsCompleted)
                 sb.Append(" (done)");
         }
         return sb.ToString();
     }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    [ContextMenu("DEBUG Objectives/Load All-Type Test Set")]
+    private void DebugLoadAllTypeTestSet()
+    {
+        if (State != GameState.Playing)
+            return;
+
+        debugObjectives = new List<LevelObjectiveDefinition>
+        {
+            new LevelObjectiveDefinition { type = LevelObjectiveType.ReachTier,
+                targetTier = debugReachTier, targetProgress = 1f, required = true },
+            new LevelObjectiveDefinition { type = LevelObjectiveType.MergeCount,
+                targetProgress = 5f, required = true },
+            new LevelObjectiveDefinition { type = LevelObjectiveType.ComboTarget,
+                targetProgress = Mathf.Max(1, debugComboValue), required = true },
+            new LevelObjectiveDefinition { type = LevelObjectiveType.MeteorObjective,
+                targetProgress = 3f, required = true },
+            new LevelObjectiveDefinition { type = LevelObjectiveType.Survival,
+                targetProgress = Mathf.Max(1f, debugSurvivalSeconds), required = true }
+        };
+        useDebugObjectiveOverride = true;
+
+        activeObjectives.Clear();
+        activeTargets.Clear();
+        achievedTargets.Clear();
+        missionReachObjectives.Clear();
+        BuildObjectives(new LevelDefinition());
+        missionHUD?.ShowLevel(CurrentLevelNumber, activeTargets);
+
+        var progress = new List<LevelObjectiveProgress>(activeObjectives.Count);
+        foreach (LevelObjective objective in activeObjectives)
+            progress.Add(objective.Snapshot);
+        ObjectivesInitialized?.Invoke(progress);
+        Debug.Log("GameManager: loaded temporary all-type objective test set.", this);
+    }
+
+    [ContextMenu("DEBUG Objectives/Simulate Reach Tier")]
+    private void DebugSimulateReachTier() => NotifyMergeCreated(debugReachTier);
+
+    [ContextMenu("DEBUG Objectives/Simulate Merge + Combo")]
+    private void DebugSimulateMergeAndCombo() => HandleMergeRegistered(Mathf.Max(1, debugComboValue));
+
+    [ContextMenu("DEBUG Objectives/Simulate Meteor Destroyed")]
+    private void DebugSimulateMeteorDestroyed() => NotifyMeteorDestroyed(1);
+
+    [ContextMenu("DEBUG Objectives/Add Survival Seconds")]
+    private void DebugAddSurvivalSeconds() =>
+        ApplyObjectiveSignal(LevelObjectiveType.Survival, Mathf.Max(0.1f, debugSurvivalSeconds));
+
+    [ContextMenu("DEBUG Objectives/Complete All Objectives")]
+    private void DebugCompleteAllObjectives()
+    {
+        if (State != GameState.Playing)
+            return;
+        foreach (LevelObjective objective in activeObjectives)
+        {
+            if (objective.ForceComplete())
+            {
+                ObjectiveProgressChanged?.Invoke(objective.Snapshot);
+                int slot = missionReachObjectives.IndexOf(objective);
+                if (slot >= 0)
+                {
+                    achievedTargets[slot] = true;
+                    missionHUD?.MarkAchieved(slot);
+                }
+            }
+        }
+        TryCompleteObjectives();
+    }
+#endif
 
     void OnDrawGizmosSelected()
     {
