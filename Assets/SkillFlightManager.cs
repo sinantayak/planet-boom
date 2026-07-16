@@ -39,13 +39,25 @@ public class SkillFlightManager : MonoBehaviour
     // The Inventory button's own RectTransform — the flight's destination
     // and the thing that receives the arrival pulse.
     [SerializeField] private RectTransform inventoryButtonRect;
+    // Timer is resolved automatically from GameManager when this override is
+    // empty. Coin points at the scene-authored Coin HUD icon RectTransform.
+    [SerializeField] private RectTransform timerTargetOverride;
+    [SerializeField] private RectTransform coinHudTarget;
 
     [Header("Icons")]
     // Indexed by SkillType (GravitySingularity, MeteorStrike, TimeWarp,
     // CosmicMimic) — same "array indexed by (int)enum" convention as
     // Planet.planetSprites.
     [SerializeField] private Sprite[] skillIcons = new Sprite[4];
-    [SerializeField] private Vector2 iconSize = new Vector2(80f, 80f);
+    // Zero preserves the legacy shared size on older scenes/prefabs; this
+    // project's GameScene is explicitly authored to its existing 150x150.
+    [SerializeField] private Vector2 skillIconSize = Vector2.zero;
+    [SerializeField] private Vector2 timeDropIconSize = new Vector2(64f, 64f);
+    [SerializeField] private Vector2 coinDropIconSize = new Vector2(64f, 64f);
+    // Receives the former shared iconSize value when an older scene/prefab is
+    // loaded. Specific sizes fall back to it only if authored as zero/invalid.
+    [FormerlySerializedAs("iconSize")]
+    [SerializeField] [HideInInspector] private Vector2 legacyIconSize = new Vector2(80f, 80f);
 
     [Header("Chest Sprite Swap")]
     // The Image whose sprite gets swapped open/closed — usually the same
@@ -155,7 +167,7 @@ public class SkillFlightManager : MonoBehaviour
         var go = new GameObject($"SkillDropIcon_{skill}", typeof(RectTransform));
         var rect = (RectTransform)go.transform;
         rect.SetParent(flightContainer, false);
-        rect.sizeDelta = iconSize;
+        rect.sizeDelta = ResolveIconSize(skillIconSize);
         rect.anchoredPosition = startPos;
 
         var image = go.AddComponent<Image>();
@@ -178,6 +190,90 @@ public class SkillFlightManager : MonoBehaviour
 
         var flightIcon = go.AddComponent<SkillDropFlightIcon>();
         flightIcon.Play(rect, startPos, endPos, settings, OnChestShouldOpen, () => OnFlightArrived(skill));
+    }
+
+    // Shared visual-only flight used by non-skill rewards. Reward ownership
+    // remains with the caller's arrival callback, so an invalid target,
+    // disabled UI, scene unload, or interrupted coroutine grants nothing.
+    public bool SpawnRewardFlight(Vector3 worldPosition, RewardDropType rewardType,
+        Sprite sprite, Action onArrived)
+    {
+        RectTransform target = ResolveRewardTarget(rewardType);
+        if (flightContainer == null || target == null || sprite == null ||
+            !target.gameObject.activeInHierarchy)
+        {
+            Debug.LogWarning($"SkillFlightManager: {rewardType} flight has no active target or sprite.", this);
+            return false;
+        }
+
+        if (worldCamera == null)
+            worldCamera = Camera.main;
+        if (worldCamera == null)
+            return false;
+
+        Vector2 startPos = ScreenToContainerLocal(worldCamera.WorldToScreenPoint(worldPosition));
+        Vector2 endPos = ScreenToContainerLocal(
+            RectTransformUtility.WorldToScreenPoint(CanvasCameraOrNull(), target.position));
+
+        var go = new GameObject($"RewardDropIcon_{rewardType}", typeof(RectTransform));
+        var rect = (RectTransform)go.transform;
+        rect.SetParent(flightContainer, false);
+        rect.sizeDelta = ResolveRewardIconSize(rewardType);
+        rect.anchoredPosition = startPos;
+
+        var image = go.AddComponent<Image>();
+        image.raycastTarget = false;
+        image.sprite = sprite;
+        image.preserveAspect = true;
+
+        var settings = new SkillDropFlightIcon.FlightSettings
+        {
+            floatUpDuration = floatUpDuration,
+            floatUpDistance = floatUpDistance,
+            hoverDuration = hoverDuration,
+            hoverBobAmplitude = hoverBobAmplitude,
+            hoverBobFrequency = hoverBobFrequency,
+            flightDuration = flightDuration,
+            arcHeight = arcHeight,
+            chestOpenAtProgress = 1f
+        };
+
+        var flightIcon = go.AddComponent<SkillDropFlightIcon>();
+        flightIcon.Play(rect, startPos, endPos, settings, null, () =>
+        {
+            if (target != null && target.gameObject.activeInHierarchy)
+                onArrived?.Invoke();
+        });
+        return true;
+    }
+
+    private RectTransform ResolveRewardTarget(RewardDropType rewardType)
+    {
+        if (rewardType == RewardDropType.Time)
+            return timerTargetOverride != null
+                ? timerTargetOverride
+                : GameManager.Instance != null ? GameManager.Instance.GameplayTimerRect : null;
+        if (rewardType == RewardDropType.SpaceCoin)
+            return coinHudTarget;
+        return inventoryButtonRect;
+    }
+
+    private Vector2 ResolveRewardIconSize(RewardDropType rewardType)
+    {
+        if (rewardType == RewardDropType.Time)
+            return ResolveIconSize(timeDropIconSize);
+        if (rewardType == RewardDropType.SpaceCoin)
+            return ResolveIconSize(coinDropIconSize);
+        return ResolveIconSize(skillIconSize);
+    }
+
+    private Vector2 ResolveIconSize(Vector2 configuredSize)
+    {
+        if (configuredSize.x > 0f && configuredSize.y > 0f)
+            return configuredSize;
+        if (legacyIconSize.x > 0f && legacyIconSize.y > 0f)
+            return legacyIconSize;
+        return new Vector2(80f, 80f);
     }
 
     // Fired once, partway through the flight (see chestOpenAtProgress) —

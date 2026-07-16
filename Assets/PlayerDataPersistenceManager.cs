@@ -66,6 +66,7 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
     public static event Action ProgressionChanged;
     public static event Action<int, int> LevelBestStarsChanged;
     public static event Action<int> HighestUnlockedLevelChanged;
+    public static event Action<long> SpaceCoinChanged;
 
     [Header("Runtime Status (Play Mode)")]
     [SerializeField] private PlayerDataState currentState = PlayerDataState.NotStarted;
@@ -83,6 +84,7 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
     public bool IsSaving => isSaving;
     public PlayerData CurrentData => currentData;
     public int HighestUnlockedLevel => currentData != null ? currentData.highestUnlockedLevel : 1;
+    public long SpaceCoin => currentData != null ? currentData.spaceCoin : 0;
     public Task ReadyTask => readyTaskSource.Task;
 
     private static SkillInventoryManager registeredSkillInventory;
@@ -91,6 +93,7 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
     private string cloudWriteLock;
     private bool localDirty;
     private bool inventoryChangedBeforeLoad;
+    private long pendingSpaceCoin;
     private readonly List<LevelStarsData> pendingLevelCompletions = new List<LevelStarsData>();
     private Coroutine debouncedSaveRoutine;
     private TaskCompletionSource<bool> readyTaskSource = NewReadyTaskSource();
@@ -260,6 +263,27 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
         readyTaskSource.TrySetResult(true);
         DataLoaded?.Invoke(currentData);
         ProgressionChanged?.Invoke();
+        SpaceCoinChanged?.Invoke(SpaceCoin);
+    }
+
+    public bool AddSpaceCoin(long amount)
+    {
+        if (amount <= 0)
+            return false;
+
+        if (!IsLoaded || currentData == null)
+        {
+            pendingSpaceCoin = SaturatingAdd(pendingSpaceCoin, amount);
+            return true;
+        }
+
+        long newAmount = SaturatingAdd(currentData.spaceCoin, amount);
+        if (newAmount == currentData.spaceCoin)
+            return false;
+        currentData.spaceCoin = newAmount;
+        MarkChangedAndScheduleSave();
+        SpaceCoinChanged?.Invoke(newAmount);
+        return true;
     }
 
     public void RecordLevelCompleted(int levelNumber, int starsEarned)
@@ -431,6 +455,22 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
             }
         }
         pendingLevelCompletions.Clear();
+
+        if (pendingSpaceCoin > 0)
+        {
+            currentData.spaceCoin = SaturatingAdd(currentData.spaceCoin, pendingSpaceCoin);
+            currentData.revision++;
+            currentData.modifiedUtcTicks = DateTime.UtcNow.Ticks;
+            localDirty = true;
+            pendingSpaceCoin = 0;
+        }
+    }
+
+    private static long SaturatingAdd(long current, long amount)
+    {
+        if (amount <= 0)
+            return current;
+        return current > long.MaxValue - amount ? long.MaxValue : current + amount;
     }
 
     private static bool ApplyLevelCompletion(PlayerData data, int levelNumber, int starsEarned)
@@ -579,7 +619,8 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
             ? $"PlayerData DEBUG: state={State}, no data loaded."
             : $"PlayerData DEBUG: state={State}, revision={currentData.revision}, " +
               $"dirty={localDirty}, unlocked={currentData.highestUnlockedLevel}, " +
-              $"skills={currentData.skillInventory.Count}, slots={string.Join(",", currentData.quickSlots)}", this);
+              $"spaceCoin={currentData.spaceCoin}, skills={currentData.skillInventory.Count}, " +
+              $"slots={string.Join(",", currentData.quickSlots)}", this);
     }
 
     [ContextMenu("DEBUG Force Cloud Save")]

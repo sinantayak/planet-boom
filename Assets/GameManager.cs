@@ -44,6 +44,11 @@ public class GameManager : MonoBehaviour
     // Seconds left on the current level's clock. Public for the timer text
     // that will be added to the HUD later; already drives the star rating.<<
     public float RemainingTime { get; private set; }
+    // Coins collected from drop flights belong to this level run until a
+    // future Level Complete reward flow explicitly commits the final reward.
+    public long LevelEarnedCoins { get; private set; }
+    public bool IsLevelRewardCommitted { get; private set; }
+    public event System.Action<long> LevelEarnedCoinsChanged;
 
     // The MissionHUD has exactly 3 target slots; levels can't ask for more.
     public const int MaxTargetsPerLevel = 3;
@@ -134,6 +139,9 @@ public class GameManager : MonoBehaviour
     // radius the lose check actually enforces.
     public Transform BlackHoleCenter => blackHoleCenter;
     public float MaxBoundaryRadius => maxBoundaryRadius;
+    public RectTransform GameplayTimerRect => gameplayTimerText != null
+        ? gameplayTimerText.rectTransform
+        : null;
 
     // True the instant any (non-absorbed) planet is beyond maxBoundaryRadius,
     // false the instant none are — recomputed every FixedUpdate alongside the
@@ -320,6 +328,68 @@ public class GameManager : MonoBehaviour
         UpdateTimerUI();
         PlayTimeWarpFeedback(seconds);
         return true;
+    }
+
+    public bool TryCollectLevelCoins(long amount)
+    {
+        // A flight launched during play can legitimately arrive after the
+        // final merge has moved us into CinematicVortex/LevelComplete. It can
+        // also finish while inventory is paused or after Game Over, where a
+        // future Continue/Life flow must retain the same run. Fresh-run and
+        // abandon paths reset explicitly through LoadLevel/Discard instead.
+        if (amount <= 0 || IsLevelRewardCommitted)
+            return false;
+
+        long newAmount = SaturatingAdd(LevelEarnedCoins, amount);
+        if (newAmount == LevelEarnedCoins)
+            return false;
+        LevelEarnedCoins = newAmount;
+        LevelEarnedCoinsChanged?.Invoke(LevelEarnedCoins);
+        return true;
+    }
+
+    // Future Level Complete UI supplies its calculated base and star rewards;
+    // this method adds the run's dropped coins and performs exactly one
+    // permanent PlayerData balance mutation. The guard makes repeated button
+    // callbacks/idempotency mistakes unable to grant the reward twice.
+    public bool TryCommitLevelReward(long baseLevelReward, long starReward,
+        out long committedTotal)
+    {
+        committedTotal = 0;
+        if (State != GameState.LevelComplete || IsLevelRewardCommitted ||
+            baseLevelReward < 0 || starReward < 0)
+            return false;
+
+        long total = SaturatingAdd(baseLevelReward, starReward);
+        total = SaturatingAdd(total, LevelEarnedCoins);
+        if (total <= 0 || PlayerDataPersistenceManager.Instance == null ||
+            !PlayerDataPersistenceManager.Instance.AddSpaceCoin(total))
+            return false;
+
+        IsLevelRewardCommitted = true;
+        committedTotal = total;
+        Debug.Log($"GameManager: committed level reward {total} Space Coin " +
+                  $"(base={baseLevelReward}, stars={starReward}, drops={LevelEarnedCoins}).", this);
+        return true;
+    }
+
+    // Abandoning/restarting starts a fresh run and discards uncommitted coins.
+    // A future Continue/Life flow should resume without calling this method,
+    // preserving the current session earnings after Game Over.
+    public void DiscardLevelEarnedCoins()
+    {
+        bool changed = LevelEarnedCoins != 0;
+        LevelEarnedCoins = 0;
+        IsLevelRewardCommitted = false;
+        if (changed)
+            LevelEarnedCoinsChanged?.Invoke(0);
+    }
+
+    private static long SaturatingAdd(long current, long amount)
+    {
+        if (amount <= 0)
+            return current;
+        return current > long.MaxValue - amount ? long.MaxValue : current + amount;
     }
 
     private void PlayTimeWarpFeedback(float bonusSeconds)
@@ -866,6 +936,10 @@ public class GameManager : MonoBehaviour
 
     private void LoadLevel(int levelNumber)
     {
+        // LoadLevel always represents a fresh run (initial load, next/back,
+        // replay, or hard restart). Game Over itself deliberately does not
+        // reset this value so a future Continue can keep the same run alive.
+        DiscardLevelEarnedCoins();
         CurrentLevelNumber = levelNumber;
         activeTargets.Clear();
         achievedTargets.Clear();

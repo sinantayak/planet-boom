@@ -35,11 +35,18 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioClip timeWarpClip;
     [SerializeField] private AudioClip cosmicMimicClip;
 
+    [Header("Reward Drop Collection Clips")]
+    [SerializeField] private AudioClip coinDropCollectedClip;
+    [SerializeField] private AudioClip timeDropCollectedClip;
+
     [Header("Skill Feedback Mix")]
     [SerializeField] [Range(0f, 1f)] private float skillCollectedVolume = 0.9f;
     [SerializeField] [Range(0f, 1f)] private float skillFeedbackVolume = 0.9f;
     [SerializeField] [Range(0f, 1f)] private float specificSkillVolume = 1f;
     [SerializeField] private bool playGenericSuccessWithSpecific = true;
+
+    [Header("Reward Drop Collection Mix")]
+    [SerializeField] [Range(0f, 1f)] private float rewardDropCollectedVolume = 0.9f;
 
     [Header("Launch")]
     [SerializeField] [Range(0f, 1f)] private float launchVolume = 0.9f;
@@ -164,6 +171,16 @@ public class AudioManager : MonoBehaviour
     public void PlaySkillCollected()
     {
         PlayOptionalOneShot(skillCollectedClip, skillCollectedVolume);
+    }
+
+    public void PlayCoinDropCollected()
+    {
+        PlayOptionalOneShot(coinDropCollectedClip, rewardDropCollectedVolume);
+    }
+
+    public void PlayTimeDropCollected()
+    {
+        PlayOptionalOneShot(timeDropCollectedClip, rewardDropCollectedVolume);
     }
 
     public void PlaySkillUseFailed()
