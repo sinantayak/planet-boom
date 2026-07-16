@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 // Central SFX brain, scene-singleton. Three core sounds — launch, collision,
 // merge — each with its own dynamics:
@@ -35,6 +36,11 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioClip meteorStrikeImpactClip;
     [SerializeField] private AudioClip timeWarpClip;
     [SerializeField] private AudioClip cosmicMimicClip;
+    [SerializeField] private AudioClip planetRerollClip;
+    [SerializeField] private AudioClip cosmicShieldClip;
+    [FormerlySerializedAs("emergencyBlastClip")]
+    [SerializeField] private AudioClip cosmicAbductionClip;
+    [SerializeField] private AudioClip meteorShowerClip;
 
     [Header("Reward Drop Collection Clips")]
     [SerializeField] private AudioClip coinDropCollectedClip;
@@ -203,6 +209,18 @@ public class AudioManager : MonoBehaviour
             case SkillType.CosmicMimic:
                 specificClip = cosmicMimicClip;
                 break;
+            case SkillType.PlanetReroll:
+                // Played by PlanetLauncher when the preview shuffle starts.
+                break;
+            case SkillType.CosmicShield:
+                // Played by PlanetLauncher after successful activation.
+                break;
+            case SkillType.CosmicAbduction:
+                // Played by the UFO sequence at visual start.
+                break;
+            case SkillType.MeteorShower:
+                // Played once by the shower controller after target validation.
+                break;
             // Meteor Strike's themed sound belongs to the later visual impact.
             case SkillType.MeteorStrike:
                 break;
@@ -216,6 +234,26 @@ public class AudioManager : MonoBehaviour
     public void PlayMeteorStrikeSequence()
     {
         PlayOptionalOneShot(meteorStrikeImpactClip, specificSkillVolume);
+    }
+
+    public void PlayCosmicAbductionSequence()
+    {
+        PlayOptionalOneShot(cosmicAbductionClip, specificSkillVolume);
+    }
+
+    public void PlayPlanetRerollSequence()
+    {
+        PlayOptionalOneShot(planetRerollClip, specificSkillVolume);
+    }
+
+    public void PlayMeteorShowerSequence()
+    {
+        PlayOptionalOneShot(meteorShowerClip, specificSkillVolume);
+    }
+
+    public void PlayCosmicShieldSequence()
+    {
+        PlayOptionalOneShot(cosmicShieldClip, specificSkillVolume);
     }
 
     private void PlayOptionalOneShot(AudioClip clip, float volume)

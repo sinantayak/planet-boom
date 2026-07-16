@@ -14,6 +14,13 @@ public sealed class SkillQuantityData
 }
 
 [Serializable]
+public sealed class BoosterQuantityData
+{
+    public string boosterType;
+    public int quantity;
+}
+
+[Serializable]
 public sealed class LevelStarsData
 {
     public int level;
@@ -28,9 +35,11 @@ public sealed class PlayerData
     public long modifiedUtcTicks;
     public bool migratedFromLegacyPlayerPrefs;
     public List<SkillQuantityData> skillInventory = new List<SkillQuantityData>();
+    public List<BoosterQuantityData> boosterInventory = new List<BoosterQuantityData>();
     public List<string> quickSlots = new List<string>();
     public int highestUnlockedLevel = 1;
     public List<LevelStarsData> bestStarsByLevel = new List<LevelStarsData>();
+    public List<string> unlockedContentIds = new List<string>();
 
     // Reserved for upcoming phases. They are part of the versioned document
     // now, but no gameplay system reads or mutates them yet.
@@ -88,11 +97,15 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
     public Task ReadyTask => readyTaskSource.Task;
 
     private static SkillInventoryManager registeredSkillInventory;
+    private static BoosterInventoryManager registeredBoosterInventory;
+    private static UnlockManager registeredUnlockManager;
     private PlayerData currentData;
     private string playerId = string.Empty;
     private string cloudWriteLock;
     private bool localDirty;
     private bool inventoryChangedBeforeLoad;
+    private bool boosterInventoryChangedBeforeLoad;
+    private bool unlockDataChangedBeforeLoad;
     private long pendingSpaceCoin;
     private readonly List<LevelStarsData> pendingLevelCompletions = new List<LevelStarsData>();
     private Coroutine debouncedSaveRoutine;
@@ -260,6 +273,8 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
     {
         currentRevision = currentData.revision;
         registeredSkillInventory?.ApplyPlayerData(currentData);
+        registeredBoosterInventory?.ApplyPlayerData(currentData);
+        registeredUnlockManager?.ApplyPlayerData(currentData);
         readyTaskSource.TrySetResult(true);
         DataLoaded?.Invoke(currentData);
         ProgressionChanged?.Invoke();
@@ -341,6 +356,49 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
         registeredSkillInventory = manager;
         if (Instance != null && Instance.IsLoaded && Instance.currentData != null)
             manager.ApplyPlayerData(Instance.currentData);
+    }
+
+    internal static void RegisterBoosterInventory(BoosterInventoryManager manager)
+    {
+        registeredBoosterInventory = manager;
+        if (Instance != null && Instance.IsLoaded && Instance.currentData != null)
+            manager.ApplyPlayerData(Instance.currentData);
+    }
+
+    internal static void RegisterUnlockManager(UnlockManager manager)
+    {
+        registeredUnlockManager = manager;
+        if (Instance != null && Instance.IsLoaded && Instance.currentData != null) manager.ApplyPlayerData(Instance.currentData);
+    }
+    internal static void UnregisterUnlockManager(UnlockManager manager)
+    {
+        if (registeredUnlockManager == manager) registeredUnlockManager = null;
+    }
+    internal static void NotifyUnlockDataChanged(UnlockManager manager)
+    {
+        if (Instance == null) return;
+        if (!Instance.IsLoaded || Instance.currentData == null) { Instance.unlockDataChangedBeforeLoad = true; return; }
+        manager.WriteToPlayerData(Instance.currentData);
+        Instance.MarkChangedAndScheduleSave();
+    }
+
+    internal static void UnregisterBoosterInventory(BoosterInventoryManager manager)
+    {
+        if (registeredBoosterInventory == manager)
+            registeredBoosterInventory = null;
+    }
+
+    internal static void NotifyBoosterInventoryChanged(BoosterInventoryManager manager)
+    {
+        if (Instance == null)
+            return;
+        if (!Instance.IsLoaded || Instance.currentData == null)
+        {
+            Instance.boosterInventoryChangedBeforeLoad = true;
+            return;
+        }
+        manager.WriteToPlayerData(Instance.currentData);
+        Instance.MarkChangedAndScheduleSave();
     }
 
     internal static void UnregisterSkillInventory(SkillInventoryManager manager)
@@ -445,6 +503,21 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
             inventoryChangedBeforeLoad = false;
         }
 
+        if (boosterInventoryChangedBeforeLoad && registeredBoosterInventory != null)
+        {
+            registeredBoosterInventory.WriteToPlayerData(currentData);
+            currentData.revision++;
+            currentData.modifiedUtcTicks = DateTime.UtcNow.Ticks;
+            localDirty = true;
+            boosterInventoryChangedBeforeLoad = false;
+        }
+        if (unlockDataChangedBeforeLoad && registeredUnlockManager != null)
+        {
+            registeredUnlockManager.WriteToPlayerData(currentData);
+            currentData.revision++; currentData.modifiedUtcTicks = DateTime.UtcNow.Ticks;
+            localDirty = true; unlockDataChangedBeforeLoad = false;
+        }
+
         foreach (LevelStarsData completion in pendingLevelCompletions)
         {
             if (ApplyLevelCompletion(currentData, completion.level, completion.bestStars))
@@ -526,10 +599,16 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
 
         foreach (SkillType type in Enum.GetValues(typeof(SkillType)))
         {
+            int quantity = Mathf.Max(0, PlayerPrefs.GetInt("SkillInventory.Count." + type, 0));
+            if (type == SkillType.CosmicAbduction)
+            {
+                quantity = (int)Math.Min(int.MaxValue, (long)quantity +
+                    Mathf.Max(0, PlayerPrefs.GetInt("SkillInventory.Count.EmergencyBlast", 0)));
+            }
             data.skillInventory.Add(new SkillQuantityData
             {
                 skillType = type.ToString(),
-                quantity = Mathf.Max(0, PlayerPrefs.GetInt("SkillInventory.Count." + type, 0))
+                quantity = quantity
             });
         }
         for (int i = 0; i < SkillInventoryManager.QuickSlotCount; i++)
@@ -561,8 +640,10 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
         data.lives = Mathf.Max(0, data.lives);
         data.spaceCoin = Math.Max(0, data.spaceCoin);
         data.skillInventory ??= new List<SkillQuantityData>();
+        data.boosterInventory ??= new List<BoosterQuantityData>();
         data.quickSlots ??= new List<string>();
         data.bestStarsByLevel ??= new List<LevelStarsData>();
+        data.unlockedContentIds ??= new List<string>();
         NormalizeProgression(data);
         while (data.quickSlots.Count < SkillInventoryManager.QuickSlotCount)
             data.quickSlots.Add(string.Empty);

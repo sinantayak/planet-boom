@@ -9,7 +9,7 @@ public enum RewardDropType
 }
 
 // Rolls whether a merge drops a collectible skill, and if so, which of the
-// four SkillType values. Purely probabilistic bookkeeping — actual
+// SkillType values. Purely probabilistic bookkeeping — actual
 // OnSkillDropped remains an immediate analytics/presentation hook. Inventory
 // intentionally does NOT subscribe here: it rewards only from
 // SkillFlightManager.OnSkillArrivedAtChest after the visual completes.
@@ -47,6 +47,20 @@ public class SkillDropManager : MonoBehaviour
     [SerializeField] [Min(1)] private int coinAmount = 1;
     [SerializeField] private Sprite coinDropSprite;
 
+    [Header("Passive Booster Icons")]
+    [SerializeField] private Sprite luckyDropIcon;
+    [SerializeField] private Sprite doubleTimeDropIcon;
+    [SerializeField] private Sprite starBoosterIcon;
+
+    [Header("Lucky Drop Booster")]
+    [SerializeField] [Min(0f)] private float luckyDropSkillChanceMultiplier = 1.5f;
+    [SerializeField] [Min(0f)] private float luckyDropTimeChanceMultiplier = 1.5f;
+    [SerializeField] [Min(0f)] private float luckyDropCoinChanceMultiplier = 1.5f;
+
+    public Sprite LuckyDropIcon => luckyDropIcon;
+    public Sprite DoubleTimeDropIcon => doubleTimeDropIcon;
+    public Sprite StarBoosterIcon => starBoosterIcon;
+
     void Awake()
     {
         if (Instance != null && Instance != this)
@@ -73,7 +87,7 @@ public class SkillDropManager : MonoBehaviour
     {
         float chance = CalculateFinalChance(RewardDropType.Skill, DropChanceForCombo(combo));
         if (!Roll(chance)) return;
-        SkillType skill = RollRandomSkillType();
+        if (!TryRollRandomSkillType(false, out SkillType skill)) return;
         Debug.Log($"SkillDropManager: combo x{combo} dropped {skill}.");
         SkillFlightManager.Instance?.SpawnFlight(worldPosition, skill);
         OnSkillDropped?.Invoke(skill);
@@ -100,11 +114,16 @@ public class SkillDropManager : MonoBehaviour
         return SkillFlightManager.Instance.SpawnRewardFlight(worldPosition, RewardDropType.Time,
             timeDropSprite, () =>
             {
+                float multiplier = BoosterInventoryManager.Instance != null
+                    ? BoosterInventoryManager.Instance.GetTimeDropRewardMultiplier()
+                    : 1f;
+                float grantedSeconds = timeBonusSeconds * multiplier;
                 bool granted = GameManager.Instance != null &&
-                               GameManager.Instance.TryAddBonusTime(timeBonusSeconds);
+                               GameManager.Instance.TryAddBonusTime(grantedSeconds);
                 if (granted)
                     AudioManager.Instance?.PlayTimeDropCollected();
-                Debug.Log($"RewardDrop: Time +{timeBonusSeconds:0.#}s arrival, granted={granted}.", this);
+                Debug.Log($"RewardDrop: Time +{grantedSeconds:0.#}s arrival " +
+                          $"(base {timeBonusSeconds:0.#} x{multiplier:0.#}), granted={granted}.", this);
             });
     }
 
@@ -126,7 +145,7 @@ public class SkillDropManager : MonoBehaviour
 
     private static bool Roll(float chance) => chance > 0f && UnityEngine.Random.value < chance;
 
-    private static float CalculateFinalChance(RewardDropType type, float baseChance)
+    public static float CalculateFinalChance(RewardDropType type, float baseChance)
     {
         float chance = Mathf.Clamp01(baseChance);
         if (ModifyDropChance == null)
@@ -134,6 +153,17 @@ public class SkillDropManager : MonoBehaviour
         foreach (Func<RewardDropType, float, float> modifier in ModifyDropChance.GetInvocationList())
             chance = Mathf.Clamp01(modifier(type, chance));
         return chance;
+    }
+
+    public float GetLuckyDropMultiplier(RewardDropType type)
+    {
+        switch (type)
+        {
+            case RewardDropType.Skill: return Mathf.Max(0f, luckyDropSkillChanceMultiplier);
+            case RewardDropType.Time: return Mathf.Max(0f, luckyDropTimeChanceMultiplier);
+            case RewardDropType.SpaceCoin: return Mathf.Max(0f, luckyDropCoinChanceMultiplier);
+            default: return 1f;
+        }
     }
 
     private float DropChanceForCombo(int combo)
@@ -147,20 +177,104 @@ public class SkillDropManager : MonoBehaviour
         return comboX5PlusDropChance;
     }
 
-    private static SkillType RollRandomSkillType()
+    private static bool TryRollRandomSkillType(bool bypassUnlock, out SkillType result)
     {
-        Array values = Enum.GetValues(typeof(SkillType));
-        return (SkillType)values.GetValue(UnityEngine.Random.Range(0, values.Length));
+        var eligible = new System.Collections.Generic.List<SkillType>();
+        foreach (SkillType value in Enum.GetValues(typeof(SkillType)))
+            if (bypassUnlock || (UnlockManager.Instance != null && UnlockManager.Instance.IsUnlocked(value))) eligible.Add(value);
+        if (eligible.Count == 0) { result = default; return false; }
+        result = eligible[UnityEngine.Random.Range(0, eligible.Count)]; return true;
     }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
+    [ContextMenu("DEBUG Star Booster/Add To Booster Inventory")]
+    private void DebugAddStarBooster()
+    {
+        bool added = BoosterInventoryManager.Instance != null &&
+                     BoosterInventoryManager.Instance.AddBooster(BoosterType.StarBooster);
+        Debug.Log($"Star Booster DEBUG: added={added}, owned={BoosterInventoryManager.Instance?.GetCount(BoosterType.StarBooster) ?? 0}.", this);
+    }
+
+    [ContextMenu("DEBUG Star Booster/Activate For Current Run")]
+    private void DebugActivateStarBooster()
+    {
+        bool activated = BoosterInventoryManager.Instance != null &&
+                         BoosterInventoryManager.Instance.TryActivateForCurrentRun(BoosterType.StarBooster, true);
+        Debug.Log($"Star Booster DEBUG: activated={activated}, active={BoosterInventoryManager.Instance?.IsStarBoosterActive ?? false}.", this);
+    }
+
+    [ContextMenu("DEBUG Boosters/Log All Active States")]
+    private void DebugLogAllBoosterStates()
+    {
+        BoosterInventoryManager manager = BoosterInventoryManager.Instance;
+        Debug.Log($"Booster DEBUG active: LuckyDrop={manager?.IsLuckyDropActive ?? false}, " +
+                  $"DoubleTimeDrop={manager?.IsDoubleTimeDropActive ?? false}, " +
+                  $"StarBooster={manager?.IsStarBoosterActive ?? false}.", this);
+    }
+
+    [ContextMenu("DEBUG 2x Time Drop/Add To Booster Inventory")]
+    private void DebugAddDoubleTimeDrop()
+    {
+        bool added = BoosterInventoryManager.Instance != null &&
+                     BoosterInventoryManager.Instance.AddBooster(BoosterType.DoubleTimeDrop);
+        Debug.Log($"2x Time Drop DEBUG: added={added}, owned={BoosterInventoryManager.Instance?.GetCount(BoosterType.DoubleTimeDrop) ?? 0}.", this);
+    }
+
+    [ContextMenu("DEBUG 2x Time Drop/Activate For Current Run")]
+    private void DebugActivateDoubleTimeDrop()
+    {
+        bool activated = BoosterInventoryManager.Instance != null &&
+                         BoosterInventoryManager.Instance.TryActivateForCurrentRun(BoosterType.DoubleTimeDrop, true);
+        Debug.Log($"2x Time Drop DEBUG: activated={activated}, active={BoosterInventoryManager.Instance?.IsDoubleTimeDropActive ?? false}, " +
+                  $"LuckyDropActive={BoosterInventoryManager.Instance?.IsLuckyDropActive ?? false}.", this);
+    }
+
+    [ContextMenu("DEBUG 2x Time Drop/Log Reward")]
+    private void DebugLogDoubleTimeDropReward()
+    {
+        float multiplier = BoosterInventoryManager.Instance?.GetTimeDropRewardMultiplier() ?? 1f;
+        Debug.Log($"2x Time Drop DEBUG: next collected Time Drop grants {timeBonusSeconds * multiplier:0.#}s " +
+                  $"(base {timeBonusSeconds:0.#} x{multiplier:0.#}). Time Warp is not routed through this calculation.", this);
+    }
+
+    [ContextMenu("DEBUG Lucky Drop/Add To Booster Inventory")]
+    private void DebugAddLuckyDrop()
+    {
+        bool added = BoosterInventoryManager.Instance != null &&
+                     BoosterInventoryManager.Instance.AddBooster(BoosterType.LuckyDrop);
+        Debug.Log($"Lucky Drop DEBUG: added={added}, owned={BoosterInventoryManager.Instance?.GetCount(BoosterType.LuckyDrop) ?? 0}.", this);
+    }
+
+    [ContextMenu("DEBUG Lucky Drop/Activate For Current Run")]
+    private void DebugActivateLuckyDrop()
+    {
+        bool activated = BoosterInventoryManager.Instance != null &&
+                         BoosterInventoryManager.Instance.TryActivateForCurrentRun(BoosterType.LuckyDrop, true);
+        Debug.Log($"Lucky Drop DEBUG: activated={activated}, active={BoosterInventoryManager.Instance?.IsLuckyDropActive ?? false}.", this);
+    }
+
+    [ContextMenu("DEBUG Lucky Drop/Log Effective Chances")]
+    private void DebugLogLuckyDropChances()
+    {
+        Debug.Log($"Lucky Drop DEBUG effective chances: Skill[x3={CalculateFinalChance(RewardDropType.Skill, comboX3DropChance):P1}, " +
+                  $"x4={CalculateFinalChance(RewardDropType.Skill, comboX4DropChance):P1}, x5+={CalculateFinalChance(RewardDropType.Skill, comboX5PlusDropChance):P1}], " +
+                  $"Time={CalculateFinalChance(RewardDropType.Time, timeDropChancePerMerge):P1}, Coin={CalculateFinalChance(RewardDropType.SpaceCoin, coinDropChancePerMerge):P1}.", this);
+    }
+
     [ContextMenu("DEBUG Spawn Random Skill Drop")]
     private void DebugSpawnSkillDrop()
     {
-        SkillType skill = RollRandomSkillType();
+        if (!TryRollRandomSkillType(true, out SkillType skill)) return;
         bool spawned = SkillFlightManager.Instance != null;
         SkillFlightManager.Instance?.SpawnFlight(transform.position, skill);
         Debug.Log($"RewardDrop DEBUG: Skill {skill} spawned={spawned}.", this);
+    }
+
+    [ContextMenu("DEBUG Unlocks/Test Normal Skill Drop Filter")]
+    private void DebugTestSkillDropFilter()
+    {
+        bool found = TryRollRandomSkillType(false, out SkillType skill);
+        Debug.Log($"Unlock filter DEBUG: eligible={found}, rolled={(found ? skill.ToString() : "none")}", this);
     }
 
     [ContextMenu("DEBUG Spawn Time Drop")]

@@ -46,9 +46,9 @@ public class SkillFlightManager : MonoBehaviour
 
     [Header("Icons")]
     // Indexed by SkillType (GravitySingularity, MeteorStrike, TimeWarp,
-    // CosmicMimic) — same "array indexed by (int)enum" convention as
+    // CosmicMimic, PlanetReroll, CosmicShield) — same enum-index convention as
     // Planet.planetSprites.
-    [SerializeField] private Sprite[] skillIcons = new Sprite[4];
+    [SerializeField] private Sprite[] skillIcons = new Sprite[8];
     // Zero preserves the legacy shared size on older scenes/prefabs; this
     // project's GameScene is explicitly authored to its existing 150x150.
     [SerializeField] private Vector2 skillIconSize = Vector2.zero;
@@ -174,6 +174,7 @@ public class SkillFlightManager : MonoBehaviour
         image.raycastTarget = false;
         int iconIndex = (int)skill;
         image.sprite = (skillIcons != null && iconIndex >= 0 && iconIndex < skillIcons.Length) ? skillIcons[iconIndex] : null;
+        image.enabled = image.sprite != null;
         image.preserveAspect = true;
 
         var settings = new SkillDropFlightIcon.FlightSettings

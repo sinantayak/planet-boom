@@ -5260,6 +5260,7 @@ GameObject:
   - component: {fileID: 1114684056}
   - component: {fileID: 1114684057}
   - component: {fileID: 1114684058}
+  - component: {fileID: 1114684059}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -5280,9 +5281,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   levels: []
+  useDebugObjectiveOverride: 0
+  debugObjectives: []
+  debugReachTier: 4
+  debugComboValue: 4
+  debugSurvivalSeconds: 10
   blackHoleCenter: {fileID: 1130355245}
   maxBoundaryRadius: 2.38
   outsideTimeLimit: 5
+  cosmicAbductionMaximumCandidateSpeed: 1
   vortexDuration: 3.5
   vortexSwallowsMeteorites: 0
   countdownText: {fileID: 1827558355}
@@ -5333,8 +5340,11 @@ MonoBehaviour:
   gravitySingularityDuration: 2
   gravitySingularityForceMultiplier: 2.5
   timeWarpBonusSeconds: 30
+  cosmicShieldDuration: 15
   blackHole: {fileID: 1130355243}
   launcher: {fileID: 1153348842}
+  boundaryVisualizer: {fileID: 0}
+  cosmicAbductionVisualController: {fileID: 1114684059}
 --- !u!114 &1114684057
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5369,6 +5379,34 @@ MonoBehaviour:
   impactFlashDuration: 0.07
   impactColor: {r: 1, g: 0.35, b: 0.08, a: 1}
   optionalImpactVfxPrefab: {fileID: 0}
+  delayBetweenStrikes: 0.2
+  activationFlashDuration: 0.18
+  activationFlashPeakAlpha: 0.14
+  activationFlashColor: {r: 0.3, g: 0.55, b: 1, a: 1}
+--- !u!114 &1114684059
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1114684053}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64b7f0e2d04f4c5ca9637af59d2c5b81, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::CosmicAbductionVisualController
+  ufoSprite: {fileID: 3901333750411442158, guid: 51beba2c0bb1f31428766ae513b183a9, type: 3}
+  beamSprite: {fileID: 0}
+  ufoScale: 0.3
+  entryViewportPosition: {x: 1.15, y: 1.1}
+  rotationOffset: 0
+  ufoTravelDuration: 0.65
+  hoverHeightAboveTarget: 2
+  beamDuration: 0.25
+  planetPullDuration: 0.55
+  exitDuration: 0.55
+  beamColor: {r: 0.35, g: 0.95, b: 1, a: 0.7}
+  fallbackBeamWidth: 0.35
 --- !u!1 &1130355242
 GameObject:
   m_ObjectHideFlags: 0
@@ -5740,6 +5778,11 @@ MonoBehaviour:
   loadedPlanetRenderer: {fileID: 760694412}
   launcherVisualScaleModifier: 1
   meteoritePreviewScaleModifier: 0.75
+  rerollAnimationDuration: 0.24
+  rerollCurrentStartScale: 0.55
+  rerollNextStartScale: 0.25
+  rerollPopScale: 1.12
+  rerollNextDelay: 0.06
   isRainbowActive: 0
 --- !u!4 &1153348843
 Transform:
@@ -6759,8 +6802,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 115}
-  m_SizeDelta: {x: -300, y: -370}
+  m_AnchoredPosition: {x: 0, y: 15}
+  m_SizeDelta: {x: -300, y: -170}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1288375340
 MonoBehaviour:
@@ -7808,6 +7851,8 @@ MonoBehaviour:
   standardSourceTexturePixels: 2048
   boundaryNormalColor: {r: 1, g: 1, b: 1, a: 0.4}
   boundaryAlertColor: {r: 1, g: 0, b: 0, a: 0.4}
+  noTargetFlashDuration: 0.3
+  noTargetFlashColor: {r: 1, g: 0.05, b: 0.05, a: 0.9}
   vortexRingSpinMultiplier: 1.5
   vortexRingSpinRampUpTime: 1.2
   singularityOrbitRotationSpeed: 50
@@ -9630,6 +9675,10 @@ MonoBehaviour:
   - {fileID: -4888399323542012093, guid: a2ff56318602c2440bdd10258f98566f, type: 3}
   - {fileID: -5968496845031216954, guid: f2393217de5173341a01233d06d720f7, type: 3}
   - {fileID: 4473551675245651988, guid: e93b864f71c5c76419530aeb8c49a349, type: 3}
+  - {fileID: -1251431866702955444, guid: f20ed7885b853c24986aac1b99443f14, type: 3}
+  - {fileID: -587030136245671435, guid: 99ea842d9783d25489f166f71a278751, type: 3}
+  - {fileID: 3284371478744884712, guid: c80045495348bc84787e3c8ddc693fde, type: 3}
+  - {fileID: 7931435193416752984, guid: 98f6249225c30f24ab2c4839cf50c95b, type: 3}
   skillIconSize: {x: 150, y: 150}
   timeDropIconSize: {x: 64, y: 64}
   coinDropIconSize: {x: 64, y: 64}
@@ -9684,6 +9733,10 @@ MonoBehaviour:
   - {fileID: -4888399323542012093, guid: a2ff56318602c2440bdd10258f98566f, type: 3}
   - {fileID: -5968496845031216954, guid: f2393217de5173341a01233d06d720f7, type: 3}
   - {fileID: 4473551675245651988, guid: e93b864f71c5c76419530aeb8c49a349, type: 3}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   unavailableIconColor: {r: 0.35, g: 0.35, b: 0.35, a: 0.75}
   selectedSlotScale: 1.08
   selectedSlotTint: {r: 0.55, g: 0.95, b: 1, a: 1}
@@ -9694,6 +9747,11 @@ MonoBehaviour:
   failureShakeDistance: 10
   failureShakeCycles: 4
   failureFlashColor: {r: 1, g: 0.3, b: 0.3, a: 1}
+  timedEffectRadialSprite: {fileID: -975215847200237586, guid: 365b2a669b424ea4aa2047c2dc82ad2c, type: 3}
+  timedEffectOverlayColor: {r: 0.025, g: 0.045, b: 0.12, a: 0.72}
+  showTimedEffectSeconds: 1
+  timedEffectTextColor: {r: 1, g: 1, b: 1, a: 1}
+  timedEffectTextFontSize: 28
 --- !u!1 &1928186843
 GameObject:
   m_ObjectHideFlags: 0
@@ -9974,6 +10032,10 @@ MonoBehaviour:
   meteorStrikeImpactClip: {fileID: 8300000, guid: dd6f3f3bcc1f1b24f968ead768ce176b, type: 3}
   timeWarpClip: {fileID: 8300000, guid: 461db31c291582c4f934e8ec9ffc499c, type: 3}
   cosmicMimicClip: {fileID: 8300000, guid: ccc191096c16a2c44b9b850684fd7027, type: 3}
+  planetRerollClip: {fileID: 8300000, guid: cd1eb8152050f6b4a8d82c6bb6d787d4, type: 3}
+  cosmicShieldClip: {fileID: 8300000, guid: 323c2a6852b08de4a8b49c5640ef9a58, type: 3}
+  cosmicAbductionClip: {fileID: 8300000, guid: 2f159c146a93e4042a45d27b2aa385d9, type: 3}
+  meteorShowerClip: {fileID: 8300000, guid: 145a44cf93258b44cb7fc5da56da3c18, type: 3}
   coinDropCollectedClip: {fileID: 8300000, guid: 11d650d1f73c66b4a97a64551391f159, type: 3}
   timeDropCollectedClip: {fileID: 8300000, guid: 8d6aab8168bbb9142914c79d0581b2bb, type: 3}
   skillCollectedVolume: 0.9

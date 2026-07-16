@@ -16,6 +16,7 @@ public class SkillInventoryManager : MonoBehaviour
 
     private const string CountKeyPrefix = "SkillInventory.Count.";
     private const string QuickSlotKeyPrefix = "SkillInventory.QuickSlot.";
+    private const string LegacyEmergencyBlastName = "EmergencyBlast";
 
     private readonly Dictionary<SkillType, int> counts = new Dictionary<SkillType, int>();
     private readonly SkillType?[] quickSlots = new SkillType?[QuickSlotCount];
@@ -172,16 +173,29 @@ public class SkillInventoryManager : MonoBehaviour
             counts[type] = Mathf.Max(0, PlayerPrefs.GetInt(CountKey(type), 0));
         }
 
+        int legacyCount = Mathf.Max(0, PlayerPrefs.GetInt(
+            CountKeyPrefix + LegacyEmergencyBlastName, 0));
+        if (legacyCount > 0)
+        {
+            counts[SkillType.CosmicAbduction] = (int)Math.Min(int.MaxValue,
+                (long)counts[SkillType.CosmicAbduction] + legacyCount);
+            SaveCount(SkillType.CosmicAbduction, counts[SkillType.CosmicAbduction]);
+            PlayerPrefs.DeleteKey(CountKeyPrefix + LegacyEmergencyBlastName);
+            PlayerPrefs.Save();
+        }
+
         bool sanitizedSave = false;
         var assigned = new HashSet<SkillType>();
         for (int i = 0; i < QuickSlotCount; i++)
         {
             string saved = PlayerPrefs.GetString(QuickSlotKey(i), string.Empty);
             if (!string.IsNullOrEmpty(saved) &&
-                Enum.TryParse(saved, out SkillType type) &&
+                TryParsePersistedSkillType(saved, out SkillType type) &&
                 IsValidSkillType(type) && assigned.Add(type))
             {
                 quickSlots[i] = type;
+                if (!string.Equals(saved, type.ToString(), StringComparison.Ordinal))
+                    sanitizedSave = true;
             }
             else
             {
@@ -200,6 +214,16 @@ public class SkillInventoryManager : MonoBehaviour
     private static bool IsValidSkillType(SkillType type)
     {
         return Enum.IsDefined(typeof(SkillType), type);
+    }
+
+    private static bool TryParsePersistedSkillType(string saved, out SkillType type)
+    {
+        if (string.Equals(saved, LegacyEmergencyBlastName, StringComparison.Ordinal))
+        {
+            type = SkillType.CosmicAbduction;
+            return true;
+        }
+        return Enum.TryParse(saved, out type) && IsValidSkillType(type);
     }
 
     private static bool IsValidSlotIndex(int slotIndex)
@@ -230,22 +254,36 @@ public class SkillInventoryManager : MonoBehaviour
         foreach (SkillType type in Enum.GetValues(typeof(SkillType)))
             counts[type] = 0;
 
+        int migratedEmergencyBlastCount = 0;
         foreach (SkillQuantityData entry in data.skillInventory)
         {
-            if (entry != null && Enum.TryParse(entry.skillType, out SkillType type) &&
+            if (entry != null && TryParsePersistedSkillType(entry.skillType, out SkillType type) &&
                 IsValidSkillType(type))
             {
-                counts[type] = Mathf.Max(0, entry.quantity);
+                int quantity = Mathf.Max(0, entry.quantity);
+                bool legacyEmergencyBlast = string.Equals(
+                    entry.skillType, LegacyEmergencyBlastName, StringComparison.Ordinal);
+                if (legacyEmergencyBlast)
+                    migratedEmergencyBlastCount = (int)Math.Min(int.MaxValue,
+                        (long)migratedEmergencyBlastCount + quantity);
+                else
+                    counts[type] = Mathf.Max(counts[type], quantity);
+                entry.skillType = type.ToString();
             }
         }
+        counts[SkillType.CosmicAbduction] = (int)Math.Min(int.MaxValue,
+            (long)counts[SkillType.CosmicAbduction] + migratedEmergencyBlastCount);
 
         var assigned = new HashSet<SkillType>();
         for (int i = 0; i < QuickSlotCount; i++)
         {
             string saved = i < data.quickSlots.Count ? data.quickSlots[i] : string.Empty;
-            if (!string.IsNullOrEmpty(saved) && Enum.TryParse(saved, out SkillType type) &&
+            if (!string.IsNullOrEmpty(saved) && TryParsePersistedSkillType(saved, out SkillType type) &&
                 IsValidSkillType(type) && assigned.Add(type))
+            {
                 quickSlots[i] = type;
+                data.quickSlots[i] = type.ToString();
+            }
             else
                 quickSlots[i] = null;
         }
@@ -301,6 +339,10 @@ public class SkillInventoryManager : MonoBehaviour
         if (DebugFunctionKeyPressed(2)) DebugAdd(SkillType.MeteorStrike);
         if (DebugFunctionKeyPressed(3)) DebugAdd(SkillType.TimeWarp);
         if (DebugFunctionKeyPressed(4)) DebugAdd(SkillType.CosmicMimic);
+        if (DebugPlanetRerollAddPressed()) DebugAdd(SkillType.PlanetReroll);
+        if (DebugCosmicShieldAddPressed()) DebugAdd(SkillType.CosmicShield);
+        if (DebugCosmicAbductionAddPressed()) DebugAdd(SkillType.CosmicAbduction);
+        if (DebugMeteorShowerAddPressed()) DebugAdd(SkillType.MeteorShower);
 
         if (DebugFunctionKeyPressed(5)) DebugAssignDefaultSlots();
         if (DebugFunctionKeyPressed(6)) DebugClearSlots();
@@ -318,6 +360,18 @@ public class SkillInventoryManager : MonoBehaviour
         AddSkill(type);
         Debug.Log($"TEMP INVENTORY: added {type}; count={GetCount(type)}.", this);
     }
+
+    [ContextMenu("DEBUG Add Planet Reroll")]
+    private void DebugAddPlanetReroll() => DebugAdd(SkillType.PlanetReroll);
+
+    [ContextMenu("DEBUG Add Cosmic Shield")]
+    private void DebugAddCosmicShield() => DebugAdd(SkillType.CosmicShield);
+
+    [ContextMenu("DEBUG Add Cosmic Abduction")]
+    private void DebugAddCosmicAbduction() => DebugAdd(SkillType.CosmicAbduction);
+
+    [ContextMenu("DEBUG Add Meteor Shower")]
+    private void DebugAddMeteorShower() => DebugAdd(SkillType.MeteorShower);
 
     private void DebugAssignDefaultSlots()
     {
@@ -425,6 +479,78 @@ public class SkillInventoryManager : MonoBehaviour
         if (number == 7 && UnityEngine.Input.GetKeyDown(KeyCode.F7)) return true;
         if (number == 8 && UnityEngine.Input.GetKeyDown(KeyCode.F8)) return true;
         if (number == 9 && UnityEngine.Input.GetKeyDown(KeyCode.F9)) return true;
+#endif
+        return false;
+    }
+
+    private static bool DebugPlanetRerollAddPressed()
+    {
+#if ENABLE_INPUT_SYSTEM
+        Keyboard keyboard = Keyboard.current;
+        if (keyboard != null && keyboard.rKey.wasPressedThisFrame &&
+            (keyboard.leftCtrlKey.isPressed || keyboard.rightCtrlKey.isPressed) &&
+            (keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed))
+            return true;
+#endif
+#if ENABLE_LEGACY_INPUT_MANAGER
+        if (UnityEngine.Input.GetKeyDown(KeyCode.R) &&
+            (UnityEngine.Input.GetKey(KeyCode.LeftControl) || UnityEngine.Input.GetKey(KeyCode.RightControl)) &&
+            (UnityEngine.Input.GetKey(KeyCode.LeftShift) || UnityEngine.Input.GetKey(KeyCode.RightShift)))
+            return true;
+#endif
+        return false;
+    }
+
+    private static bool DebugCosmicShieldAddPressed()
+    {
+#if ENABLE_INPUT_SYSTEM
+        Keyboard keyboard = Keyboard.current;
+        if (keyboard != null && keyboard.kKey.wasPressedThisFrame &&
+            (keyboard.leftCtrlKey.isPressed || keyboard.rightCtrlKey.isPressed) &&
+            (keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed))
+            return true;
+#endif
+#if ENABLE_LEGACY_INPUT_MANAGER
+        if (UnityEngine.Input.GetKeyDown(KeyCode.K) &&
+            (UnityEngine.Input.GetKey(KeyCode.LeftControl) || UnityEngine.Input.GetKey(KeyCode.RightControl)) &&
+            (UnityEngine.Input.GetKey(KeyCode.LeftShift) || UnityEngine.Input.GetKey(KeyCode.RightShift)))
+            return true;
+#endif
+        return false;
+    }
+
+    private static bool DebugCosmicAbductionAddPressed()
+    {
+#if ENABLE_INPUT_SYSTEM
+        Keyboard keyboard = Keyboard.current;
+        if (keyboard != null && keyboard.jKey.wasPressedThisFrame &&
+            (keyboard.leftCtrlKey.isPressed || keyboard.rightCtrlKey.isPressed) &&
+            (keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed))
+            return true;
+#endif
+#if ENABLE_LEGACY_INPUT_MANAGER
+        if (UnityEngine.Input.GetKeyDown(KeyCode.J) &&
+            (UnityEngine.Input.GetKey(KeyCode.LeftControl) || UnityEngine.Input.GetKey(KeyCode.RightControl)) &&
+            (UnityEngine.Input.GetKey(KeyCode.LeftShift) || UnityEngine.Input.GetKey(KeyCode.RightShift)))
+            return true;
+#endif
+        return false;
+    }
+
+    private static bool DebugMeteorShowerAddPressed()
+    {
+#if ENABLE_INPUT_SYSTEM
+        Keyboard keyboard = Keyboard.current;
+        if (keyboard != null && keyboard.mKey.wasPressedThisFrame &&
+            (keyboard.leftCtrlKey.isPressed || keyboard.rightCtrlKey.isPressed) &&
+            (keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed))
+            return true;
+#endif
+#if ENABLE_LEGACY_INPUT_MANAGER
+        if (UnityEngine.Input.GetKeyDown(KeyCode.M) &&
+            (UnityEngine.Input.GetKey(KeyCode.LeftControl) || UnityEngine.Input.GetKey(KeyCode.RightControl)) &&
+            (UnityEngine.Input.GetKey(KeyCode.LeftShift) || UnityEngine.Input.GetKey(KeyCode.RightShift)))
+            return true;
 #endif
         return false;
     }

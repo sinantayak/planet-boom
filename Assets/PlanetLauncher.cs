@@ -128,11 +128,43 @@ public class PlanetLauncher : MonoBehaviour
     // like the planet previews do.
     [SerializeField] [Range(0.1f, 1f)] private float meteoritePreviewScaleModifier = 0.5f;
 
+    [Header("Planet Reroll Feedback")]
+    [SerializeField] [Min(0.05f)] private float rerollAnimationDuration = 0.24f;
+    [SerializeField] [Range(0f, 1f)] private float rerollCurrentStartScale = 0.55f;
+    [SerializeField] [Range(0f, 1f)] private float rerollNextStartScale = 0.25f;
+    [SerializeField] [Range(1f, 1.5f)] private float rerollPopScale = 1.12f;
+    [SerializeField] [Range(0f, 0.2f)] private float rerollNextDelay = 0.06f;
+
     [Header("Skills")]
     // Skill hook: while true, the next launched planet is a wildcard that adopts
     // the tier of whatever planet it touches first. Consumed on launch.
     public bool isRainbowActive;
     public bool IsCosmicMimicQueued => isRainbowActive;
+
+    public void ApplyLevelSpawnConfiguration(PlanetTier configuredMaximumTier,
+        bool meteorsEnabled, float configuredMeteorChance)
+    {
+        highestSpawnTier = configuredMaximumTier;
+        meteoriteSpawnChance = meteorsEnabled ? Mathf.Clamp01(configuredMeteorChance) : 0f;
+        ResetQueue();
+    }
+
+    // Future shield/aura presentation can subscribe without being coupled to
+    // inventory or meteor queue implementation details.
+    public bool IsCosmicShieldActive { get; private set; }
+    public float CosmicShieldRemainingSeconds => IsCosmicShieldActive
+        ? Mathf.Max(0f, cosmicShieldEndsAt - Time.time)
+        : 0f;
+    public float CosmicShieldActiveDurationSeconds { get; private set; }
+    public event System.Action<bool> CosmicShieldStateChanged;
+    private float cosmicShieldEndsAt;
+    private Coroutine rerollFeedbackRoutine;
+    private Vector3 rerollCurrentBaseScale;
+    private Color rerollCurrentBaseColor;
+    private bool rerollCurrentBaseEnabled;
+    private Vector3 rerollNextBaseScale;
+    private Color rerollNextBaseColor;
+    private bool rerollNextBaseEnabled;
 
     public bool TryQueueCosmicMimic()
     {
@@ -143,6 +175,195 @@ public class PlanetLauncher : MonoBehaviour
         RefreshPreviews();
         return true;
     }
+
+    // Discards only the loaded launcher slot; no arena object is spawned.
+    // A pending Cosmic Mimic remains reserved for the earliest normal launch.
+    public bool TryRerollCurrentPlanet()
+    {
+        if (isWaitingForCooldown || isAiming || !isActiveAndEnabled)
+            return false;
+
+        StopRerollFeedbackAndRestore();
+        AdvanceQueue();
+        RefreshPreviews();
+        StartRerollFeedback();
+        AudioManager.Instance?.PlayPlanetRerollSequence();
+        return true;
+    }
+
+    private void StartRerollFeedback()
+    {
+        if (loadedPlanetRenderer == null && nextPlanetUIImg == null)
+            return;
+
+        if (loadedPlanetRenderer != null)
+        {
+            rerollCurrentBaseScale = loadedPlanetRenderer.transform.localScale;
+            rerollCurrentBaseColor = loadedPlanetRenderer.color;
+            rerollCurrentBaseEnabled = loadedPlanetRenderer.enabled;
+        }
+        if (nextPlanetUIImg != null)
+        {
+            rerollNextBaseScale = nextPlanetUIImg.rectTransform.localScale;
+            rerollNextBaseColor = nextPlanetUIImg.color;
+            rerollNextBaseEnabled = nextPlanetUIImg.enabled;
+        }
+        rerollFeedbackRoutine = StartCoroutine(PlayRerollFeedback());
+    }
+
+    private IEnumerator PlayRerollFeedback()
+    {
+        float duration = Mathf.Max(0.05f, rerollAnimationDuration);
+        float elapsed = 0f;
+        try
+        {
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float currentT = SmoothPreviewPop(elapsed / duration);
+                float nextT = SmoothPreviewPop((elapsed - rerollNextDelay) /
+                    Mathf.Max(0.05f, duration - rerollNextDelay));
+
+                ApplyRerollPreviewFrame(loadedPlanetRenderer != null ? loadedPlanetRenderer.transform : null,
+                    rerollCurrentBaseScale, rerollCurrentBaseColor, loadedPlanetRenderer,
+                    rerollCurrentStartScale, currentT);
+                ApplyRerollNextFrame(rerollNextStartScale, nextT);
+                yield return null;
+            }
+        }
+        finally
+        {
+            RestoreRerollPreviewState();
+            rerollFeedbackRoutine = null;
+        }
+    }
+
+    private void ApplyRerollPreviewFrame(Transform preview, Vector3 baseScale, Color baseColor,
+        SpriteRenderer renderer, float startScale, float t)
+    {
+        if (preview == null || renderer == null || !rerollCurrentBaseEnabled)
+            return;
+        float pop = Mathf.Lerp(startScale, 1f, t) + Mathf.Sin(t * Mathf.PI) * (rerollPopScale - 1f);
+        preview.localScale = baseScale * pop;
+        renderer.color = new Color(baseColor.r, baseColor.g, baseColor.b, baseColor.a * t);
+    }
+
+    private void ApplyRerollNextFrame(float startScale, float t)
+    {
+        if (nextPlanetUIImg == null || !rerollNextBaseEnabled)
+            return;
+        float pop = Mathf.Lerp(startScale, 1f, t) + Mathf.Sin(t * Mathf.PI) * (rerollPopScale - 1f);
+        nextPlanetUIImg.rectTransform.localScale = rerollNextBaseScale * pop;
+        Color color = rerollNextBaseColor;
+        nextPlanetUIImg.color = new Color(color.r, color.g, color.b, color.a * t);
+    }
+
+    private static float SmoothPreviewPop(float t)
+    {
+        t = Mathf.Clamp01(t);
+        return t * t * (3f - 2f * t);
+    }
+
+    private void StopRerollFeedbackAndRestore()
+    {
+        if (rerollFeedbackRoutine == null)
+            return;
+        StopCoroutine(rerollFeedbackRoutine);
+        rerollFeedbackRoutine = null;
+        RestoreRerollPreviewState();
+    }
+
+    private void RestoreRerollPreviewState()
+    {
+        if (loadedPlanetRenderer != null)
+        {
+            loadedPlanetRenderer.transform.localScale = rerollCurrentBaseScale;
+            loadedPlanetRenderer.color = rerollCurrentBaseColor;
+            loadedPlanetRenderer.enabled = rerollCurrentBaseEnabled;
+        }
+        if (nextPlanetUIImg != null)
+        {
+            nextPlanetUIImg.rectTransform.localScale = rerollNextBaseScale;
+            nextPlanetUIImg.color = rerollNextBaseColor;
+            nextPlanetUIImg.enabled = rerollNextBaseEnabled;
+        }
+    }
+
+    public bool TryBeginCosmicShield(float duration)
+    {
+        if (duration <= 0f || IsCosmicShieldActive || !isActiveAndEnabled)
+            return false;
+
+        IsCosmicShieldActive = true;
+        CosmicShieldActiveDurationSeconds = duration;
+        cosmicShieldEndsAt = Time.time + duration;
+
+        // Queue entries are only future spawn descriptors, not scene meteors.
+        // Converting them prevents a pre-shield roll from spawning during the
+        // protected window while preserving tiers and Cosmic Mimic state.
+        CurrentIsMeteorite = false;
+        NextIsMeteorite = false;
+        RefreshPreviews();
+        CosmicShieldStateChanged?.Invoke(true);
+        AudioManager.Instance?.PlayCosmicShieldSequence();
+        return true;
+    }
+
+    private void EndCosmicShield()
+    {
+        if (!IsCosmicShieldActive)
+            return;
+
+        IsCosmicShieldActive = false;
+        cosmicShieldEndsAt = 0f;
+        CosmicShieldActiveDurationSeconds = 0f;
+        CosmicShieldStateChanged?.Invoke(false);
+    }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    [ContextMenu("DEBUG Activate Cosmic Shield (15s)")]
+    private void DebugActivateCosmicShield()
+    {
+        Debug.Log($"Cosmic Shield DEBUG: activated={TryBeginCosmicShield(15f)}, " +
+                  $"existingMeteors={FindObjectsByType<Meteorite>(FindObjectsSortMode.None).Length}.", this);
+    }
+
+    [ContextMenu("DEBUG Spawn Three Meteorites")]
+    private void DebugSpawnThreeMeteorites()
+    {
+        if (meteoritePrefab == null)
+        {
+            Debug.LogWarning("Meteor Shower DEBUG: meteoritePrefab is not assigned.", this);
+            return;
+        }
+
+        Vector3 center = blackHole != null ? blackHole.transform.position : transform.position + Vector3.up * 3f;
+        Vector2[] offsets = { new Vector2(-2f, 0.5f), new Vector2(0f, 2.2f), new Vector2(2f, 0.5f) };
+        foreach (Vector2 offset in offsets)
+        {
+            GameObject meteor = Instantiate(meteoritePrefab, center + (Vector3)offset, Quaternion.identity);
+            if (meteor.TryGetComponent(out Rigidbody2D body))
+            {
+                body.linearVelocity = Vector2.zero;
+                body.angularVelocity = 0f;
+            }
+        }
+        Debug.Log("Meteor Shower DEBUG: spawned three meteorites.", this);
+    }
+#endif
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    [ContextMenu("DEBUG Reroll Current Planet")]
+    private void DebugRerollCurrentPlanet()
+    {
+        Debug.Log($"Planet Reroll DEBUG: success={TryRerollCurrentPlanet()}, " +
+                  $"current={QueueLabel(CurrentIsMeteorite, CurrentTier)}, " +
+                  $"next={QueueLabel(NextIsMeteorite, NextTier)}, mimicPending={isRainbowActive}.", this);
+    }
+
+    private static string QueueLabel(bool isMeteorite, PlanetTier tier) =>
+        isMeteorite ? "Meteorite" : tier.ToString();
+#endif
 
     // Preview state: CurrentTier is what the next click fires; NextTier is what
     // follows it (shown in UI later). Both readable by UI code, set only here.
@@ -260,6 +481,16 @@ public class PlanetLauncher : MonoBehaviour
 
     void Update()
     {
+        if (IsCosmicShieldActive)
+        {
+            GameManager.GameState state = GameManager.Instance != null
+                ? GameManager.Instance.State
+                : GameManager.GameState.GameOver;
+            if (Time.time >= cosmicShieldEndsAt ||
+                (state != GameManager.GameState.Playing && state != GameManager.GameState.InventoryPaused))
+                EndCosmicShield();
+        }
+
         // No shooting after a Game Over; also drop a drag that was in progress
         // when the state flipped, so the aim dots don't linger on screen.
         if (GameManager.Instance != null && GameManager.Instance.State != GameManager.GameState.Playing)
@@ -499,11 +730,17 @@ public class PlanetLauncher : MonoBehaviour
     {
         reloadRoutine = null;
         isWaitingForCooldown = false;
+        AdvanceQueue();
+        RefreshPreviews();
+    }
+
+    // Shared by normal reload and Planet Reroll so generation rules cannot drift.
+    private void AdvanceQueue()
+    {
         CurrentTier = NextTier;
         CurrentIsMeteorite = NextIsMeteorite;
         NextTier = PickRandomSpawnTier();
         NextIsMeteorite = RollIsMeteorite();
-        RefreshPreviews();
     }
 
     // Pushes the current queue state into both preview visuals. Sprites come
@@ -511,6 +748,7 @@ public class PlanetLauncher : MonoBehaviour
     // (pure white) — the pre-rendered art must display exactly as authored.
     private void RefreshPreviews()
     {
+        StopRerollFeedbackAndRestore();
         if (loadedPlanetRenderer != null)
         {
             Sprite loadedSprite = isWaitingForCooldown
@@ -644,7 +882,7 @@ public class PlanetLauncher : MonoBehaviour
     // rate per spawn either way.
     private bool RollIsMeteorite()
     {
-        return meteoritePrefab != null && Random.value < meteoriteSpawnChance;
+        return !IsCosmicShieldActive && meteoritePrefab != null && Random.value < meteoriteSpawnChance;
     }
 
     // Full queue reset for level transitions and restarts (called by
@@ -652,6 +890,7 @@ public class PlanetLauncher : MonoBehaviour
     // both queue tiers from scratch, and leaves the launcher armed.
     public void ResetQueue()
     {
+        EndCosmicShield();
         if (reloadRoutine != null)
         {
             StopCoroutine(reloadRoutine);
@@ -679,6 +918,8 @@ public class PlanetLauncher : MonoBehaviour
     // instead — the cooldown's anti-spam job is moot while nobody can shoot.
     void OnDisable()
     {
+        StopRerollFeedbackAndRestore();
+        EndCosmicShield();
         if (isWaitingForCooldown)
         {
             if (reloadRoutine != null)
@@ -691,7 +932,11 @@ public class PlanetLauncher : MonoBehaviour
 
     private PlanetTier PickRandomSpawnTier()
     {
-        return (PlanetTier)Random.Range(0, (int)highestSpawnTier + 1);
+        PlanetTier unlockedMaximum = UnlockManager.Instance != null
+            ? UnlockManager.Instance.GetHighestUnlockedPlanetTier()
+            : PlanetTier.Tier1;
+        int maximum = Mathf.Min((int)highestSpawnTier, (int)unlockedMaximum);
+        return (PlanetTier)Random.Range(0, maximum + 1);
     }
 
     private void UpdateAimLine()

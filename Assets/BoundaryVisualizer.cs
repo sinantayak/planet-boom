@@ -60,6 +60,10 @@ public class BoundaryVisualizer : MonoBehaviour
     [SerializeField] private Color boundaryNormalColor = new Color(1f, 1f, 1f, 0.4f);
     [SerializeField] private Color boundaryAlertColor = new Color(1f, 0f, 0f, 0.4f);
 
+    [Header("Skill No-Target Feedback")]
+    [SerializeField] [Min(0.05f)] private float noTargetFlashDuration = 0.3f;
+    [SerializeField] private Color noTargetFlashColor = new Color(1f, 0.05f, 0.05f, 0.9f);
+
     [Header("Vortex Ring Spin")]
     // Same rate the swirling planets use (BlackHole.VortexSwirlDegreesPerSecond)
     // times this multiplier, so the rings visibly wind up together with the
@@ -99,6 +103,12 @@ public class BoundaryVisualizer : MonoBehaviour
     private Quaternion visualBoundaryInitialRotation;
     private Quaternion innerOrbitInitialRotation;
     private float singularityOrbitRotation;
+    private float noTargetFlashEndsAt;
+
+    public void PlayNoSkillTargetFeedback()
+    {
+        noTargetFlashEndsAt = Time.unscaledTime + noTargetFlashDuration;
+    }
 
     void Awake()
     {
@@ -290,7 +300,15 @@ public class BoundaryVisualizer : MonoBehaviour
 
         GameManager manager = GameManager.Instance;
         bool exceeded = manager != null && manager.IsAnyPlanetBeyondBoundary;
-        visualBoundarySpriteRenderer.color = exceeded ? boundaryAlertColor : boundaryNormalColor;
+        if (Time.unscaledTime < noTargetFlashEndsAt)
+        {
+            float pulse = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 45f);
+            visualBoundarySpriteRenderer.color = Color.Lerp(boundaryAlertColor, noTargetFlashColor, pulse);
+        }
+        else
+        {
+            visualBoundarySpriteRenderer.color = exceeded ? boundaryAlertColor : boundaryNormalColor;
+        }
     }
 
     private static void RotateRing(Transform art, float degrees)
@@ -311,6 +329,7 @@ public class BoundaryVisualizer : MonoBehaviour
 
     void OnDisable()
     {
+        noTargetFlashEndsAt = 0f;
         vortexSpinRampElapsed = 0f;
         singularityOrbitRotation = 0f;
         RestoreRingRotation(visualBoundaryTransform, visualBoundaryInitialRotation);

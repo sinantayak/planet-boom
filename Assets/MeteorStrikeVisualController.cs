@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System;
+using UnityEngine.UI;
 using UnityEngine;
 
 // One visual-only shooting star between SkillManager's automatic targeting
@@ -29,6 +31,12 @@ public class MeteorStrikeVisualController : MonoBehaviour
     [SerializeField] private Color impactColor = new Color(1f, 0.35f, 0.08f, 1f);
     [SerializeField] private ParticleSystem optionalImpactVfxPrefab;
 
+    [Header("Meteor Shower")]
+    [SerializeField] [Min(0f)] private float delayBetweenStrikes = 0.2f;
+    [SerializeField] [Min(0.05f)] private float activationFlashDuration = 0.18f;
+    [SerializeField] [Range(0f, 0.5f)] private float activationFlashPeakAlpha = 0.14f;
+    [SerializeField] private Color activationFlashColor = new Color(0.3f, 0.55f, 1f, 1f);
+
     private sealed class ActiveStrike
     {
         public Meteorite target;
@@ -36,9 +44,13 @@ public class MeteorStrikeVisualController : MonoBehaviour
         public SpriteRenderer projectileRenderer;
         public Color originalColor;
         public GameObject projectile;
+        public Action<Meteorite, bool> onCompleted;
     }
 
     private readonly Dictionary<Meteorite, ActiveStrike> activeStrikes = new Dictionary<Meteorite, ActiveStrike>();
+    private Coroutine meteorShowerRoutine;
+    private Coroutine activationFeedbackRoutine;
+    private GameObject activationCanvasObject;
 
     void Awake()
     {
@@ -53,7 +65,10 @@ public class MeteorStrikeVisualController : MonoBehaviour
 
     void OnDisable()
     {
+        meteorShowerRoutine = null;
+        activationFeedbackRoutine = null;
         StopAllCoroutines();
+        CleanupActivationFeedback();
         var strikes = new List<ActiveStrike>(activeStrikes.Values);
         foreach (ActiveStrike strike in strikes)
             CleanupStrike(strike);
@@ -68,7 +83,7 @@ public class MeteorStrikeVisualController : MonoBehaviour
 
     // Rejecting a second sequence for the same live target prevents duplicate
     // inventory consumption and duplicate destruction.
-    public bool TryPlay(Meteorite target)
+    public bool TryPlay(Meteorite target, Action<Meteorite, bool> onCompleted = null)
     {
         if (!IsValidTarget(target) || activeStrikes.ContainsKey(target))
             return false;
@@ -76,7 +91,8 @@ public class MeteorStrikeVisualController : MonoBehaviour
         var strike = new ActiveStrike
         {
             target = target,
-            targetRenderer = target.GetComponent<SpriteRenderer>()
+            targetRenderer = target.GetComponent<SpriteRenderer>(),
+            onCompleted = onCompleted
         };
         if (strike.targetRenderer != null)
             strike.originalColor = strike.targetRenderer.color;
@@ -90,6 +106,7 @@ public class MeteorStrikeVisualController : MonoBehaviour
 
     private IEnumerator PlaySequence(ActiveStrike strike)
     {
+        bool destroyed = false;
         try
         {
             Vector3 start = strike.projectile.transform.position;
@@ -151,12 +168,125 @@ public class MeteorStrikeVisualController : MonoBehaviour
             {
                 // Existing method remains the only owner of the final
                 // explosion VFX, SFX, physics shutdown and destruction.
-                strike.target.TryDestroyBySkill();
+                destroyed = strike.target.TryDestroyBySkill();
             }
         }
         finally
         {
             CleanupStrike(strike);
+            strike.onCompleted?.Invoke(strike.target, destroyed);
+        }
+    }
+
+    public bool TryPlayMeteorShower()
+    {
+        if (meteorShowerRoutine != null || !IsGameplayPlaying())
+            return false;
+
+        var targets = new List<Meteorite>();
+        foreach (Meteorite meteorite in FindObjectsByType<Meteorite>(FindObjectsSortMode.None))
+        {
+            if (IsValidTarget(meteorite) && !activeStrikes.ContainsKey(meteorite))
+                targets.Add(meteorite);
+        }
+        if (targets.Count == 0)
+            return false;
+
+        targets.Sort((a, b) => a.UniqueId.CompareTo(b.UniqueId));
+        meteorShowerRoutine = StartCoroutine(PlayMeteorShower(targets));
+        StartActivationFeedback();
+        AudioManager.Instance?.PlayMeteorShowerSequence();
+        return true;
+    }
+
+    private void StartActivationFeedback()
+    {
+        CleanupActivationFeedback();
+
+        activationCanvasObject = new GameObject("MeteorShowerActivationFlash",
+            typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+        Canvas canvas = activationCanvasObject.GetComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 500;
+        activationCanvasObject.GetComponent<GraphicRaycaster>().enabled = false;
+
+        GameObject flashObject = new GameObject("Flash", typeof(RectTransform), typeof(Image));
+        RectTransform rect = flashObject.GetComponent<RectTransform>();
+        rect.SetParent(activationCanvasObject.transform, false);
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
+        Image image = flashObject.GetComponent<Image>();
+        image.raycastTarget = false;
+        image.color = new Color(activationFlashColor.r, activationFlashColor.g,
+            activationFlashColor.b, 0f);
+
+        activationFeedbackRoutine = StartCoroutine(PlayActivationFeedback(image));
+    }
+
+    private IEnumerator PlayActivationFeedback(Image image)
+    {
+        float duration = Mathf.Max(0.05f, activationFlashDuration);
+        float elapsed = 0f;
+        try
+        {
+            while (elapsed < duration && image != null && IsGameplayPlaying())
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / duration);
+                float alpha = Mathf.Sin(t * Mathf.PI) * activationFlashPeakAlpha;
+                image.color = new Color(activationFlashColor.r, activationFlashColor.g,
+                    activationFlashColor.b, alpha);
+                yield return null;
+            }
+        }
+        finally
+        {
+            CleanupActivationFeedback();
+            activationFeedbackRoutine = null;
+        }
+    }
+
+    private void CleanupActivationFeedback()
+    {
+        if (activationCanvasObject != null)
+            Destroy(activationCanvasObject);
+        activationCanvasObject = null;
+    }
+
+    private IEnumerator PlayMeteorShower(List<Meteorite> targets)
+    {
+        try
+        {
+            foreach (Meteorite target in targets)
+            {
+                if (!IsGameplayPlaying())
+                    yield break;
+                if (!IsValidTarget(target) || activeStrikes.ContainsKey(target))
+                    continue;
+
+                bool completed = false;
+                if (!TryPlay(target, (_, __) => completed = true))
+                    continue;
+
+                while (!completed && IsGameplayPlaying())
+                    yield return null;
+                if (!IsGameplayPlaying())
+                    yield break;
+
+                float delay = Mathf.Max(0f, delayBetweenStrikes);
+                float elapsed = 0f;
+                while (elapsed < delay && IsGameplayPlaying())
+                {
+                    elapsed += Time.deltaTime;
+                    yield return null;
+                }
+            }
+        }
+        finally
+        {
+            meteorShowerRoutine = null;
         }
     }
 
@@ -250,9 +380,12 @@ public class MeteorStrikeVisualController : MonoBehaviour
 
     private static bool IsValidTarget(Meteorite target)
     {
-        return target != null && target.gameObject.activeInHierarchy &&
+        return IsGameplayPlaying() && target != null && target.gameObject.activeInHierarchy &&
                !target.IsBeingAbsorbed && !target.IsAbsorbing;
     }
+
+    private static bool IsGameplayPlaying() =>
+        GameManager.Instance != null && GameManager.Instance.State == GameManager.GameState.Playing;
 
     private void CleanupStrike(ActiveStrike strike)
     {

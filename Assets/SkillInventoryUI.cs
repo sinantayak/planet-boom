@@ -36,6 +36,13 @@ public class SkillInventoryUI : MonoBehaviour
     [SerializeField] private float failureShakeCycles = 4f;
     [SerializeField] private Color failureFlashColor = new Color(1f, 0.3f, 0.3f, 1f);
 
+    [Header("Timed Effect Radial Indicator")]
+    [SerializeField] private Sprite timedEffectRadialSprite;
+    [SerializeField] private Color timedEffectOverlayColor = new Color(0.025f, 0.045f, 0.12f, 0.72f);
+    [SerializeField] private bool showTimedEffectSeconds = true;
+    [SerializeField] private Color timedEffectTextColor = Color.white;
+    [SerializeField] [Min(8f)] private float timedEffectTextFontSize = 28f;
+
     // Hooks for Phase 3C feedback (shake/toast/audio). UI does not invent a
     // failure animation yet, but callers receive the exact failed operation.
     public event Action<int, SkillType?> QuickSlotUseFailed;
@@ -64,6 +71,7 @@ public class SkillInventoryUI : MonoBehaviour
         public Vector2 basePosition;
         public Color baseFrameColor;
         public Coroutine feedbackRoutine;
+        public TimedEffectRadialIndicator timedEffectIndicator;
     }
 
     private sealed class EntryView
@@ -84,6 +92,7 @@ public class SkillInventoryUI : MonoBehaviour
     private readonly List<ButtonBinding> buttonBindings = new List<ButtonBinding>();
 
     private SkillInventoryManager inventory;
+    private PlanetLauncher shieldLauncher;
     private GameObject popupRoot;
     private TextMeshProUGUI chestCountText;
     private Button popupCloseButton;
@@ -101,16 +110,19 @@ public class SkillInventoryUI : MonoBehaviour
     void Start()
     {
         BindInventory();
+        BindShieldLauncher();
     }
 
     void OnEnable()
     {
         BindInventory();
+        BindShieldLauncher();
     }
 
     void OnDisable()
     {
         ResetAllHudFeedback();
+        UnbindShieldLauncher();
         UnbindInventory();
         ClosePopup();
     }
@@ -203,6 +215,8 @@ public class SkillInventoryUI : MonoBehaviour
         if (succeeded && assignment.HasValue)
         {
             PlayHudSlotFeedback(slotIndex, true);
+            if (assignment.Value == SkillType.CosmicShield)
+                StartCosmicShieldIndicator(slotIndex);
             QuickSlotUseSucceeded?.Invoke(slotIndex, assignment.Value);
         }
         else
@@ -289,8 +303,8 @@ public class SkillInventoryUI : MonoBehaviour
         bool assigned = inventory.TryGetQuickSlot(index, out SkillType type);
         int count = assigned ? inventory.GetCount(type) : 0;
 
-        view.icon.enabled = assigned || emptySlotSprite != null;
         view.icon.sprite = assigned ? IconFor(type) : emptySlotSprite;
+        view.icon.enabled = view.icon.sprite != null;
         view.icon.color = assigned && count <= 0 ? unavailableIconColor : Color.white;
         view.badgeRoot.SetActive(assigned);
         view.countText.text = count.ToString();
@@ -311,6 +325,7 @@ public class SkillInventoryUI : MonoBehaviour
             return;
         int count = inventory.GetCount(type);
         view.icon.sprite = IconFor(type);
+        view.icon.enabled = view.icon.sprite != null;
         view.icon.color = count > 0 ? Color.white : unavailableIconColor;
         view.countText.text = count.ToString();
     }
@@ -345,7 +360,11 @@ public class SkillInventoryUI : MonoBehaviour
         if (hudBar != null)
         {
             for (int i = 0; i < SkillInventoryManager.QuickSlotCount && i < hudBar.childCount; i++)
-                hudSlots.Add(ResolveSlotView(hudBar.GetChild(i)));
+            {
+                SlotView view = ResolveSlotView(hudBar.GetChild(i));
+                ConfigureTimedEffectIndicator(view);
+                hudSlots.Add(view);
+            }
         }
 
         Transform popup = canvasRoot.Find("SkillInventoryPopup");
@@ -370,6 +389,10 @@ public class SkillInventoryUI : MonoBehaviour
         Transform content = panel.Find("SkillGridViewport/Content");
         if (content != null)
         {
+            EnsureSkillGridEntry(content, SkillType.PlanetReroll);
+            EnsureSkillGridEntry(content, SkillType.CosmicShield);
+            EnsureSkillGridEntry(content, SkillType.CosmicAbduction);
+            EnsureSkillGridEntry(content, SkillType.MeteorShower);
             foreach (SkillType type in Enum.GetValues(typeof(SkillType)))
             {
                 Transform entry = content.Find(type.ToString());
@@ -385,6 +408,21 @@ public class SkillInventoryUI : MonoBehaviour
 
         Transform badge = chestButton != null ? chestButton.transform.Find("TotalSkillBadge/Count") : null;
         chestCountText = badge != null ? badge.GetComponent<TextMeshProUGUI>() : null;
+    }
+
+    // Older authored scenes have the original four entries. Reuse that exact
+    // layout for the appended skill; its icon remains Inspector-assigned.
+    private static void EnsureSkillGridEntry(Transform content, SkillType type)
+    {
+        if (content.Find(type.ToString()) != null)
+            return;
+
+        Transform template = content.Find(nameof(SkillType.CosmicMimic));
+        if (template == null)
+            return;
+
+        GameObject clone = Instantiate(template.gameObject, content);
+        clone.name = type.ToString();
     }
 
     private static SlotView ResolveSlotView(Transform root)
@@ -405,6 +443,56 @@ public class SkillInventoryUI : MonoBehaviour
             basePosition = rect != null ? rect.anchoredPosition : Vector2.zero,
             baseFrameColor = frame != null ? frame.color : Color.white
         };
+    }
+
+    private void ConfigureTimedEffectIndicator(SlotView view)
+    {
+        if (view == null || view.root == null || view.icon == null)
+            return;
+        view.timedEffectIndicator = view.root.GetComponent<TimedEffectRadialIndicator>();
+        if (view.timedEffectIndicator == null)
+            view.timedEffectIndicator = view.root.gameObject.AddComponent<TimedEffectRadialIndicator>();
+        view.timedEffectIndicator.Initialize(view.icon, timedEffectRadialSprite, timedEffectOverlayColor,
+            showTimedEffectSeconds, timedEffectTextColor, timedEffectTextFontSize);
+    }
+
+    private void BindShieldLauncher()
+    {
+        PlanetLauncher current = FindFirstObjectByType<PlanetLauncher>();
+        if (shieldLauncher == current)
+            return;
+        UnbindShieldLauncher();
+        shieldLauncher = current;
+        if (shieldLauncher != null)
+            shieldLauncher.CosmicShieldStateChanged += HandleCosmicShieldStateChanged;
+    }
+
+    private void UnbindShieldLauncher()
+    {
+        if (shieldLauncher != null)
+            shieldLauncher.CosmicShieldStateChanged -= HandleCosmicShieldStateChanged;
+        shieldLauncher = null;
+    }
+
+    private void HandleCosmicShieldStateChanged(bool active)
+    {
+        if (active)
+            return;
+        foreach (SlotView view in hudSlots)
+            view.timedEffectIndicator?.Clear();
+    }
+
+    private void StartCosmicShieldIndicator(int slotIndex)
+    {
+        BindShieldLauncher();
+        if (shieldLauncher == null || !shieldLauncher.IsCosmicShieldActive ||
+            slotIndex < 0 || slotIndex >= hudSlots.Count)
+            return;
+
+        hudSlots[slotIndex].timedEffectIndicator?.Begin(
+            shieldLauncher.CosmicShieldActiveDurationSeconds,
+            () => shieldLauncher != null ? shieldLauncher.CosmicShieldRemainingSeconds : 0f,
+            () => shieldLauncher != null && shieldLauncher.IsCosmicShieldActive);
     }
 
     private void PlayHudSlotFeedback(int slotIndex, bool succeeded)

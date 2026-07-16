@@ -5,6 +5,20 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
 
+public readonly struct StarRatingEvaluationContext
+{
+    public int LevelNumber { get; }
+    public int BaseRating { get; }
+    public int MaximumRating { get; }
+
+    public StarRatingEvaluationContext(int levelNumber, int baseRating, int maximumRating)
+    {
+        LevelNumber = levelNumber;
+        BaseRating = baseRating;
+        MaximumRating = maximumRating;
+    }
+}
+
 // One authored level: the planets the player must CREATE (via merging) to
 // clear it. Order is cosmetic — it drives the left-to-right slot layout on
 // the MissionHUD. Duplicates are legal and rendered as separate slots (two
@@ -34,6 +48,10 @@ public class LevelDefinition
 // else is self-driven.
 public class GameManager : MonoBehaviour
 {
+    // Criteria calculate a base result first. Run effects may improve that
+    // result through this hook, but CalculateStarRating clamps every response
+    // so no modifier can reduce an earned rating or exceed the rating scale.
+    public static event System.Func<StarRatingEvaluationContext, int, int> ModifyStarRating;
     // CinematicVortex: the moment between "last target fulfilled" and the win
     // popup — the black hole spins up and swallows the board while all input
     // and lose checks are frozen (every gameplay system already gates on
@@ -65,6 +83,20 @@ public class GameManager : MonoBehaviour
     // configuration (BuildDefaultLevels). Levels past the end of this list
     // replay the last authored one so the game never runs out.
     [SerializeField] private List<LevelDefinition> levels = new List<LevelDefinition>();
+    [Header("Data-Driven Campaign")]
+    [SerializeField] private LevelConfigurationCatalog levelCatalog;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    [SerializeField] private LevelConfiguration debugLevelConfiguration;
+    private LevelConfiguration debugLevelOverride;
+#endif
+    public LevelConfiguration ActiveLevelConfiguration { get; private set; }
+    public string ActiveBackgroundId => ActiveLevelConfiguration != null ? ActiveLevelConfiguration.backgroundId : "default";
+    public string ActiveOrbitId => ActiveLevelConfiguration != null ? ActiveLevelConfiguration.orbitId : "default";
+    public long ActiveBaseSpaceCoinReward => ActiveLevelConfiguration != null ? ActiveLevelConfiguration.baseSpaceCoinReward : 0;
+
+    [Header("Star Rating Booster Integration")]
+    [SerializeField, Range(0, 2)] private int starBoosterRatingAdvantage = 1;
+    public int StarBoosterRatingAdvantage => Mathf.Clamp(starBoosterRatingAdvantage, 0, 2);
 
     [Header("Objective Debug (Editor / Development)")]
     [SerializeField] private bool useDebugObjectiveOverride;
@@ -78,6 +110,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Transform blackHoleCenter;
     [SerializeField] private float maxBoundaryRadius = 6f;
     [SerializeField] private float outsideTimeLimit = 2f;
+
+    [Header("Cosmic Abduction Targeting")]
+    [SerializeField] [Min(0f)] private float cosmicAbductionMaximumCandidateSpeed = 1f;
 
     [Header("Level Complete Vortex")]
     // Seconds the CinematicVortex phase runs before the win popup appears —
@@ -191,6 +226,7 @@ public class GameManager : MonoBehaviour
     // LoadLevel so ticking and star math never index back into the list.
     private float currentTimeLimit;
     private float currentThreeStarThreshold;
+    private int lastEarnedStars;
     private float timeScaleBeforeInventoryPause = 1f;
     private Vector3 gameplayTimerBaseScale = Vector3.one;
     private Coroutine timeWarpFeedbackRoutine;
@@ -201,6 +237,142 @@ public class GameManager : MonoBehaviour
     // an unbroken stretch outside, not a lifetime total.
     private readonly Dictionary<Planet, float> outsideTimers = new Dictionary<Planet, float>();
     private readonly List<Planet> staleTimerKeys = new List<Planet>();
+
+    // Selection and final removal are deliberately separate. A future UFO
+    // controller can reserve the target, animate it, then call Complete.
+    public bool TryReserveCosmicAbductionTarget(out Planet reservedPlanet)
+    {
+        reservedPlanet = null;
+        if (State != GameState.Playing || blackHoleCenter == null)
+            return false;
+
+        float bestDistance = float.NegativeInfinity;
+        foreach (Planet planet in FindObjectsByType<Planet>(FindObjectsSortMode.None))
+        {
+            if (!IsEligibleCosmicAbductionTarget(planet, out float distance))
+                continue;
+
+            if (distance > bestDistance)
+            {
+                reservedPlanet = planet;
+                bestDistance = distance;
+            }
+        }
+
+        if (reservedPlanet == null)
+            return false;
+
+        outsideTimers.Remove(reservedPlanet);
+        if (reservedPlanet.TryGetComponent(out PlanetMerge merge))
+            merge.PrepareForDespawn();
+        IsAnyPlanetBeyondBoundary = HasLiveOutsidePlanet();
+        Debug.Log($"Cosmic Abduction reserved {reservedPlanet.CurrentTier} at distance {bestDistance:F2}.", this);
+        return true;
+    }
+
+    public bool CompleteCosmicAbduction(Planet reservedPlanet)
+    {
+        if (reservedPlanet == null)
+            return false;
+        Destroy(reservedPlanet.gameObject);
+        return true;
+    }
+
+    private bool IsEligibleCosmicAbductionTarget(Planet planet, out float distance)
+    {
+        distance = 0f;
+        if (planet == null || !planet.gameObject.activeInHierarchy)
+            return false;
+
+        if (planet.TryGetComponent(out PlanetMerge merge) &&
+            (merge.IsBeingAbsorbed || merge.IsAbsorbing))
+            return false;
+
+        Rigidbody2D body = planet.GetComponent<Rigidbody2D>();
+        if (body == null || !body.simulated)
+            return false;
+
+        // Settled bodies are always board members. Unsettled bodies must be
+        // slow enough that they are no longer an active launcher projectile.
+        if (!planet.IsSettled && body.linearVelocity.magnitude > cosmicAbductionMaximumCandidateSpeed)
+            return false;
+
+        distance = Vector2.Distance(planet.transform.position, blackHoleCenter.position);
+        return true;
+    }
+
+    private bool HasLiveOutsidePlanet()
+    {
+        foreach (KeyValuePair<Planet, float> pair in outsideTimers)
+            if (pair.Key != null && pair.Key.gameObject.activeInHierarchy)
+                return true;
+        return false;
+    }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    [ContextMenu("DEBUG Cosmic Abduction/Arrange Fresh Incoming Planet")]
+    private void DebugArrangeFreshIncomingAbductionTest()
+    {
+        Planet[] planets = FindObjectsByType<Planet>(FindObjectsSortMode.None);
+        Vector2 outward = Vector2.up;
+        bool arranged = planets.Length > 0 && DebugPlaceAbductionPlanet(
+            planets[0], outward, maxBoundaryRadius + 1f, -outward * 7f);
+        outsideTimers.Clear();
+        Debug.Log($"Cosmic Abduction DEBUG: fresh fast incoming planet arranged={arranged}; " +
+                  "it must not be selected while moving inward.", this);
+    }
+
+    [ContextMenu("DEBUG Cosmic Abduction/Arrange Multiple Valid Planets")]
+    private void DebugArrangeMultipleAbductionTargets()
+    {
+        Planet[] planets = FindObjectsByType<Planet>(FindObjectsSortMode.None);
+        int count = 0;
+        if (planets.Length > 0 && DebugPlaceAbductionPlanet(
+                planets[0], Vector2.right, maxBoundaryRadius * 0.45f, Vector2.zero)) count++;
+        if (planets.Length > 1 && DebugPlaceAbductionPlanet(
+                planets[1], Vector2.up, maxBoundaryRadius * 0.8f, Vector2.zero)) count++;
+        outsideTimers.Clear();
+        Debug.Log($"Cosmic Abduction DEBUG: arranged {count} valid planets; the outermost must be selected.", this);
+    }
+
+    [ContextMenu("DEBUG Cosmic Abduction/Arrange No Valid Planets")]
+    private void DebugArrangeNoAbductionTargets()
+    {
+        Planet[] planets = FindObjectsByType<Planet>(FindObjectsSortMode.None);
+        float radius = Mathf.Max(0.5f, maxBoundaryRadius * 0.45f);
+        for (int i = 0; i < planets.Length; i++)
+        {
+            float angle = planets.Length > 0 ? 2f * Mathf.PI * i / planets.Length : 0f;
+            DebugPlaceAbductionPlanet(planets[i], new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)),
+                radius, Vector2.right * 7f);
+        }
+        outsideTimers.Clear();
+        IsAnyPlanetBeyondBoundary = false;
+        UpdateCountdownUI(-1f);
+        Debug.Log("Cosmic Abduction DEBUG: all normal planets are fast/ineligible.", this);
+    }
+
+    [ContextMenu("DEBUG Cosmic Abduction/Log Meteor Exclusion")]
+    private void DebugLogCosmicAbductionMeteorExclusion()
+    {
+        int meteorCount = FindObjectsByType<Meteorite>(FindObjectsSortMode.None).Length;
+        Debug.Log($"Cosmic Abduction DEBUG: {meteorCount} meteor(s) present; target scan only enumerates Planet components.", this);
+    }
+
+    private bool DebugPlaceAbductionPlanet(Planet planet, Vector2 outward, float distance, Vector2 velocity)
+    {
+        if (planet == null || blackHoleCenter == null ||
+            !planet.TryGetComponent(out Rigidbody2D body))
+            return false;
+
+        outward = outward.sqrMagnitude > 0f ? outward.normalized : Vector2.right;
+        planet.transform.position = (Vector2)blackHoleCenter.position + outward * distance;
+        body.simulated = true;
+        body.linearVelocity = velocity;
+        body.angularVelocity = 0f;
+        return true;
+    }
+#endif
 
     void Awake()
     {
@@ -863,6 +1035,9 @@ public class GameManager : MonoBehaviour
         // the moment State leaves Playing, so this reads the true finish time
         // no matter how long the cinematic runs.
         int starsEarned = CalculateStarRating();
+        lastEarnedStars = starsEarned;
+        GrantActiveLevelUnlockRewards();
+        BoosterInventoryManager.Instance?.EndCurrentRun();
         PlayerDataPersistenceManager.Instance?.RecordLevelCompleted(CurrentLevelNumber, starsEarned);
         Debug.Log($"GameManager: LEVEL {CurrentLevelNumber} COMPLETE! " +
                   $"Cleared in {currentTimeLimit - RemainingTime:F1}s of {currentTimeLimit:F0}s " +
@@ -929,11 +1104,31 @@ public class GameManager : MonoBehaviour
     private int CalculateStarRating()
     {
         float timePassed = currentTimeLimit - RemainingTime;
-        if (timePassed <= currentThreeStarThreshold)
-            return 3;
-        if (timePassed <= currentThreeStarThreshold * 2f)
-            return 2;
-        return 1;
+        int baseRating = ActiveLevelConfiguration != null && ActiveLevelConfiguration.starCriteria != null
+            ? ActiveLevelConfiguration.starCriteria.Evaluate(timePassed, RemainingTime)
+            : timePassed <= currentThreeStarThreshold ? 3 : timePassed <= currentThreeStarThreshold * 2f ? 2 : 1;
+
+        int rating = baseRating;
+        var context = new StarRatingEvaluationContext(CurrentLevelNumber, baseRating, 3);
+        if (ModifyStarRating != null)
+        {
+            foreach (System.Func<StarRatingEvaluationContext, int, int> modifier in ModifyStarRating.GetInvocationList())
+                rating = Mathf.Clamp(modifier(context, rating), rating, context.MaximumRating);
+        }
+        return rating;
+    }
+
+    private void GrantActiveLevelUnlockRewards()
+    {
+        if (ActiveLevelConfiguration?.unlockRewards == null || UnlockManager.Instance == null) return;
+        foreach (LevelUnlockReward reward in ActiveLevelConfiguration.unlockRewards)
+            if (reward != null && !string.IsNullOrWhiteSpace(reward.stableContentId)) UnlockManager.Instance.Unlock(reward.CanonicalId);
+    }
+
+    public bool TryCommitConfiguredLevelReward(out long committedTotal)
+    {
+        long starReward = ActiveLevelConfiguration?.starCriteria?.CoinRewardFor(lastEarnedStars) ?? 0;
+        return TryCommitLevelReward(ActiveBaseSpaceCoinReward, starReward, out committedTotal);
     }
 
     // Wired to the Level Completed popup's NEXT button. Public and state-
@@ -1034,6 +1229,7 @@ public class GameManager : MonoBehaviour
         // LoadLevel always represents a fresh run (initial load, next/back,
         // replay, or hard restart). Game Over itself deliberately does not
         // reset this value so a future Continue can keep the same run alive.
+        BoosterInventoryManager.Instance?.EndCurrentRun();
         DiscardLevelEarnedCoins();
         CurrentLevelNumber = levelNumber;
         activeTargets.Clear();
@@ -1041,19 +1237,31 @@ public class GameManager : MonoBehaviour
         activeObjectives.Clear();
         missionReachObjectives.Clear();
 
-        if (levels.Count == 0)
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        ActiveLevelConfiguration = debugLevelOverride != null ? debugLevelOverride :
+            (levelCatalog != null ? levelCatalog.FindByNumber(levelNumber) : null);
+        debugLevelOverride = null;
+#else
+        ActiveLevelConfiguration = levelCatalog != null ? levelCatalog.FindByNumber(levelNumber) : null;
+#endif
+        if (ActiveLevelConfiguration == null && levels.Count == 0)
         {
             Debug.LogWarning("GameManager: no levels defined — mission progression disabled.");
             return;
         }
 
         // Past the authored list, replay the last level.
-        LevelDefinition source = levels[Mathf.Min(levelNumber - 1, levels.Count - 1)];
+        LevelDefinition source = ActiveLevelConfiguration != null
+            ? new LevelDefinition { timeLimit = ActiveLevelConfiguration.timeLimit, objectives = ActiveLevelConfiguration.objectives }
+            : levels[Mathf.Min(levelNumber - 1, levels.Count - 1)];
 
         // Per-level timing, floored defensively so a mis-authored 0 can't
         // produce an instant game over or a degenerate star bracket.
         currentTimeLimit = Mathf.Max(1f, source.timeLimit);
         currentThreeStarThreshold = Mathf.Clamp(source.threeStarThreshold, 1f, currentTimeLimit);
+        if (ActiveLevelConfiguration != null && launcher != null)
+            launcher.ApplyLevelSpawnConfiguration(ActiveLevelConfiguration.maximumSpawnTier,
+                ActiveLevelConfiguration.meteorsEnabled, ActiveLevelConfiguration.meteorSpawnChance);
 
         // Fresh clock for every level entry — this is the single reset point,
         // and both AdvanceToNextLevel and RestartGame funnel through here.
@@ -1076,6 +1284,39 @@ public class GameManager : MonoBehaviour
 
         Debug.Log($"GameManager: Level {levelNumber} started. Mission: {DescribeTargets()}");
     }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    [ContextMenu("DEBUG Level Config/Load Assigned Configuration")]
+    private void DebugLoadAssignedConfiguration()
+    {
+        if (debugLevelConfiguration == null) { Debug.LogWarning("Assign Debug Level Configuration first.", this); return; }
+        debugLevelOverride = debugLevelConfiguration;
+        LoadLevel(debugLevelConfiguration.levelNumber);
+    }
+
+    [ContextMenu("DEBUG Level Config/Log Active")]
+    private void DebugLogActiveConfiguration()
+    {
+        if (ActiveLevelConfiguration == null) { Debug.Log("No active data-driven level configuration; legacy fallback is active.", this); return; }
+        Debug.Log($"LevelConfig {ActiveLevelConfiguration.stableId}: level={ActiveLevelConfiguration.levelNumber}, sector={ActiveLevelConfiguration.sectorId}, " +
+                  $"time={ActiveLevelConfiguration.timeLimit}, maxTier={ActiveLevelConfiguration.maximumSpawnTier}, meteors={ActiveLevelConfiguration.meteorsEnabled}/{ActiveLevelConfiguration.meteorSpawnChance:P0}, " +
+                  $"baseCoin={ActiveLevelConfiguration.baseSpaceCoinReward}, bg={ActiveLevelConfiguration.backgroundId}, orbit={ActiveLevelConfiguration.orbitId}", this);
+    }
+
+    [ContextMenu("DEBUG Level Config/Validate Catalog")]
+    private void DebugValidateCatalog()
+    {
+        if (levelCatalog == null) { Debug.LogWarning("No Level Catalog assigned.", this); return; }
+        var ids = new HashSet<string>(); var numbers = new HashSet<int>(); int errors = 0;
+        foreach (LevelConfiguration config in levelCatalog.levels)
+        {
+            string message = "configuration reference is null";
+            if (config == null || !config.Validate(out message)) { Debug.LogError($"Invalid level config {(config != null ? config.name : "null")}: {message}", config); errors++; continue; }
+            if (!ids.Add(config.stableId) || !numbers.Add(config.levelNumber)) { Debug.LogError($"Duplicate level ID/number: {config.stableId}/{config.levelNumber}", config); errors++; }
+        }
+        Debug.Log($"Level Catalog validation finished: {levelCatalog.levels.Count} entries, {errors} error(s).", this);
+    }
+#endif
 
     private void BuildObjectives(LevelDefinition source)
     {
