@@ -198,9 +198,29 @@ public class Planet : MonoBehaviour
     // drifting away before actually coming to rest).
     private readonly HashSet<Collider2D> pileContacts = new HashSet<Collider2D>();
 
+    // Broader live contact state for boundary-danger presentation. Unlike
+    // pileContacts, this includes any Planet/Meteorite contact regardless of
+    // whether the neighbor has settled. Stay callbacks refresh the timestamp,
+    // so congestion support is robust and not a one-frame Enter-only signal.
+    private readonly HashSet<Collider2D> boardBodyContacts = new HashSet<Collider2D>();
+    private float lastBoardBodyContactTime = float.NegativeInfinity;
+
     // Read by BlackHole so it knows whether — and how much — of its pull to
     // apply this step. See settledGravityFalloff above for the decay option.
     public bool IsSettled => isSettled;
+    public bool HasCurrentBoardBodyContact
+    {
+        get
+        {
+            boardBodyContacts.RemoveWhere(contact => contact == null);
+            return boardBodyContacts.Count > 0;
+        }
+    }
+
+    public bool HadBoardBodyContactRecently(float seconds)
+    {
+        return seconds > 0f && Time.time - lastBoardBodyContactTime <= seconds;
+    }
 
     private float WorldRadius => circleCollider != null ? circleCollider.radius * transform.lossyScale.x : 0f;
 
@@ -364,11 +384,13 @@ public class Planet : MonoBehaviour
         }
 
         UpdatePileContact(collision);
+        UpdateBoardBodyContact(collision);
     }
 
     void OnCollisionStay2D(Collision2D collision)
     {
         UpdatePileContact(collision);
+        UpdateBoardBodyContact(collision);
     }
 
     // Contact ending is exactly as informative as contact starting for a live
@@ -377,6 +399,21 @@ public class Planet : MonoBehaviour
     void OnCollisionExit2D(Collision2D collision)
     {
         pileContacts.Remove(collision.collider);
+        boardBodyContacts.Remove(collision.collider);
+    }
+
+    private void UpdateBoardBodyContact(Collision2D collision)
+    {
+        if (collision.gameObject.TryGetComponent<Planet>(out _) ||
+            collision.gameObject.TryGetComponent<Meteorite>(out _))
+        {
+            boardBodyContacts.Add(collision.collider);
+            lastBoardBodyContactTime = Time.time;
+        }
+        else
+        {
+            boardBodyContacts.Remove(collision.collider);
+        }
     }
 
     // Part of the live settle-contact gate (see pileContacts): touching a

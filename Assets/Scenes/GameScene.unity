@@ -5293,6 +5293,7 @@ MonoBehaviour:
   maxBoundaryRadius: 2.38
   outsideTimeLimit: 5
   cosmicAbductionMaximumCandidateSpeed: 1
+  boundaryRecentContactMemory: 1
   vortexDuration: 3.5
   vortexSwallowsMeteorites: 0
   countdownText: {fileID: 1827558355}

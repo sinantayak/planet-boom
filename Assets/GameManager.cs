@@ -111,8 +111,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private float maxBoundaryRadius = 6f;
     [SerializeField] private float outsideTimeLimit = 2f;
 
-    [Header("Cosmic Abduction Targeting")]
-    [SerializeField] [Min(0f)] private float cosmicAbductionMaximumCandidateSpeed = 1f;
+    [Header("Boundary Projectile Classification")]
+    [SerializeField] [Min(0f)] private float boundaryRecentContactMemory = 1f;
 
     [Header("Level Complete Vortex")]
     // Seconds the CinematicVortex phase runs before the win popup appears —
@@ -314,24 +314,21 @@ public class GameManager : MonoBehaviour
         return false;
     }
 
-    // Central incoming-launch classification shared by CRITICAL feedback and
-    // boundary-related targeting. A fast unsettled body only receives launch
-    // protection while it has meaningful radial movement toward the core;
-    // outward, stalled and settled bodies are never mistaken for safe entry.
+    // Central launcher-flight classification shared by CRITICAL feedback and
+    // boundary-related targeting. It covers both the initial inward leg and an
+    // opposite-side ballistic arc and its near-zero-speed apex: a freely
+    // travelling, unsettled body with no current/recent board contact remains
+    // normal projectile motion. Low speed alone is not congestion evidence.
     private bool IsNormalIncomingPlanet(Planet planet, Rigidbody2D body)
     {
         if (planet == null || planet.IsSettled || body == null || !body.simulated ||
             blackHoleCenter == null)
             return false;
-
-        Vector2 toCenter = (Vector2)blackHoleCenter.position - body.position;
-        if (toCenter.sqrMagnitude < 0.0001f)
+        if (planet.HasCurrentBoardBodyContact ||
+            planet.HadBoardBodyContactRecently(boundaryRecentContactMemory))
             return false;
 
-        float speedThreshold = Mathf.Max(0f, cosmicAbductionMaximumCandidateSpeed);
-        float inwardSpeed = Vector2.Dot(body.linearVelocity, toCenter.normalized);
-        return body.linearVelocity.magnitude > speedThreshold &&
-               inwardSpeed > speedThreshold * 0.25f;
+        return true;
     }
 
     private bool IsGenuineBoundaryDanger(Planet planet, Rigidbody2D body,
@@ -343,17 +340,24 @@ public class GameManager : MonoBehaviour
             return true;
 
         // Suppress single-frame flashes for every fresh crossing. Once this
-        // short grace passes, stalled/outward bodies warn immediately.
+        // short grace passes, settled or contact-marked bodies warn. A free
+        // projectile does not become dangerous merely because it reaches the
+        // low-speed apex of its ballistic path.
         float flashGrace = Mathf.Min(0.25f, Mathf.Max(0f, outsideTimeLimit) * 0.25f);
         if (continuousOutsideTime < flashGrace)
             return false;
 
+        // Active support/blocking outside the ring is congestion danger even
+        // if the body still has residual speed from the collision.
+        if (planet.HasCurrentBoardBodyContact)
+            return true;
+
         if (!IsNormalIncomingPlanet(planet, body))
             return true;
 
-        // Do not hide an abnormal incoming body all the way to Game Over: if
-        // it has consumed most of the authoritative outside allowance, it is
-        // now genuine danger even while its radial velocity still points in.
+        // Do not hide even a contact-free projectile all the way to Game Over:
+        // consuming most of the authoritative outside allowance is the final
+        // visual safety fallback.
         return continuousOutsideTime >= Mathf.Max(flashGrace, outsideTimeLimit * 0.75f);
     }
 
