@@ -8604,10 +8604,10 @@ MonoBehaviour:
   comboX3DropChance: 1
   comboX4DropChance: 1
   comboX5PlusDropChance: 1
-  timeDropChancePerMerge: 0.445
+  timeDropChancePerMerge: 0.08
   timeBonusSeconds: 3
   timeDropSprite: {fileID: 7516985947582573989, guid: bdccb21609f823544abc54cc336b7c30, type: 3}
-  coinDropChancePerMerge: 0.123
+  coinDropChancePerMerge: 0.03
   coinAmount: 1
   coinDropSprite: {fileID: 3928642592490247435, guid: 1303d807a1e48f44bb60998149024d06, type: 3}
 --- !u!4 &1744964441
