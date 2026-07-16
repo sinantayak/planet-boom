@@ -83,8 +83,8 @@ public class PlanetMerge : MonoBehaviour
         // proximity check below keep running every physics step regardless of speed.
         rb.sleepMode = RigidbodySleepMode2D.NeverSleep;
 
-        // The launcher may spawn planets above Tier1 (see PlanetLauncher's
-        // highestSpawnTier). Start runs after the launcher's same-frame SetTier
+        // A configured weighted pool may spawn planets above Tier1. Start runs
+        // after the launcher's same-frame SetTier
         // call, so this snaps the spawn scale onto the tier growth curve — a
         // spawned Tier2 is exactly the size a merged-up Tier2 would be.
         if (planet.CurrentTier != PlanetTier.Tier1)
@@ -181,6 +181,19 @@ public class PlanetMerge : MonoBehaviour
         // booms no longer drive missions.)
         if (GameManager.Instance != null && !GameManager.Instance.CanMerge(mergeTier))
             return false;
+
+        // Unlock progression gates the RESULT, not the physical contact. If
+        // the next tier is locked, both planets remain intact, simulated and
+        // collidable exactly as ordinary non-mergeable bodies.
+        if (mergeTier < maxTier)
+        {
+            PlanetTier resultTier = (PlanetTier)((int)mergeTier + 1);
+            bool allowed = GameManager.Instance != null
+                ? GameManager.Instance.CanCreatePlanetTier(resultTier)
+                : UnlockManager.Instance == null || UnlockManager.Instance.IsUnlocked(resultTier);
+            if (!allowed)
+                return false;
+        }
 
         // A planet already melting into someone (or busy pulling one in) is spoken
         // for — starting a second fusion with it would orphan or double-count it.

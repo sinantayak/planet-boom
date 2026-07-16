@@ -11,14 +11,6 @@ public class PlanetLauncher : MonoBehaviour
     [SerializeField] private float spawnPositionJitter = 0.05f;
     [SerializeField] private float maxSpinTorque = 5f;
 
-    [Header("Spawn Tiers")]
-    // Highest tier the launcher will ever put in the queue: shots are drawn
-    // uniformly from Tier1..highestSpawnTier. Kept low (Suika-style) so the
-    // upper tiers can only be reached by merging; raise it to seed bigger
-    // planets directly. PlanetMerge snaps spawned planets onto the tier
-    // growth curve, so a spawned Tier2 matches a merged-up Tier2 in size.
-    [SerializeField] private PlanetTier highestSpawnTier = PlanetTier.Tier2;
-
     [Header("Meteorite Obstacles")]
     // Dead-rock obstacle prefab (see Meteorite.cs) — a separate merge system
     // from planets entirely. Left unassigned, meteorites never spawn.
@@ -141,11 +133,24 @@ public class PlanetLauncher : MonoBehaviour
     public bool isRainbowActive;
     public bool IsCosmicMimicQueued => isRainbowActive;
 
-    public void ApplyLevelSpawnConfiguration(PlanetTier configuredMaximumTier,
-        bool meteorsEnabled, float configuredMeteorChance)
+    private IReadOnlyList<WeightedPlanetTierEntry> configuredSpawnPool;
+    private PlanetTier configuredMaximumAllowedMergeTier = PlanetTier.Tier8;
+    private bool meteorGuaranteeEnabled;
+    private int meteorGuaranteeLaunchCount;
+    private int launcherSpawnsThisLevel;
+    private bool meteorGuaranteeSatisfied;
+
+    public void ApplyLevelSpawnConfiguration(IReadOnlyList<WeightedPlanetTierEntry> spawnPool,
+        PlanetTier maximumAllowedMergeTier, bool meteorsEnabled, float configuredMeteorChance,
+        bool guaranteeMeteor, int guaranteeWithinLaunches)
     {
-        highestSpawnTier = configuredMaximumTier;
+        configuredSpawnPool = spawnPool;
+        configuredMaximumAllowedMergeTier = System.Enum.IsDefined(typeof(PlanetTier), maximumAllowedMergeTier)
+            ? maximumAllowedMergeTier
+            : PlanetTier.Tier1;
         meteoriteSpawnChance = meteorsEnabled ? Mathf.Clamp01(configuredMeteorChance) : 0f;
+        meteorGuaranteeEnabled = meteorsEnabled && guaranteeMeteor;
+        meteorGuaranteeLaunchCount = Mathf.Max(1, guaranteeWithinLaunches);
         ResetQueue();
     }
 
@@ -445,9 +450,9 @@ public class PlanetLauncher : MonoBehaviour
     void Awake()
     {
         CurrentTier = PickRandomSpawnTier();
-        CurrentIsMeteorite = RollIsMeteorite();
+        CurrentIsMeteorite = RollIsMeteorite(1);
         NextTier = PickRandomSpawnTier();
-        NextIsMeteorite = RollIsMeteorite();
+        NextIsMeteorite = RollIsMeteorite(2);
         blackHole = FindFirstObjectByType<BlackHole>();
 
         if (planetPrefab != null)
@@ -639,6 +644,9 @@ public class PlanetLauncher : MonoBehaviour
         Vector3 spawnPosition = transform.position + (Vector3)spawnJitter;
 
         GameObject spawnedObject = Instantiate(prefabToSpawn, spawnPosition, Quaternion.identity);
+        launcherSpawnsThisLevel++;
+        if (CurrentIsMeteorite)
+            meteorGuaranteeSatisfied = true;
 
         if (!CurrentIsMeteorite)
         {
@@ -740,7 +748,7 @@ public class PlanetLauncher : MonoBehaviour
         CurrentTier = NextTier;
         CurrentIsMeteorite = NextIsMeteorite;
         NextTier = PickRandomSpawnTier();
-        NextIsMeteorite = RollIsMeteorite();
+        NextIsMeteorite = RollIsMeteorite(launcherSpawnsThisLevel + 2);
     }
 
     // Pushes the current queue state into both preview visuals. Sprites come
@@ -880,9 +888,14 @@ public class PlanetLauncher : MonoBehaviour
     // the two visible slots (current + next) has its own 1-in-10 shot, not a
     // shared roll — over a long queue that averages out to the configured
     // rate per spawn either way.
-    private bool RollIsMeteorite()
+    private bool RollIsMeteorite(int scheduledLaunchNumber)
     {
-        return !IsCosmicShieldActive && meteoritePrefab != null && Random.value < meteoriteSpawnChance;
+        if (IsCosmicShieldActive || meteoritePrefab == null)
+            return false;
+        if (meteorGuaranteeEnabled && !meteorGuaranteeSatisfied &&
+            scheduledLaunchNumber >= meteorGuaranteeLaunchCount)
+            return true;
+        return Random.value < meteoriteSpawnChance;
     }
 
     // Full queue reset for level transitions and restarts (called by
@@ -891,6 +904,8 @@ public class PlanetLauncher : MonoBehaviour
     public void ResetQueue()
     {
         EndCosmicShield();
+        launcherSpawnsThisLevel = 0;
+        meteorGuaranteeSatisfied = false;
         if (reloadRoutine != null)
         {
             StopCoroutine(reloadRoutine);
@@ -906,9 +921,9 @@ public class PlanetLauncher : MonoBehaviour
         }
 
         CurrentTier = PickRandomSpawnTier();
-        CurrentIsMeteorite = RollIsMeteorite();
+        CurrentIsMeteorite = RollIsMeteorite(1);
         NextTier = PickRandomSpawnTier();
-        NextIsMeteorite = RollIsMeteorite();
+        NextIsMeteorite = RollIsMeteorite(2);
         RefreshPreviews();
     }
 
@@ -932,12 +947,13 @@ public class PlanetLauncher : MonoBehaviour
 
     private PlanetTier PickRandomSpawnTier()
     {
-        PlanetTier unlockedMaximum = UnlockManager.Instance != null
-            ? UnlockManager.Instance.GetHighestUnlockedPlanetTier()
-            : PlanetTier.Tier1;
-        int maximum = Mathf.Min((int)highestSpawnTier, (int)unlockedMaximum);
-        return (PlanetTier)Random.Range(0, maximum + 1);
+        return WeightedPlanetTierSelector.TrySelect(configuredSpawnPool,
+            IsSpawnTierAllowed, out PlanetTier selected) ? selected : PlanetTier.Tier1;
     }
+
+    private bool IsSpawnTierAllowed(PlanetTier tier) =>
+        tier <= configuredMaximumAllowedMergeTier &&
+        (UnlockManager.Instance == null || UnlockManager.Instance.IsUnlocked(tier));
 
     private void UpdateAimLine()
     {

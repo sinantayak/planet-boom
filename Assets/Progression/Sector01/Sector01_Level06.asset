@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 161d2f61752146a4bb6b42234171fd12, type: 3}
+  m_Name: Sector01_Level06
+  m_EditorClassIdentifier: Assembly-CSharp::LevelConfiguration
+  levelNumber: 6
+  stableId: sector01_level06
+  sectorId: sector_01
+  sectorIndex: 0
+  displayName: Level 6
+  timeLimit: 90
+  maximumAllowedMergeTier: 4
+  objectives:
+  - type: 3
+    targetTier: 0
+    targetProgress: 1
+    required: 1
+  - type: 1
+    targetTier: 0
+    targetProgress: 15
+    required: 1
+  launcherSpawnPool:
+  - tier: 0
+    weight: 60
+  - tier: 1
+    weight: 30
+  - tier: 2
+    weight: 10
+  maximumSpawnTier: 4
+  meteorsEnabled: 1
+  meteorSpawnChance: 0.11
+  timeMode: 0
+  timeRushStartingTime: 10
+  mergeTimeRewards: []
+  guaranteeMeteorWithinLaunches: 1
+  meteorGuaranteeLaunchCount: 5
+  baseSpaceCoinReward: 60
+  starCriteria:
+    criterionType: 0
+    threeStarThreshold: 45
+    twoStarThreshold: 70
+    oneStarCoinReward: 0
+    twoStarCoinReward: 0
+    threeStarCoinReward: 0
+  unlockRewards: []
+  backgroundId: background_sector_01
+  orbitId: orbit_default

@@ -129,8 +129,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private bool vortexSwallowsMeteorites = true;
 
     [Header("UI")]
-    // Countdown readout ("CRITICAL: 1.4s!") shown while at least one planet is
-    // outside the boundary; hidden the rest of the time.
+    // Countdown readout ("CRITICAL: 1.4s!") shown only for genuine boundary
+    // danger; a normal fast incoming launcher planet is intentionally hidden.
     public TextMeshProUGUI countdownText;
 
     // Top-right live level clock, rendered MM:SS ("08:20"). Optional — when
@@ -192,10 +192,9 @@ public class GameManager : MonoBehaviour
         ? gameplayTimerText.rectTransform
         : null;
 
-    // True the instant any (non-absorbed) planet is beyond maxBoundaryRadius,
-    // false the instant none are — recomputed every FixedUpdate alongside the
-    // outside-timers below. BoundaryVisualizer polls this to flip the ring
-    // color, independent of the outsideTimeLimit countdown that triggers loss.
+    // True while at least one outside planet is classified as genuine danger,
+    // excluding normal fast incoming launcher bodies. BoundaryVisualizer polls
+    // this to flip the ring color. Game Over still uses the unfiltered timers.
     public bool IsAnyPlanetBeyondBoundary { get; private set; }
 
     // Runtime copy of the current level's targets plus per-target achieved
@@ -265,7 +264,7 @@ public class GameManager : MonoBehaviour
         outsideTimers.Remove(reservedPlanet);
         if (reservedPlanet.TryGetComponent(out PlanetMerge merge))
             merge.PrepareForDespawn();
-        IsAnyPlanetBeyondBoundary = HasLiveOutsidePlanet();
+        IsAnyPlanetBeyondBoundary = HasGenuineBoundaryDanger();
         Debug.Log($"Cosmic Abduction reserved {reservedPlanet.CurrentTier} at distance {bestDistance:F2}.", this);
         return true;
     }
@@ -292,21 +291,70 @@ public class GameManager : MonoBehaviour
         if (body == null || !body.simulated)
             return false;
 
-        // Settled bodies are always board members. Unsettled bodies must be
-        // slow enough that they are no longer an active launcher projectile.
-        if (!planet.IsSettled && body.linearVelocity.magnitude > cosmicAbductionMaximumCandidateSpeed)
+        // Share the same incoming-projectile classification as the boundary
+        // warning so targeting and danger feedback cannot disagree.
+        if (IsNormalIncomingPlanet(planet, body))
             return false;
 
         distance = Vector2.Distance(planet.transform.position, blackHoleCenter.position);
         return true;
     }
 
-    private bool HasLiveOutsidePlanet()
+    private bool HasGenuineBoundaryDanger()
     {
         foreach (KeyValuePair<Planet, float> pair in outsideTimers)
-            if (pair.Key != null && pair.Key.gameObject.activeInHierarchy)
+        {
+            Planet planet = pair.Key;
+            if (planet == null || !planet.gameObject.activeInHierarchy)
+                continue;
+            Rigidbody2D body = planet.GetComponent<Rigidbody2D>();
+            if (IsGenuineBoundaryDanger(planet, body, pair.Value))
                 return true;
+        }
         return false;
+    }
+
+    // Central incoming-launch classification shared by CRITICAL feedback and
+    // boundary-related targeting. A fast unsettled body only receives launch
+    // protection while it has meaningful radial movement toward the core;
+    // outward, stalled and settled bodies are never mistaken for safe entry.
+    private bool IsNormalIncomingPlanet(Planet planet, Rigidbody2D body)
+    {
+        if (planet == null || planet.IsSettled || body == null || !body.simulated ||
+            blackHoleCenter == null)
+            return false;
+
+        Vector2 toCenter = (Vector2)blackHoleCenter.position - body.position;
+        if (toCenter.sqrMagnitude < 0.0001f)
+            return false;
+
+        float speedThreshold = Mathf.Max(0f, cosmicAbductionMaximumCandidateSpeed);
+        float inwardSpeed = Vector2.Dot(body.linearVelocity, toCenter.normalized);
+        return body.linearVelocity.magnitude > speedThreshold &&
+               inwardSpeed > speedThreshold * 0.25f;
+    }
+
+    private bool IsGenuineBoundaryDanger(Planet planet, Rigidbody2D body,
+        float continuousOutsideTime)
+    {
+        if (planet == null)
+            return false;
+        if (planet.IsSettled)
+            return true;
+
+        // Suppress single-frame flashes for every fresh crossing. Once this
+        // short grace passes, stalled/outward bodies warn immediately.
+        float flashGrace = Mathf.Min(0.25f, Mathf.Max(0f, outsideTimeLimit) * 0.25f);
+        if (continuousOutsideTime < flashGrace)
+            return false;
+
+        if (!IsNormalIncomingPlanet(planet, body))
+            return true;
+
+        // Do not hide an abnormal incoming body all the way to Game Over: if
+        // it has consumed most of the authoritative outside allowance, it is
+        // now genuine danger even while its radial velocity still points in.
+        return continuousOutsideTime >= Mathf.Max(flashGrace, outsideTimeLimit * 0.75f);
     }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -723,7 +771,7 @@ public class GameManager : MonoBehaviour
         // The countdown UI shows the single most endangered planet: the one
         // with the longest unbroken stretch outside, i.e. the least time left.
         float worstTimer = -1f;
-        bool anyBeyondBoundary = false;
+        bool anyGenuineBoundaryDanger = false;
 
         foreach (Planet planet in FindObjectsByType<Planet>(FindObjectsSortMode.None))
         {
@@ -745,15 +793,16 @@ public class GameManager : MonoBehaviour
                 continue;
             }
 
-            anyBeyondBoundary = true;
-
             outsideTimers.TryGetValue(planet, out float timer);
             timer += Time.fixedDeltaTime;
             outsideTimers[planet] = timer;
 
-            if (timer > worstTimer)
+            Rigidbody2D body = planet.GetComponent<Rigidbody2D>();
+            if (IsGenuineBoundaryDanger(planet, body, timer))
             {
-                worstTimer = timer;
+                anyGenuineBoundaryDanger = true;
+                if (timer > worstTimer)
+                    worstTimer = timer;
             }
 
             if (timer >= outsideTimeLimit)
@@ -764,11 +813,11 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        IsAnyPlanetBeyondBoundary = anyBeyondBoundary;
+        IsAnyPlanetBeyondBoundary = anyGenuineBoundaryDanger;
         UpdateCountdownUI(worstTimer);
     }
 
-    // worstTimer < 0 means no planet is outside this step → hide the readout.
+    // worstTimer < 0 means no outside planet is genuine danger this step.
     private void UpdateCountdownUI(float worstTimer)
     {
         if (countdownText == null)
@@ -890,6 +939,16 @@ public class GameManager : MonoBehaviour
         if (State != GameState.Playing)
             return;
 
+        // Guaranteed Time Rush time is awarded only from this normal planet
+        // merge completion hook. Time Drops and Time Warp keep their own data
+        // and triggers while sharing the authoritative RemainingTime state.
+        if (ActiveLevelConfiguration != null &&
+            ActiveLevelConfiguration.TryGetMergeTimeBonus(createdTier, out float mergeBonus))
+        {
+            if (TryAddBonusTime(mergeBonus))
+                Debug.Log($"Time Rush: {createdTier} merge +{mergeBonus:0.#}s.", ActiveLevelConfiguration);
+        }
+
         foreach (LevelObjective objective in activeObjectives)
         {
             if (objective.Type == LevelObjectiveType.ReachTier &&
@@ -947,6 +1006,19 @@ public class GameManager : MonoBehaviour
         }
 
         return !hasIncompleteReachTier && !AreAllRequiredObjectivesCompleted();
+    }
+
+    public bool CanCreatePlanetTier(PlanetTier resultTier)
+    {
+        if (!System.Enum.IsDefined(typeof(PlanetTier), resultTier))
+            return false;
+        if (ActiveLevelConfiguration != null)
+        {
+            if (!System.Enum.IsDefined(typeof(PlanetTier), ActiveLevelConfiguration.maximumAllowedMergeTier) ||
+                resultTier > ActiveLevelConfiguration.maximumAllowedMergeTier)
+                return false;
+        }
+        return UnlockManager.Instance == null || UnlockManager.Instance.IsUnlocked(resultTier);
     }
 
     private void HandleMergeRegistered(int combo)
@@ -1257,11 +1329,25 @@ public class GameManager : MonoBehaviour
 
         // Per-level timing, floored defensively so a mis-authored 0 can't
         // produce an instant game over or a degenerate star bracket.
-        currentTimeLimit = Mathf.Max(1f, source.timeLimit);
+        float configuredStartingTime = ActiveLevelConfiguration != null &&
+            ActiveLevelConfiguration.timeMode == LevelTimeMode.MergeTimeRush
+                ? ActiveLevelConfiguration.timeRushStartingTime
+                : source.timeLimit;
+        currentTimeLimit = Mathf.Max(1f, configuredStartingTime);
         currentThreeStarThreshold = Mathf.Clamp(source.threeStarThreshold, 1f, currentTimeLimit);
         if (ActiveLevelConfiguration != null && launcher != null)
-            launcher.ApplyLevelSpawnConfiguration(ActiveLevelConfiguration.maximumSpawnTier,
-                ActiveLevelConfiguration.meteorsEnabled, ActiveLevelConfiguration.meteorSpawnChance);
+        {
+            System.Func<PlanetTier, bool> isUnlocked = UnlockManager.Instance != null
+                ? UnlockManager.Instance.IsUnlocked
+                : null;
+            if (!ActiveLevelConfiguration.ValidateSpawnPool(isUnlocked, out string spawnPoolMessage))
+                Debug.LogWarning($"LevelConfig {ActiveLevelConfiguration.stableId} spawn pool: {spawnPoolMessage}. Invalid entries are ignored; Tier1 is the final fallback.", ActiveLevelConfiguration);
+            launcher.ApplyLevelSpawnConfiguration(ActiveLevelConfiguration.launcherSpawnPool,
+                ActiveLevelConfiguration.maximumAllowedMergeTier,
+                ActiveLevelConfiguration.meteorsEnabled, ActiveLevelConfiguration.meteorSpawnChance,
+                ActiveLevelConfiguration.guaranteeMeteorWithinLaunches,
+                ActiveLevelConfiguration.meteorGuaranteeLaunchCount);
+        }
 
         // Fresh clock for every level entry — this is the single reset point,
         // and both AdvanceToNextLevel and RestartGame funnel through here.
@@ -1308,10 +1394,14 @@ public class GameManager : MonoBehaviour
     {
         if (levelCatalog == null) { Debug.LogWarning("No Level Catalog assigned.", this); return; }
         var ids = new HashSet<string>(); var numbers = new HashSet<int>(); int errors = 0;
+        System.Func<PlanetTier, bool> isUnlocked = UnlockManager.Instance != null
+            ? UnlockManager.Instance.IsUnlocked
+            : null;
         foreach (LevelConfiguration config in levelCatalog.levels)
         {
             string message = "configuration reference is null";
             if (config == null || !config.Validate(out message)) { Debug.LogError($"Invalid level config {(config != null ? config.name : "null")}: {message}", config); errors++; continue; }
+            if (!config.ValidateSpawnPool(isUnlocked, out message)) { Debug.LogError($"Invalid runtime spawn pool {config.name}: {message}", config); errors++; }
             if (!ids.Add(config.stableId) || !numbers.Add(config.levelNumber)) { Debug.LogError($"Duplicate level ID/number: {config.stableId}/{config.levelNumber}", config); errors++; }
         }
         Debug.Log($"Level Catalog validation finished: {levelCatalog.levels.Count} entries, {errors} error(s).", this);

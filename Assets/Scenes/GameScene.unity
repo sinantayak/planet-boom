@@ -5281,6 +5281,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   levels: []
+  levelCatalog: {fileID: 11400000, guid: fff49d6298a194f4d855fb96a2ced08d, type: 2}
+  debugLevelConfiguration: {fileID: 0}
+  starBoosterRatingAdvantage: 1
   useDebugObjectiveOverride: 0
   debugObjectives: []
   debugReachTier: 4
@@ -5393,7 +5396,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 64b7f0e2d04f4c5ca9637af59d2c5b81, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CosmicAbductionVisualController
   ufoSprite: {fileID: 3901333750411442158, guid: 51beba2c0bb1f31428766ae513b183a9, type: 3}
   beamSprite: {fileID: 0}
@@ -5754,7 +5757,6 @@ MonoBehaviour:
   launchSpeed: 8
   spawnPositionJitter: 0.05
   maxSpinTorque: 0
-  highestSpawnTier: 1
   meteoritePrefab: {fileID: 1000000000000000001, guid: 9ce448208ffa4bbaadfbd4703e8f05fc, type: 3}
   meteoriteSpawnChance: 0.1
   dotPrefab: {fileID: 1962485415518948208, guid: bed2cd13564eafb4283cc937ff0531db, type: 3}
@@ -8655,6 +8657,12 @@ MonoBehaviour:
   coinDropChancePerMerge: 0.03
   coinAmount: 1
   coinDropSprite: {fileID: 3928642592490247435, guid: 1303d807a1e48f44bb60998149024d06, type: 3}
+  luckyDropIcon: {fileID: 0}
+  doubleTimeDropIcon: {fileID: 0}
+  starBoosterIcon: {fileID: 0}
+  luckyDropSkillChanceMultiplier: 1.5
+  luckyDropTimeChanceMultiplier: 1.5
+  luckyDropCoinChanceMultiplier: 1.5
 --- !u!4 &1744964441
 Transform:
   m_ObjectHideFlags: 0
@@ -10725,7 +10733,20 @@ MonoBehaviour:
   - {fileID: 1395595670}
   - {fileID: 1228761277}
   planetPrefab: {fileID: 804950424806596201, guid: 603fc024be9b949468e2ed37b069c7b1, type: 3}
-  achievedTint: {r: 0.45, g: 0.45, b: 0.45, a: 0.9}
+  mergeCountIcon: {fileID: 0}
+  comboTargetIcon: {fileID: 0}
+  meteorObjectiveIcon: {fileID: 6234309664736565513, guid: ed64da3f403e9704cb377e7cae80026f, type: 3}
+  survivalIcon: {fileID: 0}
+  entryWidth: 92
+  entryHeight: 92
+  entrySpacing: 6
+  objectiveAreaOffset: {x: 0, y: -128}
+  progressFontSize: 27
+  pendingTint: {r: 1, g: 1, b: 1, a: 1}
+  achievedTint: {r: 0.45, g: 1, b: 0.55, a: 1}
+  optionalTint: {r: 1, g: 1, b: 1, a: 0.62}
+  completionPopDuration: 0.2
+  completionPopScale: 1.12
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

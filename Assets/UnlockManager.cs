@@ -5,13 +5,6 @@ using UnityEngine;
 
 public enum UnlockContentType { Planet, Skill, Booster, Background, Orbit }
 
-[CreateAssetMenu(menuName = "Planet Boom/Unlock Defaults", fileName = "UnlockDefaults")]
-public sealed class UnlockDefaultsConfig : ScriptableObject
-{
-    [Tooltip("Canonical IDs such as skill:MeteorStrike or planet:Tier1.")]
-    public List<string> defaultUnlockedIds = new List<string>();
-}
-
 // Central, string-ID based progression gate. Inventory ownership and active
 // run state remain separate concerns.
 public sealed class UnlockManager : MonoBehaviour
