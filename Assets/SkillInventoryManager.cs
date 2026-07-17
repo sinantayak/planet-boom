@@ -45,12 +45,19 @@ public class SkillInventoryManager : MonoBehaviour
         if (Instance == this)
         {
             SkillFlightManager.OnSkillArrivedAtChest += HandleSkillArrivedAtChest;
+            UnlockManager.UnlockChanged += HandleUnlockChanged;
+            PlayerDataPersistenceManager.DataLoaded += HandlePlayerDataLoaded;
+            if (PlayerDataPersistenceManager.Instance != null &&
+                PlayerDataPersistenceManager.Instance.IsLoaded)
+                SanitizeLockedQuickSlots();
         }
     }
 
     void OnDisable()
     {
         SkillFlightManager.OnSkillArrivedAtChest -= HandleSkillArrivedAtChest;
+        UnlockManager.UnlockChanged -= HandleUnlockChanged;
+        PlayerDataPersistenceManager.DataLoaded -= HandlePlayerDataLoaded;
     }
 
     void OnDestroy()
@@ -84,7 +91,7 @@ public class SkillInventoryManager : MonoBehaviour
     public bool TryUseSkill(SkillType type)
     {
         int currentCount = GetCount(type);
-        if (currentCount <= 0 || SkillManager.Instance == null)
+        if (!IsSkillUnlocked(type) || currentCount <= 0 || SkillManager.Instance == null)
         {
             AudioManager.Instance?.PlaySkillUseFailed();
             return false;
@@ -107,7 +114,8 @@ public class SkillInventoryManager : MonoBehaviour
 
     public bool TryGetQuickSlot(int slotIndex, out SkillType type)
     {
-        if (IsValidSlotIndex(slotIndex) && quickSlots[slotIndex].HasValue)
+        if (IsValidSlotIndex(slotIndex) && quickSlots[slotIndex].HasValue &&
+            IsSkillUnlocked(quickSlots[slotIndex].Value))
         {
             type = quickSlots[slotIndex].Value;
             return true;
@@ -119,7 +127,7 @@ public class SkillInventoryManager : MonoBehaviour
 
     public bool TryAssignQuickSlot(int slotIndex, SkillType type)
     {
-        if (!IsValidSlotIndex(slotIndex) || !IsValidSkillType(type))
+        if (!IsValidSlotIndex(slotIndex) || !IsValidSkillType(type) || !IsSkillUnlocked(type))
             return false;
 
         for (int i = 0; i < QuickSlotCount; i++)
@@ -155,7 +163,42 @@ public class SkillInventoryManager : MonoBehaviour
 
     public bool TryUseQuickSlot(int slotIndex)
     {
-        return TryGetQuickSlot(slotIndex, out SkillType type) && TryUseSkill(type);
+        // Final unlock gate intentionally remains here as well as in assignment
+        // and TryUseSkill. A stale/legacy slot can never activate a locked skill.
+        return TryGetQuickSlot(slotIndex, out SkillType type) &&
+               IsSkillUnlocked(type) && TryUseSkill(type);
+    }
+
+    private void HandleUnlockChanged(string canonicalId, bool isUnlocked)
+    {
+        if (!isUnlocked)
+            SanitizeLockedQuickSlots();
+    }
+
+    private void HandlePlayerDataLoaded(PlayerData data)
+    {
+        // PlayerDataPersistenceManager applies inventory first and unlocks
+        // second. DataLoaded fires after both, so this is the safe point to
+        // validate legacy slot assignments without racing initial load.
+        SanitizeLockedQuickSlots();
+    }
+
+    private void SanitizeLockedQuickSlots()
+    {
+        bool changed = false;
+        for (int i = 0; i < QuickSlotCount; i++)
+        {
+            if (!quickSlots[i].HasValue || IsSkillUnlocked(quickSlots[i].Value))
+                continue;
+
+            quickSlots[i] = null;
+            SaveQuickSlot(i);
+            QuickSlotChanged?.Invoke(i, null);
+            changed = true;
+        }
+
+        if (changed)
+            PlayerDataPersistenceManager.NotifySkillInventoryChanged(this);
     }
 
     private void HandleSkillArrivedAtChest(SkillType type)
@@ -214,6 +257,12 @@ public class SkillInventoryManager : MonoBehaviour
     private static bool IsValidSkillType(SkillType type)
     {
         return Enum.IsDefined(typeof(SkillType), type);
+    }
+
+    public static bool IsSkillUnlocked(SkillType type)
+    {
+        return IsValidSkillType(type) && UnlockManager.Instance != null &&
+               UnlockManager.Instance.IsUnlocked(type);
     }
 
     private static bool TryParsePersistedSkillType(string saved, out SkillType type)

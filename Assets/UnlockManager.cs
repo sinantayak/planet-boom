@@ -142,8 +142,10 @@ public sealed class UnlockManager : MonoBehaviour
     [ContextMenu("DEBUG Unlocks/Reset To First-Time Defaults")]
     private void DebugResetDefaults()
     {
-        foreach (string id in unlocked.ToArray()) UnlockChanged?.Invoke(id, false);
-        unlocked.Clear(); ApplyFirstTimeDefaults();
+        string[] previouslyUnlocked = unlocked.ToArray();
+        unlocked.Clear();
+        foreach (string id in previouslyUnlocked) UnlockChanged?.Invoke(id, false);
+        ApplyFirstTimeDefaults();
         PlayerDataPersistenceManager.NotifyUnlockDataChanged(this);
         foreach (string id in unlocked) UnlockChanged?.Invoke(id, true);
         DebugLogAll();

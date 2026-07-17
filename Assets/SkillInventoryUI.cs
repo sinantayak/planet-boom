@@ -11,6 +11,23 @@ using UnityEngine.UI;
 // from SkillInventoryManager. No UI hierarchy or inventory data is created here.
 public class SkillInventoryUI : MonoBehaviour
 {
+    // Explicit campaign-facing presentation order. This is intentionally
+    // independent of SkillType's numeric values and is shared with the scene
+    // authoring tool so persistent hierarchy order cannot drift.
+    private static readonly IReadOnlyList<SkillType> displayOrder = Array.AsReadOnly(new[]
+    {
+        SkillType.TimeWarp,
+        SkillType.GravitySingularity,
+        SkillType.PlanetReroll,
+        SkillType.CosmicMimic,
+        SkillType.MeteorStrike,
+        SkillType.CosmicShield,
+        SkillType.CosmicAbduction,
+        SkillType.MeteorShower
+    });
+
+    public static IReadOnlyList<SkillType> DisplayOrder => displayOrder;
+
     [Header("Existing Scene Wiring")]
     [SerializeField] private RectTransform canvasRoot;
     [SerializeField] private RectTransform safeAreaRoot;
@@ -22,6 +39,11 @@ public class SkillInventoryUI : MonoBehaviour
     [SerializeField] private Sprite[] skillIcons = Array.Empty<Sprite>();
 
     [SerializeField] private Color unavailableIconColor = new Color(0.35f, 0.35f, 0.35f, 0.75f);
+
+    [Header("Locked Skill Presentation")]
+    [SerializeField] private Sprite lockIconSprite;
+    [SerializeField] private Color lockedIconColor = new Color(0.16f, 0.18f, 0.22f, 0.55f);
+    [SerializeField] private Color lockOverlayColor = Color.white;
 
     [Header("Selected Popup Slot Feedback")]
     [SerializeField] private float selectedSlotScale = 1.08f;
@@ -76,8 +98,10 @@ public class SkillInventoryUI : MonoBehaviour
 
     private sealed class EntryView
     {
+        public Button button;
         public Image icon;
         public TextMeshProUGUI countText;
+        public Image lockOverlay;
     }
 
     private sealed class ButtonBinding
@@ -115,12 +139,16 @@ public class SkillInventoryUI : MonoBehaviour
 
     void OnEnable()
     {
+        UnlockManager.UnlockChanged += HandleUnlockChanged;
+        PlayerDataPersistenceManager.DataLoaded += HandlePlayerDataLoaded;
         BindInventory();
         BindShieldLauncher();
     }
 
     void OnDisable()
     {
+        UnlockManager.UnlockChanged -= HandleUnlockChanged;
+        PlayerDataPersistenceManager.DataLoaded -= HandlePlayerDataLoaded;
         ResetAllHudFeedback();
         UnbindShieldLauncher();
         UnbindInventory();
@@ -200,6 +228,25 @@ public class SkillInventoryUI : MonoBehaviour
         RefreshSlot(popupSlots, slotIndex, true);
     }
 
+    private void HandleUnlockChanged(string canonicalId, bool isUnlocked)
+    {
+        foreach (SkillType type in DisplayOrder)
+        {
+            if (!string.Equals(canonicalId, UnlockManager.Id(type), StringComparison.Ordinal))
+                continue;
+
+            RefreshEntry(type);
+            RefreshChestBadge();
+            RefreshAllSlots();
+            return;
+        }
+    }
+
+    private void HandlePlayerDataLoaded(PlayerData data)
+    {
+        RefreshAll();
+    }
+
     private void UseQuickSlot(int slotIndex)
     {
         if (inventory == null)
@@ -270,7 +317,7 @@ public class SkillInventoryUI : MonoBehaviour
     {
         RefreshChestBadge();
         RefreshAllSlots();
-        foreach (SkillType type in Enum.GetValues(typeof(SkillType)))
+        foreach (SkillType type in DisplayOrder)
             RefreshEntry(type);
     }
 
@@ -280,8 +327,9 @@ public class SkillInventoryUI : MonoBehaviour
             return;
 
         long total = 0;
-        foreach (SkillType type in Enum.GetValues(typeof(SkillType)))
-            total += inventory.GetCount(type);
+        foreach (SkillType type in DisplayOrder)
+            if (SkillInventoryManager.IsSkillUnlocked(type))
+                total += inventory.GetCount(type);
         chestCountText.text = total.ToString();
     }
 
@@ -326,8 +374,29 @@ public class SkillInventoryUI : MonoBehaviour
         int count = inventory.GetCount(type);
         view.icon.sprite = IconFor(type);
         view.icon.enabled = view.icon.sprite != null;
-        view.icon.color = count > 0 ? Color.white : unavailableIconColor;
-        view.countText.text = count.ToString();
+        bool unlocked = SkillInventoryManager.IsSkillUnlocked(type);
+        view.icon.color = !unlocked
+            ? lockedIconColor
+            : count > 0 ? Color.white : unavailableIconColor;
+
+        if (view.countText != null)
+        {
+            view.countText.gameObject.SetActive(unlocked);
+            if (unlocked)
+                view.countText.text = count.ToString();
+        }
+
+        if (view.lockOverlay != null)
+        {
+            view.lockOverlay.raycastTarget = false;
+            view.lockOverlay.sprite = lockIconSprite;
+            view.lockOverlay.color = lockOverlayColor;
+            view.lockOverlay.enabled = !unlocked && lockIconSprite != null;
+            view.lockOverlay.gameObject.SetActive(!unlocked);
+        }
+
+        if (view.button != null)
+            view.button.interactable = unlocked;
     }
 
     private Sprite IconFor(SkillType type)
@@ -389,19 +458,18 @@ public class SkillInventoryUI : MonoBehaviour
         Transform content = panel.Find("SkillGridViewport/Content");
         if (content != null)
         {
-            EnsureSkillGridEntry(content, SkillType.PlanetReroll);
-            EnsureSkillGridEntry(content, SkillType.CosmicShield);
-            EnsureSkillGridEntry(content, SkillType.CosmicAbduction);
-            EnsureSkillGridEntry(content, SkillType.MeteorShower);
-            foreach (SkillType type in Enum.GetValues(typeof(SkillType)))
+            foreach (SkillType type in DisplayOrder)
             {
+                EnsureSkillGridEntry(content, type);
                 Transform entry = content.Find(type.ToString());
                 if (entry == null)
                     continue;
                 entries[type] = new EntryView
                 {
+                    button = entry.GetComponent<Button>(),
                     icon = entry.Find("Icon")?.GetComponent<Image>(),
-                    countText = entry.Find("Count")?.GetComponent<TextMeshProUGUI>()
+                    countText = entry.Find("Count")?.GetComponent<TextMeshProUGUI>(),
+                    lockOverlay = entry.Find("LockOverlay")?.GetComponent<Image>()
                 };
             }
         }
@@ -410,8 +478,8 @@ public class SkillInventoryUI : MonoBehaviour
         chestCountText = badge != null ? badge.GetComponent<TextMeshProUGUI>() : null;
     }
 
-    // Older authored scenes have the original four entries. Reuse that exact
-    // layout for the appended skill; its icon remains Inspector-assigned.
+    // Compatibility fallback for older scenes. Current scenes author every
+    // SkillType persistently, so this path should not create duplicates.
     private static void EnsureSkillGridEntry(Transform content, SkillType type)
     {
         if (content.Find(type.ToString()) != null)
@@ -582,12 +650,10 @@ public class SkillInventoryUI : MonoBehaviour
             int index = i;
             AddButtonBinding(popupSlots[i].button, () => SelectPopupSlot(index));
         }
-        foreach (KeyValuePair<SkillType, EntryView> pair in entries)
+        foreach (SkillType type in DisplayOrder)
         {
-            Transform entry = pair.Value.icon != null ? pair.Value.icon.transform.parent : null;
-            SkillType type = pair.Key;
-            AddButtonBinding(entry != null ? entry.GetComponent<Button>() : null,
-                () => AssignSelectedSlot(type));
+            if (entries.TryGetValue(type, out EntryView view))
+                AddButtonBinding(view.button, () => AssignSelectedSlot(type));
         }
     }
 
