@@ -35,6 +35,7 @@ public static class LevelMapAuthoring
         {
             Scene existingScene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
             UpgradeExistingScene(existingScene, catalog, icons);
+            ValidateDefaultSelection(catalog);
             if (!EditorSceneManager.SaveScene(existingScene)) throw new System.InvalidOperationException("LevelMap scene save failed.");
             AssetDatabase.SaveAssets();
             Debug.Log("Level Map upgraded in place: PathNodes drive the orbit; existing editable objects were preserved.");
@@ -96,8 +97,10 @@ public static class LevelMapAuthoring
         SetObject(screen, "selectionText", selection); SetObject(screen, "previousSectorButton", previous);
         SetObject(screen, "nextSectorButton", next); SetObject(screen, "playButton", play); SetObject(screen, "orbitPath", path);
         SetList(screen, "nodes", nodes);
+        EnsureBottomNavigation(screen);
         SerializedObject pathSerialized = new(path); SetReferenceList(pathSerialized.FindProperty("controlPoints"), points); pathSerialized.ApplyModifiedPropertiesWithoutUndo();
         AssignSectors(screen);
+        EnsureSectorLayouts(screen);
 
         EditorSceneManager.MarkSceneDirty(scene);
         if (!EditorSceneManager.SaveScene(scene, ScenePath)) throw new System.InvalidOperationException("LevelMap scene save failed.");
@@ -107,11 +110,27 @@ public static class LevelMapAuthoring
         Debug.Log("Level Map authored: persistent 7-node hierarchy, sectors 1-9 art, safe empty sector 10.");
     }
 
+    [MenuItem("Tools/Planet Boom/Level Map/Recover Sector 1 From Scene + Validate")]
+    public static void RecoverSectorOneFromScene()
+    {
+        Scene scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+        LevelMapScreen screen = null;
+        foreach (GameObject root in scene.GetRootGameObjects())
+            if (screen == null) screen = root.GetComponentInChildren<LevelMapScreen>(true);
+        if (screen == null) throw new System.InvalidOperationException("LevelMapScreen is missing.");
+        LevelMapSectorVisual sector = screen.EditorFindSector(1);
+        if (sector?.layout == null) throw new System.InvalidOperationException("Sector 1 layout asset is not assigned.");
+        if (!LevelMapLayoutEditorUtility.RecoverAndValidateSectorOne(screen, sector.layout, out string report))
+            throw new System.InvalidOperationException("Sector 1 round-trip failed: " + report);
+        Debug.Log("Sector 1 recovered from the current Edit Mode scene. " + report, sector.layout);
+    }
+
     private static LevelMapNodeUI CreateNode(Transform parent, int index, Sprite lockSprite, Sprite filled, Sprite empty)
     {
         GameObject root = CreateUI($"LevelNode{index + 1:00}", parent); root.AddComponent<CanvasGroup>();
         Image circle = CreateImage("PathNode", root.transform,
-            AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd"), new Color(.08f,.12f,.2f,.95f));
+            LoadSprite("Assets/Buttons/SkillSlot.png") ?? AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd"), Color.white);
+        circle.preserveAspect = true;
         circle.raycastTarget = true; SetRect(circle.rectTransform, new Vector2(.5f,.5f), Vector2.zero, new Vector2(92,92));
         Button button = root.AddComponent<Button>(); button.targetGraphic = circle;
         TMP_Text number = CreateText("LevelNumber", circle.transform, (index + 1).ToString(), 42, TextAlignmentOptions.Center);
@@ -119,7 +138,8 @@ public static class LevelMapAuthoring
         GameObject lockOverlay = CreateUI("LockOverlay", circle.transform); Stretch(lockOverlay.GetComponent<RectTransform>());
         Image lockImage = lockOverlay.AddComponent<Image>(); lockImage.sprite = lockSprite; lockImage.preserveAspect = true; lockImage.color = Color.white;
         Image dim = CreateImage("LockedDim", lockOverlay.transform, null, new Color(0,0,0,.36f)); Stretch(dim.rectTransform); dim.transform.SetAsFirstSibling();
-        Image island = CreateImage("IslandImage", root.transform, null, Color.white); island.preserveAspect = true;
+        Image island = CreateImage("IslandImage", root.transform, null, Color.white); island.preserveAspect = true; island.raycastTarget = true;
+        Button islandButton = island.gameObject.AddComponent<Button>(); islandButton.targetGraphic = island;
         SetRect(island.rectTransform, new Vector2(.5f,.5f), new Vector2(index % 2 == 0 ? -205 : 205, 0), Sizes[index]);
         GameObject starsRoot = CreateUI("Stars", root.transform);
         SetRect(starsRoot.GetComponent<RectTransform>(), new Vector2(.5f,.5f), new Vector2(index % 2 == 0 ? -205 : 205, Sizes[index].y * .5f + 28), new Vector2(150,42));
@@ -134,11 +154,13 @@ public static class LevelMapAuthoring
 
         LevelMapNodeUI node = root.AddComponent<LevelMapNodeUI>(); SerializedObject serialized = new(node);
         serialized.FindProperty("button").objectReferenceValue = button; serialized.FindProperty("islandImage").objectReferenceValue = island;
+        serialized.FindProperty("islandButton").objectReferenceValue = islandButton;
         serialized.FindProperty("levelText").objectReferenceValue = number; serialized.FindProperty("lockOverlay").objectReferenceValue = lockOverlay;
         serialized.FindProperty("filledStar").objectReferenceValue = filled; serialized.FindProperty("emptyStar").objectReferenceValue = empty;
         serialized.FindProperty("rewardContainer").objectReferenceValue = reward.rectTransform; serialized.FindProperty("rewardIcon").objectReferenceValue = rewardIcon;
         serialized.FindProperty("rewardCompleteMark").objectReferenceValue = check.gameObject; serialized.FindProperty("canvasGroup").objectReferenceValue = root.GetComponent<CanvasGroup>();
         SetReferenceList(serialized.FindProperty("stars"), stars); serialized.ApplyModifiedPropertiesWithoutUndo();
+        EnsureSelectedHighlight(root.transform, circle);
         return node;
     }
 
@@ -155,10 +177,12 @@ public static class LevelMapAuthoring
         if (screen == null || path == null) throw new System.InvalidOperationException("Existing LevelMap scene is incomplete.");
 
         EnsureBackgroundViewport(screen);
+        EnsureBottomNavigation(screen);
 
         Transform nodeRoot = screen.transform.Find("LevelNodes");
         if (nodeRoot == null) throw new System.InvalidOperationException("LevelNodes root is missing.");
-        Sprite circleSprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
+        Sprite circleSprite = LoadSprite("Assets/Buttons/SkillSlot.png") ??
+            AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
         var pathPoints = new List<RectTransform>();
         for (int i = 0; i < 7; i++)
         {
@@ -178,9 +202,10 @@ public static class LevelMapAuthoring
             else
             {
                 circle = pathNode.GetComponent<Image>() ?? pathNode.gameObject.AddComponent<Image>();
-                circle.sprite = circleSprite; circle.color = new Color(.08f,.12f,.2f,.95f);
+                circle.sprite = circleSprite; circle.color = Color.white; circle.preserveAspect = true;
             }
             circle.raycastTarget = true;
+            EnsureSelectedHighlight(node, circle);
             pathPoints.Add((RectTransform)pathNode);
             if (migratingLegacyNode)
             {
@@ -210,6 +235,24 @@ public static class LevelMapAuthoring
 
             Button button = node.GetComponent<Button>();
             if (button != null) button.targetGraphic = circle;
+            Transform numberTransform = pathNode.Find("LevelNumber");
+            if (numberTransform != null && numberTransform.TryGetComponent(out TMP_Text numberTextComponent))
+                numberTextComponent.color = Color.white;
+            Transform islandTransform = node.Find("IslandImage");
+            if (islandTransform != null)
+            {
+                Image islandImage = islandTransform.GetComponent<Image>();
+                if (islandImage != null) islandImage.raycastTarget = true;
+                Button islandButton = islandTransform.GetComponent<Button>() ?? islandTransform.gameObject.AddComponent<Button>();
+                islandButton.targetGraphic = islandImage;
+                LevelMapNodeUI nodeUI = node.GetComponent<LevelMapNodeUI>();
+                if (nodeUI != null)
+                {
+                    SerializedObject nodeSerialized = new(nodeUI);
+                    nodeSerialized.FindProperty("islandButton").objectReferenceValue = islandButton;
+                    nodeSerialized.ApplyModifiedPropertiesWithoutUndo();
+                }
+            }
             EditorUtility.SetDirty(node.gameObject);
         }
 
@@ -224,8 +267,167 @@ public static class LevelMapAuthoring
         screenSerialized.FindProperty("levelCatalog").objectReferenceValue = catalog;
         screenSerialized.FindProperty("rewardIcons").objectReferenceValue = icons;
         screenSerialized.ApplyModifiedPropertiesWithoutUndo();
+        EnsureSectorLayouts(screen);
         EditorUtility.SetDirty(screen);
         EditorSceneManager.MarkSceneDirty(scene);
+    }
+
+    private static void EnsureSelectedHighlight(Transform node, Image circle)
+    {
+        Transform highlightTransform = circle.transform.Find("SelectedHighlight");
+        Image highlight;
+        if (highlightTransform == null)
+        {
+            highlight = CreateImage("SelectedHighlight", circle.transform,
+                AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd"), new Color(.25f,.78f,1f,0f));
+            SetRect(highlight.rectTransform, new Vector2(.5f,.5f), Vector2.zero, new Vector2(126,126));
+            highlight.transform.SetAsFirstSibling();
+        }
+        else highlight = highlightTransform.GetComponent<Image>() ?? highlightTransform.gameObject.AddComponent<Image>();
+        highlight.raycastTarget = false;
+        highlight.gameObject.SetActive(false);
+
+        LevelMapNodeUI nodeUI = node.GetComponent<LevelMapNodeUI>();
+        if (nodeUI != null)
+        {
+            SerializedObject serialized = new(nodeUI);
+            serialized.FindProperty("selectedHighlight").objectReferenceValue = highlight;
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(nodeUI);
+        }
+    }
+
+    private static void EnsureBottomNavigation(LevelMapScreen screen)
+    {
+        Transform bottom = screen.transform.Find("BottomNavigation");
+        if (bottom == null)
+        {
+            bottom = CreateUI("BottomNavigation", screen.transform).transform;
+            Stretch((RectTransform)bottom);
+        }
+        if (bottom.GetComponent<SafeAreaFitter>() == null) bottom.gameObject.AddComponent<SafeAreaFitter>();
+
+        SerializedObject screenSerialized = new(screen);
+        Button previous = screenSerialized.FindProperty("previousSectorButton").objectReferenceValue as Button;
+        Button next = screenSerialized.FindProperty("nextSectorButton").objectReferenceValue as Button;
+        TMP_Text selection = screenSerialized.FindProperty("selectionText").objectReferenceValue as TMP_Text;
+        if (previous == null || next == null)
+            throw new System.InvalidOperationException("Bottom navigation references are incomplete.");
+
+        previous.transform.SetParent(bottom, false);
+        next.transform.SetParent(bottom, false);
+        SetRect(previous.GetComponent<RectTransform>(), new Vector2(0f,0f), new Vector2(105,105), new Vector2(150,120));
+        SetRect(next.GetComponent<RectTransform>(), new Vector2(1f,0f), new Vector2(-105,105), new Vector2(150,120));
+
+        Transform center = bottom.Find("StartButton") ?? bottom.Find("CenterStatus");
+        Image frame;
+        if (center == null)
+        {
+            frame = CreateImage("StartButton", bottom, LoadSprite("Assets/UI Elements/Green-Buttonpng.png"), Color.white);
+            center = frame.transform;
+            SetRect(frame.rectTransform, new Vector2(.5f,0f), new Vector2(0,105), new Vector2(560,120));
+        }
+        else frame = center.GetComponent<Image>() ?? center.gameObject.AddComponent<Image>();
+        center.name = "StartButton";
+        Sprite startSprite = LoadSprite("Assets/UI Elements/Green-Buttonpng.png");
+        if (startSprite != null) frame.sprite = startSprite;
+        frame.color = Color.white; frame.preserveAspect = true; frame.raycastTarget = true;
+        Button startButton = center.GetComponent<Button>() ?? center.gameObject.AddComponent<Button>();
+        startButton.targetGraphic = frame;
+
+        TMP_Text startText = center.Find("StartText")?.GetComponent<TMP_Text>();
+        if (startText == null)
+        {
+            startText = selection != null ? selection : CreateText("StartText", center, "START", 42, TextAlignmentOptions.Center);
+            startText.name = "StartText";
+        }
+        startText.transform.SetParent(center, false);
+        startText.text = "START"; startText.color = Color.white;
+        StretchInset(startText.rectTransform, 18f);
+
+        Button oldPlay = screenSerialized.FindProperty("playButton").objectReferenceValue as Button;
+        if (oldPlay != null && oldPlay != startButton) Object.DestroyImmediate(oldPlay.gameObject);
+
+        Image previousImage = ConfigureRootNavigationButton(previous,
+            screenSerialized.FindProperty("backButtonSprite").objectReferenceValue as Sprite);
+        Image nextImage = ConfigureRootNavigationButton(next,
+            screenSerialized.FindProperty("nextButtonSprite").objectReferenceValue as Sprite);
+        screenSerialized.FindProperty("backButtonImage").objectReferenceValue = previousImage;
+        screenSerialized.FindProperty("nextButtonImage").objectReferenceValue = nextImage;
+        screenSerialized.FindProperty("centerStatusBackground").objectReferenceValue = frame;
+        screenSerialized.FindProperty("selectionText").objectReferenceValue = null;
+        screenSerialized.FindProperty("playButton").objectReferenceValue = startButton;
+        screenSerialized.ApplyModifiedPropertiesWithoutUndo();
+        EditorUtility.SetDirty(screen);
+    }
+
+    private static Image ConfigureRootNavigationButton(Button button, Sprite assignedSprite)
+    {
+        Image rootImage = button.GetComponent<Image>() ?? button.gameObject.AddComponent<Image>();
+        Transform oldArrow = button.transform.Find("ArrowImage");
+        if (assignedSprite == null && oldArrow != null && oldArrow.TryGetComponent(out Image oldArrowImage))
+            assignedSprite = oldArrowImage.sprite;
+        rootImage.sprite = assignedSprite;
+        rootImage.preserveAspect = true;
+        rootImage.raycastTarget = true;
+        rootImage.color = assignedSprite != null ? Color.white : new Color(1f,1f,1f,0f);
+        button.targetGraphic = rootImage;
+        if (oldArrow != null) Object.DestroyImmediate(oldArrow.gameObject);
+        Transform oldLabel = button.transform.Find("Label");
+        if (oldLabel != null) Object.DestroyImmediate(oldLabel.gameObject);
+        for (int i = button.transform.childCount - 1; i >= 0; i--)
+        {
+            Transform child = button.transform.GetChild(i);
+            if (child.name == "ArrowImage" || child.name == "Label") Object.DestroyImmediate(child.gameObject);
+        }
+        return rootImage;
+    }
+
+    private static void EnsureSectorLayouts(LevelMapScreen screen)
+    {
+        const string folder = "Assets/Progression/MapLayouts";
+        EnsureFolder(folder);
+        SerializedObject serialized = new(screen);
+        SerializedProperty sectors = serialized.FindProperty("sectors");
+        for (int i = 0; i < Mathf.Min(9, sectors.arraySize); i++)
+        {
+            int sectorNumber = i + 1;
+            string path = $"{folder}/Sector{sectorNumber:00}_MapLayout.asset";
+            SectorMapLayout layout = AssetDatabase.LoadAssetAtPath<SectorMapLayout>(path);
+            if (layout == null)
+            {
+                layout = ScriptableObject.CreateInstance<SectorMapLayout>();
+                layout.sectorNumber = sectorNumber;
+                AssetDatabase.CreateAsset(layout, path);
+            }
+            SerializedProperty layoutProperty = sectors.GetArrayElementAtIndex(i).FindPropertyRelative("layout");
+            layoutProperty.objectReferenceValue = layout;
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+            if (!layout.HasCompleteNodeLayout)
+            {
+                if (sectorNumber == 1)
+                    Debug.LogWarning("Sector 1 layout is incomplete. It is intentionally NOT auto-seeded; restore the scene and use 'Recapture Sector 1 From Current Scene'.", layout);
+                else
+                {
+                    LevelMapLayoutEditorUtility.Capture(screen, layout);
+                    layout.sectorNumber = sectorNumber;
+                    EditorUtility.SetDirty(layout);
+                }
+            }
+        }
+        serialized.ApplyModifiedPropertiesWithoutUndo();
+    }
+
+    private static void ValidateDefaultSelection(LevelConfigurationCatalog catalog)
+    {
+        LevelConfiguration fresh = LevelMapDefaultSelection.Find(catalog, 1, 7, level => level == 1, _ => 0);
+        LevelConfiguration partial = LevelMapDefaultSelection.Find(catalog, 1, 7, level => level <= 4,
+            level => level <= 3 ? 1 : 0);
+        LevelConfiguration complete = LevelMapDefaultSelection.Find(catalog, 1, 7, level => level <= 7, _ => 1);
+        LevelConfiguration unfinished = LevelMapDefaultSelection.Find(catalog, 8, 7, _ => true, _ => 0);
+        if (fresh?.levelNumber != 1 || partial?.levelNumber != 4 || complete?.levelNumber != 7 || unfinished != null)
+            throw new System.InvalidOperationException("Level Map automatic-selection validation failed.");
+        Debug.Log("Level Map automatic-selection validation passed: fresh=L1, partial=L4, complete=L7, unfinished sector=none.");
     }
 
     private static void EnsureBackgroundViewport(LevelMapScreen screen)
@@ -315,6 +517,7 @@ public static class LevelMapAuthoring
     private static void CreateCamera() { GameObject go = new("Main Camera"); Camera camera = go.AddComponent<Camera>(); camera.clearFlags = CameraClearFlags.SolidColor; camera.backgroundColor = Color.black; camera.orthographic = true; go.tag = "MainCamera"; }
     private static void CreateEventSystem() { GameObject go = new("EventSystem"); go.AddComponent<EventSystem>(); go.AddComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>(); }
     private static void AddSceneToBuild() { var scenes = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes); if (!scenes.Exists(item => item.path == ScenePath)) scenes.Insert(1, new EditorBuildSettingsScene(ScenePath, true)); EditorBuildSettings.scenes = scenes.ToArray(); }
+    private static void EnsureFolder(string path) { if (AssetDatabase.IsValidFolder(path)) return; int slash = path.LastIndexOf('/'); string parent = path.Substring(0, slash); if (!AssetDatabase.IsValidFolder(parent)) EnsureFolder(parent); AssetDatabase.CreateFolder(parent, path.Substring(slash + 1)); }
     private static void PointMainMenuAtMap() { Scene menu = EditorSceneManager.OpenScene("Assets/Scenes/MainMenu.unity", OpenSceneMode.Additive); MainMenuController controller = Object.FindFirstObjectByType<MainMenuController>(); SerializedObject serialized = new(controller); serialized.FindProperty("gameplaySceneName").stringValue = "LevelMap"; serialized.ApplyModifiedPropertiesWithoutUndo(); EditorUtility.SetDirty(controller); EditorSceneManager.SaveScene(menu); EditorSceneManager.CloseScene(menu, true); }
 }
 #endif

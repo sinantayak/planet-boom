@@ -1,0 +1,371 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b30f828daa875454190523a1051389de, type: 3}
+  m_Name: Sector02_MapLayout
+  m_EditorClassIdentifier: Assembly-CSharp::SectorMapLayout
+  sectorNumber: 2
+  referenceResolution: {x: 1080, y: 1920}
+  nodes:
+  - normalizedRootCenter: {x: 0.33708158, y: 0.88315}
+    normalizedPathPosition: {x: 0.33708158, y: 0.88315}
+    pathNodeSize: {x: 92, y: 92}
+    islandPosition: {x: -139.99998, y: 0}
+    islandSize: {x: 230, y: 145}
+    islandRotation: 0
+    islandScale: {x: 1, y: 1, z: 1}
+    starsPosition: {x: -139.99998, y: 100.50006}
+    rewardBadgePosition: {x: -204.99995, y: -110.50006}
+    rewardBadgeSize: {x: 62, y: 62}
+    islandRect:
+      anchorMin: {x: 0.5, y: 0.5}
+      anchorMax: {x: 0.5, y: 0.5}
+      pivot: {x: 0.5, y: 0.5}
+      anchoredPosition: {x: -140, y: 0}
+      sizeDelta: {x: 230, y: 145}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+    starsRect:
+      anchorMin: {x: 0.5, y: 0.5}
+      anchorMax: {x: 0.5, y: 0.5}
+      pivot: {x: 0.5, y: 0.5}
+      anchoredPosition: {x: -140, y: 100.5}
+      sizeDelta: {x: 150, y: 42}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+    rewardBadgeRect:
+      anchorMin: {x: 0.5, y: 0.5}
+      anchorMax: {x: 0.5, y: 0.5}
+      pivot: {x: 0.5, y: 0.5}
+      anchoredPosition: {x: -205, y: -110.5}
+      sizeDelta: {x: 62, y: 62}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+    rootRect:
+      anchorMin: {x: 0, y: 1}
+      anchorMax: {x: 0, y: 1}
+      pivot: {x: 0, y: 1}
+      anchoredPosition: {x: 50, y: -99.99982}
+      sizeDelta: {x: 560, y: 295}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+    pathRect:
+      anchorMin: {x: 0.5, y: 0.5}
+      anchorMax: {x: 0.5, y: 0.5}
+      pivot: {x: 0.5, y: 0.5}
+      anchoredPosition: {x: 0, y: 0}
+      sizeDelta: {x: 92, y: 92}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+  - normalizedRootCenter: {x: 0.23493566, y: 0.7356119}
+    normalizedPathPosition: {x: 0.23493566, y: 0.7356119}
+    pathNodeSize: {x: 92, y: 92}
+    islandPosition: {x: 140, y: 0}
+    islandSize: {x: 270, y: 170}
+    islandRotation: 0
+    islandScale: {x: 1, y: 1, z: 1}
+    starsPosition: {x: 140, y: 112.99988}
+    rewardBadgePosition: {x: 205.00002, y: -123.00003}
+    rewardBadgeSize: {x: 62, y: 62}
+    islandRect:
+      anchorMin: {x: 0.5, y: 0.5}
+      anchorMax: {x: 0.5, y: 0.5}
+      pivot: {x: 0.5, y: 0.5}
+      anchoredPosition: {x: 140, y: 0}
+      sizeDelta: {x: 270, y: 170}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+    starsRect:
+      anchorMin: {x: 0.5, y: 0.5}
+      anchorMax: {x: 0.5, y: 0.5}
+      pivot: {x: 0.5, y: 0.5}
+      anchoredPosition: {x: 140, y: 113}
+      sizeDelta: {x: 150, y: 42}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+    rewardBadgeRect:
+      anchorMin: {x: 0.5, y: 0.5}
+      anchorMax: {x: 0.5, y: 0.5}
+      pivot: {x: 0.5, y: 0.5}
+      anchoredPosition: {x: 205, y: -123}
+      sizeDelta: {x: 62, y: 62}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+    rootRect:
+      anchorMin: {x: 0, y: 1}
+      anchorMax: {x: 0, y: 1}
+      pivot: {x: 0, y: 1}
+      anchoredPosition: {x: -50, y: -400}
+      sizeDelta: {x: 560, y: 320}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+    pathRect:
+      anchorMin: {x: 0.5, y: 0.5}
+      anchorMax: {x: 0.5, y: 0.5}
+      pivot: {x: 0.5, y: 0.5}
+      anchoredPosition: {x: 0, y: 0}
+      sizeDelta: {x: 92, y: 92}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+  - normalizedRootCenter: {x: 0.9182832, y: 0.837118}
+    normalizedPathPosition: {x: 0.9182832, y: 0.837118}
+    pathNodeSize: {x: 92, y: 92}
+    islandPosition: {x: -140.00003, y: 0}
+    islandSize: {x: 225, y: 140}
+    islandRotation: 0
+    islandScale: {x: 1, y: 1, z: 1}
+    starsPosition: {x: -140.00003, y: 98.00018}
+    rewardBadgePosition: {x: -205, y: -107.99988}
+    rewardBadgeSize: {x: 62, y: 62}
+    islandRect:
+      anchorMin: {x: 0.5, y: 0.5}
+      anchorMax: {x: 0.5, y: 0.5}
+      pivot: {x: 0.5, y: 0.5}
+      anchoredPosition: {x: -140, y: 0}
+      sizeDelta: {x: 225, y: 140}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+    starsRect:
+      anchorMin: {x: 0.5, y: 0.5}
+      anchorMax: {x: 0.5, y: 0.5}
+      pivot: {x: 0.5, y: 0.5}
+      anchoredPosition: {x: -140, y: 98}
+      sizeDelta: {x: 150, y: 42}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+    rewardBadgeRect:
+      anchorMin: {x: 0.5, y: 0.5}
+      anchorMax: {x: 0.5, y: 0.5}
+      pivot: {x: 0.5, y: 0.5}
+      anchoredPosition: {x: -205, y: -108}
+      sizeDelta: {x: 62, y: 62}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+    rootRect:
+      anchorMin: {x: 1, y: 1}
+      anchorMax: {x: 1, y: 1}
+      pivot: {x: 1, y: 1}
+      anchoredPosition: {x: 200, y: -200}
+      sizeDelta: {x: 560, y: 290}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+    pathRect:
+      anchorMin: {x: 0.5, y: 0.5}
+      anchorMax: {x: 0.5, y: 0.5}
+      pivot: {x: 0.5, y: 0.5}
+      anchoredPosition: {x: 0, y: 0}
+      sizeDelta: {x: 92, y: 92}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+  - normalizedRootCenter: {x: 0.61184543, y: 0.6416365}
+    normalizedPathPosition: {x: 0.61184543, y: 0.6416365}
+    pathNodeSize: {x: 92, y: 92}
+    islandPosition: {x: 139.99997, y: 0}
+    islandSize: {x: 315, y: 195}
+    islandRotation: 0
+    islandScale: {x: 1, y: 1, z: 1}
+    starsPosition: {x: 139.99997, y: 125.49997}
+    rewardBadgePosition: {x: 204.99997, y: -135.50003}
+    rewardBadgeSize: {x: 62, y: 62}
+    islandRect:
+      anchorMin: {x: 0.5, y: 0.5}
+      anchorMax: {x: 0.5, y: 0.5}
+      pivot: {x: 0.5, y: 0.5}
+      anchoredPosition: {x: 140, y: 0}
+      sizeDelta: {x: 315, y: 195}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+    starsRect:
+      anchorMin: {x: 0.5, y: 0.5}
+      anchorMax: {x: 0.5, y: 0.5}
+      pivot: {x: 0.5, y: 0.5}
+      anchoredPosition: {x: 140, y: 125.5}
+      sizeDelta: {x: 150, y: 42}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+    rewardBadgeRect:
+      anchorMin: {x: 0.5, y: 0.5}
+      anchorMax: {x: 0.5, y: 0.5}
+      pivot: {x: 0.5, y: 0.5}
+      anchoredPosition: {x: 205, y: -135.5}
+      sizeDelta: {x: 62, y: 62}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+    rootRect:
+      anchorMin: {x: 1, y: 0.5}
+      anchorMax: {x: 1, y: 0.5}
+      pivot: {x: 1, y: 0.5}
+      anchoredPosition: {x: -100, y: 300}
+      sizeDelta: {x: 560, y: 345}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+    pathRect:
+      anchorMin: {x: 0.5, y: 0.5}
+      anchorMax: {x: 0.5, y: 0.5}
+      pivot: {x: 0.5, y: 0.5}
+      anchoredPosition: {x: 0, y: 0}
+      sizeDelta: {x: 92, y: 92}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+  - normalizedRootCenter: {x: 0.74463516, y: 0.45278785}
+    normalizedPathPosition: {x: 0.74463516, y: 0.45278785}
+    pathNodeSize: {x: 92, y: 92}
+    islandPosition: {x: 139.99992, y: 0}
+    islandSize: {x: 235, y: 148}
+    islandRotation: 0
+    islandScale: {x: 1, y: 1, z: 1}
+    starsPosition: {x: 139.99992, y: 101.99996}
+    rewardBadgePosition: {x: -205.00003, y: -112.00001}
+    rewardBadgeSize: {x: 62, y: 62}
+    islandRect:
+      anchorMin: {x: 0.5, y: 0.5}
+      anchorMax: {x: 0.5, y: 0.5}
+      pivot: {x: 0.5, y: 0.5}
+      anchoredPosition: {x: 140, y: 0}
+      sizeDelta: {x: 235, y: 148}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+    starsRect:
+      anchorMin: {x: 0.5, y: 0.5}
+      anchorMax: {x: 0.5, y: 0.5}
+      pivot: {x: 0.5, y: 0.5}
+      anchoredPosition: {x: 140, y: 102}
+      sizeDelta: {x: 150, y: 42}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+    rewardBadgeRect:
+      anchorMin: {x: 0.5, y: 0.5}
+      anchorMax: {x: 0.5, y: 0.5}
+      pivot: {x: 0.5, y: 0.5}
+      anchoredPosition: {x: -205, y: -112}
+      sizeDelta: {x: 62, y: 62}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+    rootRect:
+      anchorMin: {x: 1, y: 0.5}
+      anchorMax: {x: 1, y: 0.5}
+      pivot: {x: 1, y: 0.5}
+      anchoredPosition: {x: 30, y: -100}
+      sizeDelta: {x: 560, y: 298}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+    pathRect:
+      anchorMin: {x: 0.5, y: 0.5}
+      anchorMax: {x: 0.5, y: 0.5}
+      pivot: {x: 0.5, y: 0.5}
+      anchoredPosition: {x: 0, y: 0}
+      sizeDelta: {x: 92, y: 92}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+  - normalizedRootCenter: {x: 0.28600863, y: 0.5944243}
+    normalizedPathPosition: {x: 0.28600863, y: 0.5944243}
+    pathNodeSize: {x: 92, y: 92}
+    islandPosition: {x: -140, y: 0}
+    islandSize: {x: 275, y: 172}
+    islandRotation: 0
+    islandScale: {x: 1, y: 1, z: 1}
+    starsPosition: {x: -140, y: 113.999954}
+    rewardBadgePosition: {x: 205.00002, y: -124.00001}
+    rewardBadgeSize: {x: 62, y: 62}
+    islandRect:
+      anchorMin: {x: 0.5, y: 0.5}
+      anchorMax: {x: 0.5, y: 0.5}
+      pivot: {x: 0.5, y: 0.5}
+      anchoredPosition: {x: -140, y: 0}
+      sizeDelta: {x: 275, y: 172}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+    starsRect:
+      anchorMin: {x: 0.5, y: 0.5}
+      anchorMax: {x: 0.5, y: 0.5}
+      pivot: {x: 0.5, y: 0.5}
+      anchoredPosition: {x: -140, y: 114}
+      sizeDelta: {x: 150, y: 42}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+    rewardBadgeRect:
+      anchorMin: {x: 0.5, y: 0.5}
+      anchorMax: {x: 0.5, y: 0.5}
+      pivot: {x: 0.5, y: 0.5}
+      anchoredPosition: {x: 205, y: -124}
+      sizeDelta: {x: 62, y: 62}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+    rootRect:
+      anchorMin: {x: 0, y: 0.5}
+      anchorMax: {x: 0, y: 0.5}
+      pivot: {x: 0, y: 0.5}
+      anchoredPosition: {x: 0, y: 200}
+      sizeDelta: {x: 560, y: 322}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+    pathRect:
+      anchorMin: {x: 0.5, y: 0.5}
+      anchorMax: {x: 0.5, y: 0.5}
+      pivot: {x: 0.5, y: 0.5}
+      anchoredPosition: {x: 0, y: 0}
+      sizeDelta: {x: 92, y: 92}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+  - normalizedRootCenter: {x: 0.5, y: 0.3583635}
+    normalizedPathPosition: {x: 0.5, y: 0.3583635}
+    pathNodeSize: {x: 92, y: 92}
+    islandPosition: {x: -170.00002, y: 0}
+    islandSize: {x: 330, y: 205}
+    islandRotation: 0
+    islandScale: {x: 1, y: 1, z: 1}
+    starsPosition: {x: -170.00002, y: 130.50005}
+    rewardBadgePosition: {x: -349, y: 0}
+    rewardBadgeSize: {x: 62, y: 62}
+    islandRect:
+      anchorMin: {x: 0.5, y: 0.5}
+      anchorMax: {x: 0.5, y: 0.5}
+      pivot: {x: 0.5, y: 0.5}
+      anchoredPosition: {x: -170, y: 0}
+      sizeDelta: {x: 330, y: 205}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+    starsRect:
+      anchorMin: {x: 0.5, y: 0.5}
+      anchorMax: {x: 0.5, y: 0.5}
+      pivot: {x: 0.5, y: 0.5}
+      anchoredPosition: {x: -170, y: 130.5}
+      sizeDelta: {x: 150, y: 42}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+    rewardBadgeRect:
+      anchorMin: {x: 0, y: 0.5}
+      anchorMax: {x: 0, y: 0.5}
+      pivot: {x: 0, y: 0.5}
+      anchoredPosition: {x: -100, y: 0}
+      sizeDelta: {x: 62, y: 62}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+    rootRect:
+      anchorMin: {x: 0.5, y: 0.5}
+      anchorMax: {x: 0.5, y: 0.5}
+      pivot: {x: 0.5, y: 0.5}
+      anchoredPosition: {x: 0, y: -300}
+      sizeDelta: {x: 560, y: 355}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+    pathRect:
+      anchorMin: {x: 0.5, y: 0.5}
+      anchorMax: {x: 0.5, y: 0.5}
+      pivot: {x: 0.5, y: 0.5}
+      anchoredPosition: {x: 0, y: 0}
+      sizeDelta: {x: 92, y: 92}
+      rotation: 0
+      scale: {x: 1, y: 1, z: 1}
+  completeHierarchyCaptured: 1
+  backgroundPosition: {x: 0, y: 0}
+  backgroundSize: {x: 2048, y: 2048}
+  backgroundScale: {x: 1.1, y: 1.1, z: 1}

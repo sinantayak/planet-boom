@@ -1,0 +1,83 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b30f828daa875454190523a1051389de, type: 3}
+  m_Name: Sector04_MapLayout
+  m_EditorClassIdentifier: Assembly-CSharp::SectorMapLayout
+  sectorNumber: 4
+  referenceResolution: {x: 1080, y: 1920}
+  nodes:
+  - normalizedPathPosition: {x: 0.035755213, y: 0.69585323}
+    pathNodeSize: {x: 92, y: 92}
+    islandPosition: {x: -140, y: 0}
+    islandSize: {x: 230, y: 145}
+    islandRotation: 0
+    islandScale: {x: 1, y: 1, z: 1}
+    starsPosition: {x: -140, y: 100.5}
+    rewardBadgePosition: {x: -205, y: -110.5}
+    rewardBadgeSize: {x: 62, y: 62}
+  - normalizedPathPosition: {x: 0.6851852, y: 0.6372595}
+    pathNodeSize: {x: 92, y: 92}
+    islandPosition: {x: 140, y: 0}
+    islandSize: {x: 270, y: 170}
+    islandRotation: 0
+    islandScale: {x: 1, y: 1, z: 1}
+    starsPosition: {x: 140, y: 113}
+    rewardBadgePosition: {x: 205, y: -123}
+    rewardBadgeSize: {x: 62, y: 62}
+  - normalizedPathPosition: {x: 0.08205151, y: 0.7604166}
+    pathNodeSize: {x: 92, y: 92}
+    islandPosition: {x: -140, y: 0}
+    islandSize: {x: 225, y: 140}
+    islandRotation: 0
+    islandScale: {x: 1, y: 1, z: 1}
+    starsPosition: {x: -140, y: 98}
+    rewardBadgePosition: {x: -205, y: -108}
+    rewardBadgeSize: {x: 62, y: 62}
+  - normalizedPathPosition: {x: 0.9179485, y: 0.65625}
+    pathNodeSize: {x: 92, y: 92}
+    islandPosition: {x: 140, y: 0}
+    islandSize: {x: 315, y: 195}
+    islandRotation: 0
+    islandScale: {x: 1, y: 1, z: 1}
+    starsPosition: {x: 140, y: 125.5}
+    rewardBadgePosition: {x: 205, y: -135.5}
+    rewardBadgeSize: {x: 62, y: 62}
+  - normalizedPathPosition: {x: 1.0383189, y: 0.44791666}
+    pathNodeSize: {x: 92, y: 92}
+    islandPosition: {x: 140, y: 0}
+    islandSize: {x: 235, y: 148}
+    islandRotation: 0
+    islandScale: {x: 1, y: 1, z: 1}
+    starsPosition: {x: 140, y: 102}
+    rewardBadgePosition: {x: -205, y: -112}
+    rewardBadgeSize: {x: 62, y: 62}
+  - normalizedPathPosition: {x: -0.010541054, y: 0.5}
+    pathNodeSize: {x: 92, y: 92}
+    islandPosition: {x: -140, y: 0}
+    islandSize: {x: 275, y: 172}
+    islandRotation: 0
+    islandScale: {x: 1, y: 1, z: 1}
+    starsPosition: {x: -140, y: 114}
+    rewardBadgePosition: {x: 205, y: -124}
+    rewardBadgeSize: {x: 62, y: 62}
+  - normalizedPathPosition: {x: 0.47222224, y: 0.34375}
+    pathNodeSize: {x: 92, y: 92}
+    islandPosition: {x: 170, y: 0}
+    islandSize: {x: 330, y: 205}
+    islandRotation: 0
+    islandScale: {x: 1, y: 1, z: 1}
+    starsPosition: {x: 170, y: 130.5}
+    rewardBadgePosition: {x: 100, y: 130}
+    rewardBadgeSize: {x: 62, y: 62}
+  backgroundPosition: {x: 0, y: 0}
+  backgroundSize: {x: 2048, y: 2048}
+  backgroundScale: {x: 1.1, y: 1.1, z: 1}

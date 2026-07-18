@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 [Serializable]
@@ -12,6 +13,24 @@ public sealed class LevelMapSectorVisual
     public string title = "SECTOR 1";
     public Sprite background;
     public Sprite island;
+    public SectorMapLayout layout;
+}
+
+public static class LevelMapDefaultSelection
+{
+    public static LevelConfiguration Find(LevelConfigurationCatalog catalog, int firstLevel, int levelCount,
+        Func<int, bool> isUnlocked, Func<int, int> getBestStars)
+    {
+        LevelConfiguration lastPlayable = null;
+        for (int i = 0; i < levelCount; i++)
+        {
+            LevelConfiguration config = catalog != null ? catalog.FindByNumber(firstLevel + i) : null;
+            if (config == null || !isUnlocked(config.levelNumber)) continue;
+            lastPlayable = config;
+            if (getBestStars(config.levelNumber) <= 0) return config;
+        }
+        return lastPlayable;
+    }
 }
 
 public sealed class LevelMapScreen : MonoBehaviour
@@ -25,13 +44,28 @@ public sealed class LevelMapScreen : MonoBehaviour
     [SerializeField] private Button previousSectorButton;
     [SerializeField] private Button nextSectorButton;
     [SerializeField] private Button playButton;
+    [Header("Bottom Navigation Artwork")]
+    [FormerlySerializedAs("previousSectorArrowImage")]
+    [SerializeField] private Image backButtonImage;
+    [FormerlySerializedAs("previousSectorArrowSprite")]
+    [SerializeField] private Sprite backButtonSprite;
+    [FormerlySerializedAs("nextSectorArrowImage")]
+    [SerializeField] private Image nextButtonImage;
+    [FormerlySerializedAs("nextSectorArrowSprite")]
+    [SerializeField] private Sprite nextButtonSprite;
+    [SerializeField] private Image centerStatusBackground;
+    [SerializeField] private Sprite centerStatusBackgroundSprite;
     [SerializeField] private List<LevelMapNodeUI> nodes = new();
     [SerializeField] private LevelMapOrbitPath orbitPath;
     [SerializeField] private string gameplaySceneName = "GameScene";
     [SerializeField, Range(1, 10)] private int initialSector = 1;
+#if UNITY_EDITOR
+    [SerializeField, Range(1, 10)] private int editorPreviewSector = 1;
+#endif
 
     private int currentSector;
     private LevelConfiguration selected;
+    private bool autoSelectRequested;
 
     private void OnEnable()
     {
@@ -47,6 +81,7 @@ public sealed class LevelMapScreen : MonoBehaviour
 
     private void Start()
     {
+        ApplyBottomNavigationArtwork();
         previousSectorButton?.onClick.AddListener(PreviousSector);
         nextSectorButton?.onClick.AddListener(NextSector);
         playButton?.onClick.AddListener(PlaySelected);
@@ -59,7 +94,7 @@ public sealed class LevelMapScreen : MonoBehaviour
         selected = config;
         CampaignLevelSelection.Select(config);
         if (selectionText != null) selectionText.text = config.displayName;
-        if (playButton != null) playButton.gameObject.SetActive(true);
+        if (playButton != null) playButton.interactable = true;
         foreach (LevelMapNodeUI node in nodes) node?.SetSelected(false);
         int localIndex = (config.levelNumber - 1) % 7;
         if (localIndex >= 0 && localIndex < nodes.Count) nodes[localIndex]?.SetSelected(true);
@@ -69,7 +104,9 @@ public sealed class LevelMapScreen : MonoBehaviour
     {
         currentSector = Mathf.Clamp(sectorNumber, 1, 10);
         selected = null;
-        if (playButton != null) playButton.gameObject.SetActive(false);
+        autoSelectRequested = true;
+        foreach (LevelMapNodeUI node in nodes) node?.SetSelected(false);
+        if (playButton != null) { playButton.gameObject.SetActive(true); playButton.interactable = false; }
         if (selectionText != null) selectionText.text = "Bir seviye seç";
         Refresh();
     }
@@ -93,6 +130,8 @@ public sealed class LevelMapScreen : MonoBehaviour
             sectorBackground.sprite = visual?.background;
             sectorBackground.enabled = visual?.background != null;
         }
+        ApplyLayout(visual?.layout);
+        BindSectorIslandArtwork(visual?.island);
         previousSectorButton.interactable = currentSector > 1;
         nextSectorButton.interactable = currentSector < 10;
 
@@ -107,7 +146,28 @@ public sealed class LevelMapScreen : MonoBehaviour
             nodes[i]?.Bind(this, config, visual?.island, unlocked, stars, rewardIcons);
             if (i < nodes.Count - 1 && stars > 0) completedSegments++;
         }
+        BindSectorIslandArtwork(visual?.island);
         orbitPath?.SetCompletedSegments(completedSegments);
+        if (autoSelectRequested)
+        {
+            autoSelectRequested = false;
+            AutoSelectCurrentProgressionLevel(firstLevel);
+        }
+    }
+
+    private void AutoSelectCurrentProgressionLevel(int firstLevel)
+    {
+        PlayerDataPersistenceManager save = PlayerDataPersistenceManager.Instance;
+        if (save != null && !save.IsLoaded)
+        {
+            autoSelectRequested = true;
+            if (playButton != null) playButton.interactable = false;
+            return;
+        }
+        LevelConfiguration target = LevelMapDefaultSelection.Find(levelCatalog, firstLevel, nodes.Count,
+            IsLevelUnlocked, level => save != null ? save.GetBestStars(level) : 0);
+        if (target != null) SelectLevel(target);
+        else if (playButton != null) playButton.interactable = false;
     }
 
     private static bool IsLevelUnlocked(int levelNumber)
@@ -117,6 +177,90 @@ public sealed class LevelMapScreen : MonoBehaviour
     }
 
     private void HandleUnlockChanged(string _, bool __) => Refresh();
+
+    private void ApplyLayout(SectorMapLayout layout, bool forceValidationApply = false)
+    {
+        if (layout == null) return;
+        if (!forceValidationApply && !layout.completeHierarchyCaptured)
+        {
+            Debug.LogWarning($"SectorMapLayout '{layout.name}' has not passed complete-hierarchy round-trip validation. " +
+                "The current scene transforms are preserved to prevent an Edit Mode -> Play Mode layout jump.", layout);
+            return;
+        }
+        int count = Mathf.Min(nodes.Count, layout.nodes != null ? layout.nodes.Count : 0);
+        for (int i = 0; i < count; i++)
+        {
+            SectorMapNodeLayout nodeLayout = layout.nodes[i];
+            if (nodeLayout == null) continue;
+            Vector2 position = nodeLayout.normalizedPathPosition;
+            if (position.x < 0f || position.x > 1f || position.y < 0f || position.y > 1f)
+                Debug.LogWarning($"SectorMapLayout '{layout.name}' node {i + 1} has out-of-range normalized position {position}. Runtime clamps it to 0..1; recapture the layout.", layout);
+            Vector2 rootPosition = nodeLayout.normalizedRootCenter;
+            if (rootPosition.x < 0f || rootPosition.x > 1f || rootPosition.y < 0f || rootPosition.y > 1f)
+                Debug.LogWarning($"SectorMapLayout '{layout.name}' node {i + 1} has out-of-range normalized root center {rootPosition}. Runtime clamps it to 0..1; recapture the layout.", layout);
+            nodes[i]?.ApplyVisualLayout(nodeLayout);
+        }
+        if (sectorBackground != null)
+        {
+            RectTransform rect = sectorBackground.rectTransform;
+            rect.anchorMin = rect.anchorMax = new Vector2(.5f, .5f);
+            rect.anchoredPosition = layout.backgroundPosition;
+            rect.sizeDelta = layout.backgroundSize;
+            rect.localScale = layout.backgroundScale;
+        }
+        orbitPath?.SetVerticesDirty();
+    }
+
+    private void BindSectorIslandArtwork(Sprite island)
+    {
+        if (island == null) return;
+        for (int i = 0; i < nodes.Count; i++) nodes[i]?.BindIslandSprite(island);
+    }
+
+    private void ApplyBottomNavigationArtwork()
+    {
+        ApplyOptionalSprite(backButtonImage, backButtonSprite);
+        ApplyOptionalSprite(nextButtonImage, nextButtonSprite);
+        ApplyOptionalSprite(centerStatusBackground, centerStatusBackgroundSprite);
+    }
+
+    private static void ApplyOptionalSprite(Image image, Sprite sprite)
+    {
+        if (image == null || sprite == null) return;
+        image.sprite = sprite;
+        image.enabled = true;
+        image.preserveAspect = true;
+        Color color = image.color;
+        color.a = 1f;
+        image.color = color;
+        Transform fallback = image.transform.parent != null ? image.transform.parent.Find("Label") : null;
+        if (fallback != null) fallback.gameObject.SetActive(false);
+    }
+
+#if UNITY_EDITOR
+    public int EditorPreviewSector => editorPreviewSector;
+    public IReadOnlyList<LevelMapNodeUI> EditorNodes => nodes;
+    public Image EditorSectorBackground => sectorBackground;
+    public RectTransform EditorLayoutRoot => nodes != null && nodes.Count > 0 && nodes[0] != null
+        ? nodes[0].RootRect.parent as RectTransform : null;
+    public LevelMapSectorVisual EditorFindSector(int sectorNumber) =>
+        sectors?.Find(item => item != null && item.sectorNumber == sectorNumber);
+    public void EditorApplyPreviewSector()
+    {
+        currentSector = Mathf.Clamp(editorPreviewSector, 1, 10);
+        LevelMapSectorVisual visual = EditorFindSector(currentSector);
+        if (sectorBackground != null) { sectorBackground.sprite = visual?.background; sectorBackground.enabled = visual?.background != null; }
+        BindSectorIslandArtwork(visual?.island);
+        ApplyLayout(visual?.layout);
+    }
+    public void EditorApplyLayoutForValidation(SectorMapLayout layout) => ApplyLayout(layout, true);
+    public void EditorApplySectorForValidation(int sectorNumber)
+    {
+        LevelMapSectorVisual visual = EditorFindSector(sectorNumber);
+        ApplyLayout(visual?.layout, true);
+        BindSectorIslandArtwork(visual?.island);
+    }
+#endif
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
     [ContextMenu("DEBUG Map/Fresh Player Preview")]

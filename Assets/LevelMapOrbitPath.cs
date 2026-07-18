@@ -46,8 +46,8 @@ public sealed class LevelMapOrbitPath : MaskableGraphic
         for (int segment = 0; segment < controlPoints.Count - 1; segment++)
         {
             if (controlPoints[segment] == null || controlPoints[segment + 1] == null) continue;
-            Vector2 start = transform.InverseTransformPoint(controlPoints[segment].position);
-            Vector2 end = transform.InverseTransformPoint(controlPoints[segment + 1].position);
+            Vector2 start = PointCenterInPathSpace(controlPoints[segment]);
+            Vector2 end = PointCenterInPathSpace(controlPoints[segment + 1]);
             float bend = (segment % 2 == 0 ? 1f : -1f) * Mathf.Min(90f, Vector2.Distance(start, end) * .22f);
             Vector2 middle = (start + end) * .5f + Vector2.right * bend;
             Vector2 previous = start;
@@ -71,6 +71,15 @@ public sealed class LevelMapOrbitPath : MaskableGraphic
                 previous = point;
             }
         }
+    }
+
+    private Vector2 PointCenterInPathSpace(RectTransform point)
+    {
+        // Both path and nodes live under the same stretched LevelMapScreen.
+        // Transform the actual rect center directly between local UI spaces;
+        // this is independent of screen pixels, Canvas scale and pivot choice.
+        Vector3 worldCenter = point.TransformPoint(point.rect.center);
+        return rectTransform.InverseTransformPoint(worldCenter);
     }
 
     private static Vector2 Quadratic(Vector2 a, Vector2 b, Vector2 c, float t)
