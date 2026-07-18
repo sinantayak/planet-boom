@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b215bbff50d7f6c4e87da5a12ef8ec8e, type: 3}
+  m_Name: LevelMapRewardIcons
+  m_EditorClassIdentifier: Assembly-CSharp::LevelMapRewardIconLibrary
+  entries:
+  - contentType: 0
+    stableContentId: Tier5
+    icon: {fileID: 21300000, guid: 84df05106c68ef041afeea83915c8251, type: 3}
+  - contentType: 3
+    stableContentId: background_sector_02
+    icon: {fileID: 4645252967730676244, guid: 00522e2ae1d0be94694b23bd22aef586, type: 3}

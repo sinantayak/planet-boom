@@ -486,7 +486,12 @@ public class GameManager : MonoBehaviour
         // authored: gameplay HUD visible, the level-complete group hidden.
         HideLevelCompleteScreen();
 
-        LoadLevel(1);
+        LevelConfiguration mapSelection = CampaignLevelSelection.Consume();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (mapSelection != null)
+            debugLevelOverride = mapSelection;
+#endif
+        LoadLevel(mapSelection != null ? mapSelection.levelNumber : 1);
     }
 
     void OnEnable()

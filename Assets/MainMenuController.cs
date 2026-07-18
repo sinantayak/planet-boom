@@ -20,7 +20,7 @@ public class MainMenuController : MonoBehaviour
     // Must match a scene name added to Build Settings. Kept as a plain
     // string (not a build index) so re-ordering scenes in Build Settings
     // can't silently repoint this at the wrong scene.
-    [SerializeField] private string gameplaySceneName = "SampleScene";
+    [SerializeField] private string gameplaySceneName = "LevelMap";
 
     [Header("Audio Toggle")]
     [SerializeField] private Image audioButtonImage;
