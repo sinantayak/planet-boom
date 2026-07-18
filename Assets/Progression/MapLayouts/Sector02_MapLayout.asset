@@ -24,7 +24,7 @@ MonoBehaviour:
     islandScale: {x: 1, y: 1, z: 1}
     starsPosition: {x: -139.99998, y: 100.50006}
     rewardBadgePosition: {x: -204.99995, y: -110.50006}
-    rewardBadgeSize: {x: 62, y: 62}
+    rewardBadgeSize: {x: 90, y: 90}
     islandRect:
       anchorMin: {x: 0.5, y: 0.5}
       anchorMax: {x: 0.5, y: 0.5}
@@ -46,7 +46,7 @@ MonoBehaviour:
       anchorMax: {x: 0.5, y: 0.5}
       pivot: {x: 0.5, y: 0.5}
       anchoredPosition: {x: -205, y: -110.5}
-      sizeDelta: {x: 62, y: 62}
+      sizeDelta: {x: 90, y: 90}
       rotation: 0
       scale: {x: 1, y: 1, z: 1}
     rootRect:
@@ -74,7 +74,7 @@ MonoBehaviour:
     islandScale: {x: 1, y: 1, z: 1}
     starsPosition: {x: 140, y: 112.99988}
     rewardBadgePosition: {x: 205.00002, y: -123.00003}
-    rewardBadgeSize: {x: 62, y: 62}
+    rewardBadgeSize: {x: 90, y: 90}
     islandRect:
       anchorMin: {x: 0.5, y: 0.5}
       anchorMax: {x: 0.5, y: 0.5}
@@ -96,7 +96,7 @@ MonoBehaviour:
       anchorMax: {x: 0.5, y: 0.5}
       pivot: {x: 0.5, y: 0.5}
       anchoredPosition: {x: 205, y: -123}
-      sizeDelta: {x: 62, y: 62}
+      sizeDelta: {x: 90, y: 90}
       rotation: 0
       scale: {x: 1, y: 1, z: 1}
     rootRect:
@@ -124,7 +124,7 @@ MonoBehaviour:
     islandScale: {x: 1, y: 1, z: 1}
     starsPosition: {x: -140.00003, y: 98.00018}
     rewardBadgePosition: {x: -205, y: -107.99988}
-    rewardBadgeSize: {x: 62, y: 62}
+    rewardBadgeSize: {x: 90, y: 90}
     islandRect:
       anchorMin: {x: 0.5, y: 0.5}
       anchorMax: {x: 0.5, y: 0.5}
@@ -146,7 +146,7 @@ MonoBehaviour:
       anchorMax: {x: 0.5, y: 0.5}
       pivot: {x: 0.5, y: 0.5}
       anchoredPosition: {x: -205, y: -108}
-      sizeDelta: {x: 62, y: 62}
+      sizeDelta: {x: 90, y: 90}
       rotation: 0
       scale: {x: 1, y: 1, z: 1}
     rootRect:
@@ -174,7 +174,7 @@ MonoBehaviour:
     islandScale: {x: 1, y: 1, z: 1}
     starsPosition: {x: 139.99997, y: 125.49997}
     rewardBadgePosition: {x: 204.99997, y: -135.50003}
-    rewardBadgeSize: {x: 62, y: 62}
+    rewardBadgeSize: {x: 90, y: 90}
     islandRect:
       anchorMin: {x: 0.5, y: 0.5}
       anchorMax: {x: 0.5, y: 0.5}
@@ -196,7 +196,7 @@ MonoBehaviour:
       anchorMax: {x: 0.5, y: 0.5}
       pivot: {x: 0.5, y: 0.5}
       anchoredPosition: {x: 205, y: -135.5}
-      sizeDelta: {x: 62, y: 62}
+      sizeDelta: {x: 90, y: 90}
       rotation: 0
       scale: {x: 1, y: 1, z: 1}
     rootRect:
@@ -224,7 +224,7 @@ MonoBehaviour:
     islandScale: {x: 1, y: 1, z: 1}
     starsPosition: {x: 139.99992, y: 101.99996}
     rewardBadgePosition: {x: -205.00003, y: -112.00001}
-    rewardBadgeSize: {x: 62, y: 62}
+    rewardBadgeSize: {x: 90, y: 90}
     islandRect:
       anchorMin: {x: 0.5, y: 0.5}
       anchorMax: {x: 0.5, y: 0.5}
@@ -246,7 +246,7 @@ MonoBehaviour:
       anchorMax: {x: 0.5, y: 0.5}
       pivot: {x: 0.5, y: 0.5}
       anchoredPosition: {x: -205, y: -112}
-      sizeDelta: {x: 62, y: 62}
+      sizeDelta: {x: 90, y: 90}
       rotation: 0
       scale: {x: 1, y: 1, z: 1}
     rootRect:
@@ -274,7 +274,7 @@ MonoBehaviour:
     islandScale: {x: 1, y: 1, z: 1}
     starsPosition: {x: -140, y: 113.999954}
     rewardBadgePosition: {x: 205.00002, y: -124.00001}
-    rewardBadgeSize: {x: 62, y: 62}
+    rewardBadgeSize: {x: 90, y: 90}
     islandRect:
       anchorMin: {x: 0.5, y: 0.5}
       anchorMax: {x: 0.5, y: 0.5}
@@ -296,7 +296,7 @@ MonoBehaviour:
       anchorMax: {x: 0.5, y: 0.5}
       pivot: {x: 0.5, y: 0.5}
       anchoredPosition: {x: 205, y: -124}
-      sizeDelta: {x: 62, y: 62}
+      sizeDelta: {x: 90, y: 90}
       rotation: 0
       scale: {x: 1, y: 1, z: 1}
     rootRect:
@@ -324,7 +324,7 @@ MonoBehaviour:
     islandScale: {x: 1, y: 1, z: 1}
     starsPosition: {x: -170.00002, y: 130.50005}
     rewardBadgePosition: {x: -349, y: 0}
-    rewardBadgeSize: {x: 62, y: 62}
+    rewardBadgeSize: {x: 90, y: 90}
     islandRect:
       anchorMin: {x: 0.5, y: 0.5}
       anchorMax: {x: 0.5, y: 0.5}
@@ -346,7 +346,7 @@ MonoBehaviour:
       anchorMax: {x: 0, y: 0.5}
       pivot: {x: 0, y: 0.5}
       anchoredPosition: {x: -100, y: 0}
-      sizeDelta: {x: 62, y: 62}
+      sizeDelta: {x: 90, y: 90}
       rotation: 0
       scale: {x: 1, y: 1, z: 1}
     rootRect:

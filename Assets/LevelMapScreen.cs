@@ -69,13 +69,13 @@ public sealed class LevelMapScreen : MonoBehaviour
 
     private void OnEnable()
     {
-        PlayerDataPersistenceManager.ProgressionChanged += Refresh;
+        PlayerDataPersistenceManager.ProgressionChanged += HandleProgressionChanged;
         UnlockManager.UnlockChanged += HandleUnlockChanged;
     }
 
     private void OnDisable()
     {
-        PlayerDataPersistenceManager.ProgressionChanged -= Refresh;
+        PlayerDataPersistenceManager.ProgressionChanged -= HandleProgressionChanged;
         UnlockManager.UnlockChanged -= HandleUnlockChanged;
     }
 
@@ -177,6 +177,16 @@ public sealed class LevelMapScreen : MonoBehaviour
     }
 
     private void HandleUnlockChanged(string _, bool __) => Refresh();
+
+    private void HandleProgressionChanged()
+    {
+        // Re-read only the real PlayerData state. This also advances the default
+        // selection after returning from a completed level or after a debug reset.
+        selected = null;
+        autoSelectRequested = true;
+        if (playButton != null) playButton.interactable = false;
+        Refresh();
+    }
 
     private void ApplyLayout(SectorMapLayout layout, bool forceValidationApply = false)
     {

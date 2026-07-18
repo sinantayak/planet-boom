@@ -27,6 +27,8 @@ public class AudioManager : MonoBehaviour
     // BOOM/Big Pop only (PlanetMerge.TriggerBoom, Meteorite.TriggerBigPop) —
     // regular tier-up merges still ride PlayMerge's combo chain above.
     public AudioClip SFX_Explosion;
+    [Header("Optional Music Source")]
+    [SerializeField] private AudioSource musicSource;
 
     [Header("Skill Feedback Clips")]
     [SerializeField] private AudioClip skillCollectedClip;
@@ -119,7 +121,7 @@ public class AudioManager : MonoBehaviour
         // Main Menu wouldn't otherwise survive into the gameplay scene —
         // re-apply it here every time a fresh instance wakes up. Key/values
         // must stay in sync with MainMenuController.MuteStateKey.
-        SetMuted(PlayerPrefs.GetInt("MuteState", 1) == 0);
+        ApplySavedPreferences();
     }
 
     void OnDestroy()
@@ -136,8 +138,16 @@ public class AudioManager : MonoBehaviour
     // bookkeeping needed.
     public void SetMuted(bool muted)
     {
-        IsMuted = muted;
-        AudioListener.volume = muted ? 0f : 1f;
+        GameSettings.SfxEnabled = !muted;
+        ApplySavedPreferences();
+    }
+
+    public void ApplySavedPreferences()
+    {
+        IsMuted = !GameSettings.SfxEnabled;
+        if (sfxSource != null) sfxSource.mute = IsMuted;
+        if (mergeSource != null) mergeSource.mute = IsMuted;
+        if (musicSource != null) musicSource.mute = !GameSettings.MusicEnabled;
     }
 
     public void PlayLaunch()

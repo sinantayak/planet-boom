@@ -15,7 +15,10 @@ public sealed class LevelMapNodeUI : MonoBehaviour
     [SerializeField] private Sprite filledStar;
     [SerializeField] private Sprite emptyStar;
     [SerializeField] private RectTransform rewardContainer;
+    [SerializeField] private Image rewardFrame;
     [SerializeField] private Image rewardIcon;
+    [SerializeField] private Sprite rewardUnclaimedFrame;
+    [SerializeField] private Sprite rewardClaimedFrame;
     [SerializeField] private GameObject rewardCompleteMark;
     [SerializeField] private CanvasGroup canvasGroup;
 
@@ -78,7 +81,10 @@ public sealed class LevelMapNodeUI : MonoBehaviour
         if (layout.starsRect != null) ApplySnapshot(StarsRect, layout.starsRect);
         else ApplyCenter(StarsRect, layout.starsPosition);
         if (layout.rewardBadgeRect != null) ApplySnapshot(RewardBadgeRect, layout.rewardBadgeRect);
-        else ApplyRectByCenter(RewardBadgeRect, layout.rewardBadgePosition, layout.rewardBadgeSize);
+        // Legacy layouts only knew a generated 62x62 badge size. Applying that fallback on
+        // every refresh destroyed Inspector-authored sizes. Keep the current size and only
+        // restore the legacy position until the sector is captured with a full snapshot.
+        else ApplyCenter(RewardBadgeRect, layout.rewardBadgePosition);
         CacheSelectionBaseline();
     }
 
@@ -254,7 +260,18 @@ public sealed class LevelMapNodeUI : MonoBehaviour
             rewardIcon.enabled = icon != null;
         }
         bool claimed = UnlockManager.Instance != null && UnlockManager.Instance.IsUnlocked(reward.CanonicalId);
-        if (rewardCompleteMark != null) rewardCompleteMark.SetActive(claimed);
+        Image frame = rewardFrame != null ? rewardFrame : rewardContainer != null
+            ? rewardContainer.GetComponent<Image>() : null;
+        if (frame != null)
+        {
+            Sprite frameSprite = claimed ? rewardClaimedFrame : rewardUnclaimedFrame;
+            if (frameSprite != null) frame.sprite = frameSprite;
+            frame.enabled = frame.sprite != null;
+            frame.preserveAspect = true;
+            frame.raycastTarget = false;
+        }
+        // Claimed state is already part of EmptySquareFrameWithCheck; never stack the old mark.
+        if (rewardCompleteMark != null) rewardCompleteMark.SetActive(false);
     }
 
     private void HandleClick()

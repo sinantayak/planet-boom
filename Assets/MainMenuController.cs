@@ -42,8 +42,8 @@ public class MainMenuController : MonoBehaviour
     {
         // Default to ON when no key is saved yet (first-ever launch);
         // GetInt's default only applies while the key is absent.
-        audioOn = PlayerPrefs.GetInt(MuteStateKey, 1) == 1;
-        vibeOn = PlayerPrefs.GetInt(VibeStateKey, 1) == 1;
+        audioOn = GameSettings.SfxEnabled;
+        vibeOn = GameSettings.VibrationEnabled;
 
         // save:false — just sync visuals/AudioManager to the existing saved
         // value, don't re-write PlayerPrefs on every menu visit.
@@ -100,8 +100,7 @@ public class MainMenuController : MonoBehaviour
 
         if (save)
         {
-            PlayerPrefs.SetInt(MuteStateKey, audioOn ? 1 : 0);
-            PlayerPrefs.Save();
+            GameSettings.SfxEnabled = audioOn;
         }
 
         if (audioButtonImage != null)
@@ -128,8 +127,7 @@ public class MainMenuController : MonoBehaviour
     public void ToggleVibe()
     {
         vibeOn = !vibeOn;
-        PlayerPrefs.SetInt(VibeStateKey, vibeOn ? 1 : 0);
-        PlayerPrefs.Save();
+        GameSettings.VibrationEnabled = vibeOn;
         RefreshVibeVisual();
     }
 

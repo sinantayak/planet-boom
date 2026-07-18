@@ -23,7 +23,7 @@ MonoBehaviour:
     islandScale: {x: 1, y: 1, z: 1}
     starsPosition: {x: -140, y: 100.5}
     rewardBadgePosition: {x: -205, y: -110.5}
-    rewardBadgeSize: {x: 62, y: 62}
+    rewardBadgeSize: {x: 90, y: 90}
   - normalizedPathPosition: {x: 0.6851852, y: 0.6372595}
     pathNodeSize: {x: 92, y: 92}
     islandPosition: {x: 140, y: 0}
@@ -32,7 +32,7 @@ MonoBehaviour:
     islandScale: {x: 1, y: 1, z: 1}
     starsPosition: {x: 140, y: 113}
     rewardBadgePosition: {x: 205, y: -123}
-    rewardBadgeSize: {x: 62, y: 62}
+    rewardBadgeSize: {x: 90, y: 90}
   - normalizedPathPosition: {x: 0.08205151, y: 0.7604166}
     pathNodeSize: {x: 92, y: 92}
     islandPosition: {x: -140, y: 0}
@@ -41,7 +41,7 @@ MonoBehaviour:
     islandScale: {x: 1, y: 1, z: 1}
     starsPosition: {x: -140, y: 98}
     rewardBadgePosition: {x: -205, y: -108}
-    rewardBadgeSize: {x: 62, y: 62}
+    rewardBadgeSize: {x: 90, y: 90}
   - normalizedPathPosition: {x: 0.9179485, y: 0.65625}
     pathNodeSize: {x: 92, y: 92}
     islandPosition: {x: 140, y: 0}
@@ -50,7 +50,7 @@ MonoBehaviour:
     islandScale: {x: 1, y: 1, z: 1}
     starsPosition: {x: 140, y: 125.5}
     rewardBadgePosition: {x: 205, y: -135.5}
-    rewardBadgeSize: {x: 62, y: 62}
+    rewardBadgeSize: {x: 90, y: 90}
   - normalizedPathPosition: {x: 1.0383189, y: 0.44791666}
     pathNodeSize: {x: 92, y: 92}
     islandPosition: {x: 140, y: 0}
@@ -59,7 +59,7 @@ MonoBehaviour:
     islandScale: {x: 1, y: 1, z: 1}
     starsPosition: {x: 140, y: 102}
     rewardBadgePosition: {x: -205, y: -112}
-    rewardBadgeSize: {x: 62, y: 62}
+    rewardBadgeSize: {x: 90, y: 90}
   - normalizedPathPosition: {x: -0.010541054, y: 0.5}
     pathNodeSize: {x: 92, y: 92}
     islandPosition: {x: -140, y: 0}
@@ -68,7 +68,7 @@ MonoBehaviour:
     islandScale: {x: 1, y: 1, z: 1}
     starsPosition: {x: -140, y: 114}
     rewardBadgePosition: {x: 205, y: -124}
-    rewardBadgeSize: {x: 62, y: 62}
+    rewardBadgeSize: {x: 90, y: 90}
   - normalizedPathPosition: {x: 0.47222224, y: 0.34375}
     pathNodeSize: {x: 92, y: 92}
     islandPosition: {x: 170, y: 0}
@@ -77,7 +77,7 @@ MonoBehaviour:
     islandScale: {x: 1, y: 1, z: 1}
     starsPosition: {x: 170, y: 130.5}
     rewardBadgePosition: {x: 100, y: 130}
-    rewardBadgeSize: {x: 62, y: 62}
+    rewardBadgeSize: {x: 90, y: 90}
   backgroundPosition: {x: 0, y: 0}
   backgroundSize: {x: 2048, y: 2048}
   backgroundScale: {x: 1.1, y: 1.1, z: 1}

@@ -4,6 +4,7 @@ using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
+using UnityEngine.SceneManagement;
 
 public readonly struct StarRatingEvaluationContext
 {
@@ -56,7 +57,7 @@ public class GameManager : MonoBehaviour
     // popup — the black hole spins up and swallows the board while all input
     // and lose checks are frozen (every gameplay system already gates on
     // State == Playing, so the new state disables them for free).
-    public enum GameState { Playing, LevelComplete, GameOver, CinematicVortex, InventoryPaused }
+    public enum GameState { Playing, LevelComplete, GameOver, CinematicVortex, InventoryPaused, GamePaused }
 
     public static GameManager Instance { get; private set; }
 
@@ -138,7 +139,12 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI gameplayTimerText;
 
     [Header("Time Warp Feedback")]
-    [SerializeField] private Vector2 timeWarpPopupOffset = new Vector2(0f, -55f);
+    [FormerlySerializedAs("timeWarpPopupOffset")]
+    [SerializeField] private Vector2 timeWarpFeedbackOffset = new Vector2(0f, -55f);
+    [SerializeField] [Min(1f)] private float timeWarpFeedbackWidth = 220f;
+    [SerializeField] [Min(1f)] private float timeWarpFeedbackHeight = 80f;
+    [SerializeField] [Min(1f)] private float timeWarpFeedbackFontSize = 80f;
+    [SerializeField] private Vector3 timeWarpFeedbackScale = Vector3.one;
     [SerializeField] private float timeWarpPopupDuration = 0.65f;
     [SerializeField] private float timeWarpPopupRiseDistance = 35f;
     [SerializeField] private float timeWarpPopupStartScale = 0.65f;
@@ -227,6 +233,7 @@ public class GameManager : MonoBehaviour
     private float currentThreeStarThreshold;
     private int lastEarnedStars;
     private float timeScaleBeforeInventoryPause = 1f;
+    private float timeScaleBeforeGamePause = 1f;
     private Vector3 gameplayTimerBaseScale = Vector3.one;
     private Coroutine timeWarpFeedbackRoutine;
     private TextMeshProUGUI activeTimeWarpPopup;
@@ -511,6 +518,7 @@ public class GameManager : MonoBehaviour
         {
             Time.timeScale = timeScaleBeforeInventoryPause;
         }
+        else if (State == GameState.GamePaused) Time.timeScale = timeScaleBeforeGamePause;
         if (Instance == this)
         {
             Instance = null;
@@ -576,7 +584,55 @@ public class GameManager : MonoBehaviour
         return true;
     }
 
+    public bool TryPauseForBreakMenu()
+    {
+        if (State != GameState.Playing || Time.timeScale <= 0f) return false;
+        timeScaleBeforeGamePause = Time.timeScale;
+        State = GameState.GamePaused;
+        Time.timeScale = 0f;
+        return true;
+    }
+
+    public bool TryResumeFromBreakMenu()
+    {
+        if (State != GameState.GamePaused) return false;
+        Time.timeScale = timeScaleBeforeGamePause;
+        State = GameState.Playing;
+        return true;
+    }
+
+    public void RestartCurrentLevel()
+    {
+        if (State == GameState.GamePaused) Time.timeScale = timeScaleBeforeGamePause;
+        else if (State == GameState.InventoryPaused) Time.timeScale = timeScaleBeforeInventoryPause;
+        ClearBoard(clearMeteorites: true);
+        launcher?.ResetQueue();
+        State = GameState.Playing;
+        LoadLevel(CurrentLevelNumber);
+    }
+
+    public void AbandonRunToMainMenu()
+    {
+        if (State == GameState.GamePaused) Time.timeScale = timeScaleBeforeGamePause;
+        else if (State == GameState.InventoryPaused) Time.timeScale = timeScaleBeforeInventoryPause;
+        BoosterInventoryManager.Instance?.EndCurrentRun();
+        DiscardLevelEarnedCoins();
+        State = GameState.GameOver;
+        SceneManager.LoadScene("MainMenu");
+    }
+
     public bool TryAddBonusTime(float seconds)
+    {
+        return TryAddBonusTimeInternal(seconds, timeWarpFeedbackOffset, true);
+    }
+
+    public bool TryAddBonusTime(float seconds, Vector2 feedbackOffset)
+    {
+        return TryAddBonusTimeInternal(seconds, feedbackOffset, false);
+    }
+
+    private bool TryAddBonusTimeInternal(float seconds, Vector2 feedbackOffset,
+        bool useTimeWarpPresentation)
     {
         if (State != GameState.Playing || seconds <= 0f)
             return false;
@@ -588,7 +644,7 @@ public class GameManager : MonoBehaviour
         currentTimeLimit += seconds;
         lastDisplayedTimerSeconds = -1;
         UpdateTimerUI();
-        PlayTimeWarpFeedback(seconds);
+        PlayTimeWarpFeedback(seconds, feedbackOffset, useTimeWarpPresentation);
         return true;
     }
 
@@ -654,7 +710,8 @@ public class GameManager : MonoBehaviour
         return current > long.MaxValue - amount ? long.MaxValue : current + amount;
     }
 
-    private void PlayTimeWarpFeedback(float bonusSeconds)
+    private void PlayTimeWarpFeedback(float bonusSeconds, Vector2 feedbackOffset,
+        bool useTimeWarpPresentation)
     {
         if (gameplayTimerText == null)
             return;
@@ -666,18 +723,26 @@ public class GameManager : MonoBehaviour
             typeof(CanvasRenderer), typeof(TextMeshProUGUI), typeof(CanvasGroup));
         RectTransform popupRect = popupObject.GetComponent<RectTransform>();
         popupRect.SetParent(timerRect.parent, false);
-        popupRect.anchorMin = timerRect.anchorMin;
-        popupRect.anchorMax = timerRect.anchorMax;
-        popupRect.pivot = timerRect.pivot;
-        popupRect.sizeDelta = timerRect.sizeDelta;
-        popupRect.anchoredPosition = timerRect.anchoredPosition + timeWarpPopupOffset;
-        popupRect.localScale = Vector3.one * Mathf.Max(0.01f, timeWarpPopupStartScale);
+        popupRect.anchorMin = popupRect.anchorMax = new Vector2(.5f, .5f);
+        popupRect.pivot = new Vector2(.5f, .5f);
+        popupRect.sizeDelta = useTimeWarpPresentation
+            ? new Vector2(timeWarpFeedbackWidth, timeWarpFeedbackHeight)
+            : timerRect.rect.size;
+        RectTransform popupParent = timerRect.parent as RectTransform;
+        Vector2 timerCenterInParent = popupParent != null
+            ? (Vector2)popupParent.InverseTransformPoint(timerRect.TransformPoint(timerRect.rect.center))
+            : timerRect.anchoredPosition;
+        popupRect.anchoredPosition = timerCenterInParent -
+            (popupParent != null ? (Vector2)popupParent.rect.center : Vector2.zero) + feedbackOffset;
+        Vector3 feedbackBaseScale = useTimeWarpPresentation ? timeWarpFeedbackScale : Vector3.one;
+        popupRect.localScale = feedbackBaseScale * Mathf.Max(0.01f, timeWarpPopupStartScale);
         popupRect.SetSiblingIndex(timerRect.GetSiblingIndex() + 1);
 
         activeTimeWarpPopup = popupObject.GetComponent<TextMeshProUGUI>();
         activeTimeWarpPopup.font = gameplayTimerText.font;
         activeTimeWarpPopup.fontSharedMaterial = gameplayTimerText.fontSharedMaterial;
-        activeTimeWarpPopup.fontSize = gameplayTimerText.fontSize;
+        activeTimeWarpPopup.fontSize = useTimeWarpPresentation
+            ? timeWarpFeedbackFontSize : gameplayTimerText.fontSize;
         activeTimeWarpPopup.fontStyle = FontStyles.Bold;
         activeTimeWarpPopup.alignment = TextAlignmentOptions.Center;
         activeTimeWarpPopup.color = gameplayTimerText.color;
@@ -685,11 +750,12 @@ public class GameManager : MonoBehaviour
         activeTimeWarpPopup.text = FormatBonusTime(bonusSeconds);
 
         timeWarpFeedbackRoutine = StartCoroutine(AnimateTimeWarpFeedback(
-            timerRect, popupRect, popupObject.GetComponent<CanvasGroup>()));
+            timerRect, popupRect, popupObject.GetComponent<CanvasGroup>(), feedbackBaseScale));
     }
 
     private IEnumerator AnimateTimeWarpFeedback(
-        RectTransform timerRect, RectTransform popupRect, CanvasGroup popupCanvasGroup)
+        RectTransform timerRect, RectTransform popupRect, CanvasGroup popupCanvasGroup,
+        Vector3 feedbackBaseScale)
     {
         Vector2 popupStartPosition = popupRect.anchoredPosition;
         float popupDuration = Mathf.Max(0.05f, timeWarpPopupDuration);
@@ -704,7 +770,7 @@ public class GameManager : MonoBehaviour
             float popupScale = popupT < 0.25f
                 ? Mathf.Lerp(timeWarpPopupStartScale, timeWarpPopupPeakScale, SmoothStep01(popT))
                 : Mathf.Lerp(timeWarpPopupPeakScale, 1f, SmoothStep01((popupT - 0.25f) / 0.75f));
-            popupRect.localScale = Vector3.one * Mathf.Max(0.01f, popupScale);
+            popupRect.localScale = feedbackBaseScale * Mathf.Max(0.01f, popupScale);
             popupRect.anchoredPosition = popupStartPosition + Vector2.up * (timeWarpPopupRiseDistance * popupT);
             popupCanvasGroup.alpha = 1f - SmoothStep01(Mathf.InverseLerp(0.45f, 1f, popupT));
 
@@ -1530,6 +1596,7 @@ public class GameManager : MonoBehaviour
         {
             Time.timeScale = timeScaleBeforeInventoryPause;
         }
+        else if (State == GameState.GamePaused) Time.timeScale = timeScaleBeforeGamePause;
 
         // RestartGame is public and unguarded by design; if it fires while
         // the win cinematic is mid-swallow, shut the vortex down cleanly so

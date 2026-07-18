@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 2fe367f845877da419da0143132fb492
+guid: fcf6af3113299114f8f12615e069840a
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 7104089753038633805
-    second: BreakMenu_0
+      213: 3183634485310217748
+    second: SelectedSkillShot_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,23 +126,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: BreakMenu_0
+      name: SelectedSkillShot_0
       rect:
         serializedVersion: 2
-        x: 69
+        x: 0
         y: 0
-        width: 404
-        height: 501
+        width: 125
+        height: 125
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d4b3c56cdfbc69260800000000000000
-      internalID: 7104089753038633805
+      spriteID: 41e599f52ba8e2c20800000000000000
+      internalID: 3183634485310217748
       vertices: []
       indices: 
       edges: []
@@ -151,7 +151,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 569c2f869f1aa3547a955417a356e59d
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      BreakMenu_0: 7104089753038633805
+      SelectedSkillShot_0: 3183634485310217748
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

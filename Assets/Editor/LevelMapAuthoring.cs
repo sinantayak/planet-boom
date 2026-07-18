@@ -147,9 +147,14 @@ public static class LevelMapAuthoring
         layout.childControlWidth = layout.childControlHeight = false;
         var stars = new List<Image>();
         for (int s = 0; s < 3; s++) { Image star = CreateImage($"Star{s+1}", starsRoot.transform, empty, Color.white); star.rectTransform.sizeDelta = new Vector2(42,42); star.preserveAspect = true; stars.Add(star); }
-        Image reward = CreateImage("RewardBadge", root.transform, null, new Color(.08f,.12f,.2f,.9f));
-        SetRect(reward.rectTransform, new Vector2(.5f,.5f), new Vector2(index % 2 == 0 ? -205 : 205, -Sizes[index].y * .5f - 38), new Vector2(62,62));
-        Image rewardIcon = CreateImage("RewardIcon", reward.transform, null, Color.white); StretchInset(rewardIcon.rectTransform, 9);
+        Sprite unclaimedFrame = LoadSprite("Assets/UI Elements/EmptySquareFrame.png");
+        Sprite claimedFrame = LoadSprite("Assets/UI Elements/EmptySquareFrameWithCheck.png");
+        Image reward = CreateImage("RewardBadge", root.transform, unclaimedFrame, Color.white);
+        reward.preserveAspect = true; reward.raycastTarget = false;
+        SetRect(reward.rectTransform, new Vector2(.5f,.5f), new Vector2(index % 2 == 0 ? -205 : 205, -Sizes[index].y * .5f - 38), new Vector2(90,90));
+        Image rewardIcon = CreateImage("RewardIcon", reward.transform, null, Color.white);
+        rewardIcon.preserveAspect = true; rewardIcon.raycastTarget = false;
+        SetRect(rewardIcon.rectTransform, new Vector2(.5f,.5f), Vector2.zero, new Vector2(58,58));
         TMP_Text check = CreateText("ClaimedCheck", reward.transform, "✓", 28, TextAlignmentOptions.BottomRight); Stretch(check.rectTransform);
 
         LevelMapNodeUI node = root.AddComponent<LevelMapNodeUI>(); SerializedObject serialized = new(node);
@@ -157,8 +162,13 @@ public static class LevelMapAuthoring
         serialized.FindProperty("islandButton").objectReferenceValue = islandButton;
         serialized.FindProperty("levelText").objectReferenceValue = number; serialized.FindProperty("lockOverlay").objectReferenceValue = lockOverlay;
         serialized.FindProperty("filledStar").objectReferenceValue = filled; serialized.FindProperty("emptyStar").objectReferenceValue = empty;
-        serialized.FindProperty("rewardContainer").objectReferenceValue = reward.rectTransform; serialized.FindProperty("rewardIcon").objectReferenceValue = rewardIcon;
-        serialized.FindProperty("rewardCompleteMark").objectReferenceValue = check.gameObject; serialized.FindProperty("canvasGroup").objectReferenceValue = root.GetComponent<CanvasGroup>();
+        serialized.FindProperty("rewardContainer").objectReferenceValue = reward.rectTransform;
+        serialized.FindProperty("rewardFrame").objectReferenceValue = reward;
+        serialized.FindProperty("rewardIcon").objectReferenceValue = rewardIcon;
+        serialized.FindProperty("rewardUnclaimedFrame").objectReferenceValue = unclaimedFrame;
+        serialized.FindProperty("rewardClaimedFrame").objectReferenceValue = claimedFrame;
+        serialized.FindProperty("rewardCompleteMark").objectReferenceValue = null;
+        serialized.FindProperty("canvasGroup").objectReferenceValue = root.GetComponent<CanvasGroup>();
         SetReferenceList(serialized.FindProperty("stars"), stars); serialized.ApplyModifiedPropertiesWithoutUndo();
         EnsureSelectedHighlight(root.transform, circle);
         return node;
@@ -230,7 +240,7 @@ public static class LevelMapAuthoring
                     new Vector2(side * 205f, islandSize.y * .5f + 28f), new Vector2(150,42));
                 Transform reward = node.Find("RewardBadge");
                 if (reward != null) SetRect((RectTransform)reward, new Vector2(.5f,.5f),
-                    new Vector2(side * 205f, -islandSize.y * .5f - 38f), new Vector2(62,62));
+                    new Vector2(side * 205f, -islandSize.y * .5f - 38f), new Vector2(90,90));
             }
 
             Button button = node.GetComponent<Button>();
@@ -253,6 +263,7 @@ public static class LevelMapAuthoring
                     nodeSerialized.ApplyModifiedPropertiesWithoutUndo();
                 }
             }
+            EnsureRewardBadgeVisuals(node);
             EditorUtility.SetDirty(node.gameObject);
         }
 
@@ -272,18 +283,65 @@ public static class LevelMapAuthoring
         EditorSceneManager.MarkSceneDirty(scene);
     }
 
+    private static void EnsureRewardBadgeVisuals(Transform node)
+    {
+        Transform rewardTransform = node.Find("RewardBadge");
+        if (rewardTransform == null) return;
+
+        Sprite unclaimedFrame = LoadSprite("Assets/UI Elements/EmptySquareFrame.png");
+        Sprite claimedFrame = LoadSprite("Assets/UI Elements/EmptySquareFrameWithCheck.png");
+        Image frame = rewardTransform.GetComponent<Image>() ?? rewardTransform.gameObject.AddComponent<Image>();
+        frame.sprite = unclaimedFrame;
+        frame.color = Color.white;
+        frame.preserveAspect = true;
+        frame.raycastTarget = false;
+
+        RectTransform rewardRect = (RectTransform)rewardTransform;
+        if (Vector2.SqrMagnitude(rewardRect.sizeDelta - new Vector2(62f, 62f)) < .001f)
+            rewardRect.sizeDelta = new Vector2(90f, 90f);
+
+        Transform iconTransform = rewardTransform.Find("RewardIcon");
+        Image icon = iconTransform != null ? iconTransform.GetComponent<Image>() : null;
+        if (icon != null)
+        {
+            icon.preserveAspect = true;
+            icon.raycastTarget = false;
+            RectTransform iconRect = icon.rectTransform;
+            bool legacyStretch = iconRect.anchorMin == Vector2.zero && iconRect.anchorMax == Vector2.one;
+            if (legacyStretch)
+                SetRect(iconRect, new Vector2(.5f, .5f), Vector2.zero, new Vector2(58f, 58f));
+        }
+
+        Transform claimedCheck = rewardTransform.Find("ClaimedCheck");
+        if (claimedCheck != null) claimedCheck.gameObject.SetActive(false);
+
+        LevelMapNodeUI nodeUI = node.GetComponent<LevelMapNodeUI>();
+        if (nodeUI == null) return;
+        SerializedObject serialized = new(nodeUI);
+        serialized.FindProperty("rewardContainer").objectReferenceValue = rewardRect;
+        serialized.FindProperty("rewardFrame").objectReferenceValue = frame;
+        serialized.FindProperty("rewardIcon").objectReferenceValue = icon;
+        serialized.FindProperty("rewardUnclaimedFrame").objectReferenceValue = unclaimedFrame;
+        serialized.FindProperty("rewardClaimedFrame").objectReferenceValue = claimedFrame;
+        serialized.FindProperty("rewardCompleteMark").objectReferenceValue = null;
+        serialized.ApplyModifiedPropertiesWithoutUndo();
+    }
+
     private static void EnsureSelectedHighlight(Transform node, Image circle)
     {
+        Sprite selectedSprite = LoadSprite("Assets/Buttons/SelectedSkillShot.png");
         Transform highlightTransform = circle.transform.Find("SelectedHighlight");
         Image highlight;
         if (highlightTransform == null)
         {
             highlight = CreateImage("SelectedHighlight", circle.transform,
-                AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd"), new Color(.25f,.78f,1f,0f));
+                selectedSprite, new Color(1f, 1f, 1f, 0f));
             SetRect(highlight.rectTransform, new Vector2(.5f,.5f), Vector2.zero, new Vector2(126,126));
             highlight.transform.SetAsFirstSibling();
         }
         else highlight = highlightTransform.GetComponent<Image>() ?? highlightTransform.gameObject.AddComponent<Image>();
+        if (selectedSprite != null) highlight.sprite = selectedSprite;
+        highlight.preserveAspect = true;
         highlight.raycastTarget = false;
         highlight.gameObject.SetActive(false);
 
@@ -292,6 +350,7 @@ public static class LevelMapAuthoring
         {
             SerializedObject serialized = new(nodeUI);
             serialized.FindProperty("selectedHighlight").objectReferenceValue = highlight;
+            serialized.FindProperty("selectedHighlightSprite").objectReferenceValue = selectedSprite;
             serialized.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(nodeUI);
         }

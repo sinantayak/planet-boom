@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 2fe367f845877da419da0143132fb492
+guid: fd1a7258ef5a6a24b8f1d245c7d13119
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 7104089753038633805
-    second: BreakMenu_0
+      213: 2281162832046736065
+    second: EmptyButtonFrame_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,23 +126,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: BreakMenu_0
+      name: EmptyButtonFrame_0
       rect:
         serializedVersion: 2
-        x: 69
-        y: 0
-        width: 404
-        height: 501
+        x: 0
+        y: 7
+        width: 125
+        height: 111
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d4b3c56cdfbc69260800000000000000
-      internalID: 7104089753038633805
+      spriteID: 1c248f6728158af10800000000000000
+      internalID: 2281162832046736065
       vertices: []
       indices: 
       edges: []
@@ -151,7 +151,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 569c2f869f1aa3547a955417a356e59d
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      BreakMenu_0: 7104089753038633805
+      EmptyButtonFrame_0: 2281162832046736065
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

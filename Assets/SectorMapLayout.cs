@@ -16,7 +16,8 @@ public sealed class SectorMapNodeLayout
     public Vector3 islandScale = Vector3.one;
     public Vector2 starsPosition;
     public Vector2 rewardBadgePosition;
-    public Vector2 rewardBadgeSize = new(62f, 62f);
+    [Tooltip("Legacy/default value only. Full layout snapshots preserve the authored RectTransform size exactly.")]
+    public Vector2 rewardBadgeSize = new(90f, 90f);
     public RectTransformLayout islandRect;
     public RectTransformLayout starsRect;
     public RectTransformLayout rewardBadgeRect;

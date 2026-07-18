@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 using Unity.Services.CloudSave.Models;
 using Unity.Services.CloudSave.Models.Data.Player;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 [Serializable]
 public sealed class SkillQuantityData
@@ -81,6 +84,7 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
     [SerializeField] private PlayerDataState currentState = PlayerDataState.NotStarted;
     [SerializeField] private bool isSaving;
     [SerializeField] private long currentRevision;
+    [SerializeField] private long lastConfirmedCloudRevision = -1;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
     [Header("Temporary Progression Debug")]
     [SerializeField, Min(1)] private int debugLevelNumber = 1;
@@ -108,6 +112,7 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
     private bool unlockDataChangedBeforeLoad;
     private long pendingSpaceCoin;
     private readonly List<LevelStarsData> pendingLevelCompletions = new List<LevelStarsData>();
+    private readonly List<string> unlocksSinceLastCompletion = new List<string>();
     private Coroutine debouncedSaveRoutine;
     private TaskCompletionSource<bool> readyTaskSource = NewReadyTaskSource();
 
@@ -204,6 +209,7 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
             PlayerData cloud = DeserializeAndNormalize(cloudJson);
             if (cloud == null)
                 throw new InvalidOperationException("Cloud PlayerData exists but could not be parsed safely.");
+            lastConfirmedCloudRevision = cloud.revision;
 
             // Safe/simple stage-one conflict rule: an explicitly dirty local
             // document wins only when its revision is strictly newer. Cloud
@@ -317,7 +323,15 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
         {
             MarkChangedAndScheduleSave();
             NotifyProgressionChanged(levelNumber, previousBest, previousHighest);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            string newUnlocks = unlocksSinceLastCompletion.Count > 0
+                ? string.Join(", ", unlocksSinceLastCompletion) : "none";
+            Debug.Log($"[Progression]\nCompleted Level: {levelNumber}\nStars Earned: {starsEarned}\n" +
+                      $"Best Stars: {GetBestStars(levelNumber)}\nHighest Unlocked Level: {HighestUnlockedLevel}\n" +
+                      $"New Unlocks: {newUnlocks}\nSave Dirty: {localDirty}", this);
+#endif
         }
+        unlocksSinceLastCompletion.Clear();
     }
 
     public bool IsLevelUnlocked(int levelNumber)
@@ -378,7 +392,11 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
     {
         if (Instance == null) return;
         if (!Instance.IsLoaded || Instance.currentData == null) { Instance.unlockDataChangedBeforeLoad = true; return; }
+        var previous = new HashSet<string>(Instance.currentData.unlockedContentIds, StringComparer.Ordinal);
         manager.WriteToPlayerData(Instance.currentData);
+        foreach (string id in Instance.currentData.unlockedContentIds)
+            if (!previous.Contains(id) && !Instance.unlocksSinceLastCompletion.Contains(id))
+                Instance.unlocksSinceLastCompletion.Add(id);
         Instance.MarkChangedAndScheduleSave();
     }
 
@@ -467,6 +485,7 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
                 SaveLocalCache(false);
             }
             Debug.Log($"PlayerData: cloud save succeeded at revision {savedRevision}.", this);
+            lastConfirmedCloudRevision = savedRevision;
             return true;
         }
         catch (Exception exception)
@@ -616,6 +635,28 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
         return Normalize(data);
     }
 
+    private static PlayerData CreateFreshPlayerData(long revision)
+    {
+        var data = new PlayerData
+        {
+            schemaVersion = 1,
+            revision = Math.Max(1, revision),
+            modifiedUtcTicks = DateTime.UtcNow.Ticks,
+            migratedFromLegacyPlayerPrefs = false
+        };
+        UnlockDefaultsConfig defaults = Resources.Load<UnlockDefaultsConfig>("UnlockDefaults");
+        if (defaults == null)
+            throw new InvalidOperationException("Resources/UnlockDefaults.asset is required for a safe progression reset.");
+        if (defaults.defaultUnlockedIds != null)
+        {
+            var unique = new HashSet<string>(StringComparer.Ordinal);
+            foreach (string id in defaults.defaultUnlockedIds)
+                if (!string.IsNullOrWhiteSpace(id) && unique.Add(id.Trim()))
+                    data.unlockedContentIds.Add(id.Trim());
+        }
+        return Normalize(data);
+    }
+
     private static PlayerData DeserializeAndNormalize(string json)
     {
         if (string.IsNullOrEmpty(json))
@@ -696,13 +737,104 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
     [ContextMenu("DEBUG Log PlayerData Snapshot")]
     private void DebugLogSnapshot()
     {
-        Debug.Log(currentData == null
-            ? $"PlayerData DEBUG: state={State}, no data loaded."
-            : $"PlayerData DEBUG: state={State}, revision={currentData.revision}, " +
-              $"dirty={localDirty}, unlocked={currentData.highestUnlockedLevel}, " +
-              $"spaceCoin={currentData.spaceCoin}, skills={currentData.skillInventory.Count}, " +
-              $"slots={string.Join(",", currentData.quickSlots)}", this);
+        if (currentData == null)
+        {
+            Debug.Log($"[PlayerData Snapshot] state={State}; no data loaded.", this);
+            return;
+        }
+
+        var stars = new List<string>();
+        foreach (LevelStarsData row in currentData.bestStarsByLevel)
+            if (row != null) stars.Add($"L{row.level}:{row.bestStars}");
+        var skills = new List<string>();
+        foreach (SkillQuantityData row in currentData.skillInventory)
+            if (row != null) skills.Add($"{row.skillType}:{row.quantity}");
+        var boosters = new List<string>();
+        foreach (BoosterQuantityData row in currentData.boosterInventory)
+            if (row != null) boosters.Add($"{row.boosterType}:{row.quantity}");
+
+        string authenticatedId = !string.IsNullOrEmpty(playerId) ? playerId :
+            UnityGamingServicesManager.Instance != null ? UnityGamingServicesManager.Instance.PlayerId : "offline";
+        Debug.Log($"[PlayerData Snapshot]\nPlayerId: {authenticatedId}\nState: {State}\n" +
+                  $"HighestUnlockedLevel: {HighestUnlockedLevel}\nBestStarsByLevel: [{string.Join(", ", stars)}]\n" +
+                  $"SpaceCoin: {currentData.spaceCoin}\nLives: {currentData.lives}\n" +
+                  $"Skill Inventory: [{string.Join(", ", skills)}]\nBooster Inventory: [{string.Join(", ", boosters)}]\n" +
+                  $"Quick Slots: [{string.Join(", ", currentData.quickSlots)}]\n" +
+                  $"UnlockedContentIds: [{string.Join(", ", currentData.unlockedContentIds)}]\n" +
+                  $"Dirty: {localDirty}; IsSaving: {isSaving}; Local Revision: {currentData.revision}; " +
+                  $"Confirmed Cloud Revision: {lastConfirmedCloudRevision}; WriteLock: {!string.IsNullOrEmpty(cloudWriteLock)}", this);
     }
+
+#if UNITY_EDITOR
+    [ContextMenu("DEBUG Reset All Player Progress")]
+    private void DebugResetAllPlayerProgress()
+    {
+        if (!EditorApplication.isPlaying)
+        {
+            Debug.LogWarning("PlayerData DEBUG reset must be run in Play Mode on the live persistence manager.", this);
+            return;
+        }
+        if (!EditorUtility.DisplayDialog("Reset All Player Progress?",
+                "This overwrites the current player's local cache and Cloud Save with first-time defaults. " +
+                "The Authentication PlayerId is preserved.", "RESET ALL PROGRESS", "Cancel"))
+            return;
+        _ = DebugResetAllPlayerProgressAsync();
+    }
+
+    private async Task DebugResetAllPlayerProgressAsync()
+    {
+        if (!IsLoaded || currentData == null)
+        {
+            Debug.LogWarning($"PlayerData DEBUG reset aborted: data is not ready (state={State}).", this);
+            return;
+        }
+
+        if (debouncedSaveRoutine != null)
+        {
+            StopCoroutine(debouncedSaveRoutine);
+            debouncedSaveRoutine = null;
+        }
+        while (isSaving)
+            await Task.Yield();
+
+        long freshRevision = Math.Max(currentData.revision, lastConfirmedCloudRevision) + 1;
+        currentData = CreateFreshPlayerData(freshRevision);
+        currentRevision = currentData.revision;
+        localDirty = true;
+        inventoryChangedBeforeLoad = false;
+        boosterInventoryChangedBeforeLoad = false;
+        unlockDataChangedBeforeLoad = false;
+        pendingSpaceCoin = 0;
+        pendingLevelCompletions.Clear();
+        unlocksSinceLastCompletion.Clear();
+
+        PlayerPrefs.DeleteKey("SkillInventory.Count.EmergencyBlast");
+        registeredSkillInventory?.ApplyPlayerData(currentData);
+        registeredBoosterInventory?.EndCurrentRun();
+        registeredBoosterInventory?.ApplyPlayerData(currentData);
+        registeredUnlockManager?.ApplyPlayerData(currentData);
+        GameManager.Instance?.DiscardLevelEarnedCoins();
+        SaveLocalCache(true);
+
+        DataLoaded?.Invoke(currentData);
+        ProgressionChanged?.Invoke();
+        HighestUnlockedLevelChanged?.Invoke(HighestUnlockedLevel);
+        SpaceCoinChanged?.Invoke(SpaceCoin);
+
+        bool cloudAvailable = UnityGamingServicesManager.Instance != null &&
+                              UnityGamingServicesManager.Instance.IsCloudSaveAvailable;
+        bool cloudSaved = cloudAvailable && await SaveCloudSnapshotAsync();
+        if (cloudSaved) SetState(PlayerDataState.ReadyCloud);
+        else if (!cloudAvailable)
+            Debug.LogWarning("[PlayerData RESET] Cloud Save is unavailable. The fresh local cache is dirty and will be uploaded when Cloud Save becomes available.", this);
+        Debug.Log($"[PlayerData RESET] Fresh state applied for PlayerId=" +
+                  $"{(string.IsNullOrEmpty(playerId) ? "offline" : playerId)}; " +
+                  $"localRevision={currentData.revision}; localDirty={localDirty}; " +
+                  $"cloudAvailable={cloudAvailable}; cloudConfirmed={cloudSaved}; " +
+                  $"confirmedCloudRevision={lastConfirmedCloudRevision}.", this);
+        DebugLogSnapshot();
+    }
+#endif
 
     [ContextMenu("DEBUG Force Cloud Save")]
     private void DebugForceCloudSave()

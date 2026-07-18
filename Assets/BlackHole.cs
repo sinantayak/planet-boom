@@ -379,6 +379,8 @@ public class BlackHole : MonoBehaviour
     // core, and resets to base once the vortex is off.
     private void UpdateVortexAudio()
     {
+        if (vortexAudioSource != null)
+            vortexAudioSource.mute = !GameSettings.SfxEnabled;
         if (vortexAudioSource.clip == null)
             return;
 
