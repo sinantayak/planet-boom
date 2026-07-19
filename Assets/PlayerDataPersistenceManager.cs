@@ -79,6 +79,7 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
     public static event Action<int, int> LevelBestStarsChanged;
     public static event Action<int> HighestUnlockedLevelChanged;
     public static event Action<long> SpaceCoinChanged;
+    public static event Action<int> LivesChanged;
 
     [Header("Runtime Status (Play Mode)")]
     [SerializeField] private PlayerDataState currentState = PlayerDataState.NotStarted;
@@ -98,6 +99,7 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
     public PlayerData CurrentData => currentData;
     public int HighestUnlockedLevel => currentData != null ? currentData.highestUnlockedLevel : 1;
     public long SpaceCoin => currentData != null ? currentData.spaceCoin : 0;
+    public int Lives => currentData != null ? currentData.lives : new PlayerData().lives;
     public Task ReadyTask => readyTaskSource.Task;
 
     private static SkillInventoryManager registeredSkillInventory;
@@ -285,6 +287,7 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
         DataLoaded?.Invoke(currentData);
         ProgressionChanged?.Invoke();
         SpaceCoinChanged?.Invoke(SpaceCoin);
+        LivesChanged?.Invoke(Lives);
     }
 
     public bool AddSpaceCoin(long amount)
@@ -820,6 +823,7 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
         ProgressionChanged?.Invoke();
         HighestUnlockedLevelChanged?.Invoke(HighestUnlockedLevel);
         SpaceCoinChanged?.Invoke(SpaceCoin);
+        LivesChanged?.Invoke(Lives);
 
         bool cloudAvailable = UnityGamingServicesManager.Instance != null &&
                               UnityGamingServicesManager.Instance.IsCloudSaveAvailable;

@@ -38,13 +38,11 @@ public class LevelCompletePanel : MonoBehaviour
     [SerializeField] private Sprite starFilledSprite;
     [SerializeField] private Sprite starEmptySprite;
 
-    [Header("Reward Readouts (mock)")]
+    [Header("Space Coin Reward")]
     // Placeholder economy texts, hardcoded in Show() until the scoring and
     // currency systems exist — they're here so the panel layout and font can
     // be art-reviewed with realistic values on screen.
-    [SerializeField] private TextMeshProUGUI scoreText;
-    [SerializeField] private TextMeshProUGUI goldText;
-    [SerializeField] private TextMeshProUGUI gemText;
+    [SerializeField] private TextMeshProUGUI coinRewardText;
 
     // Banner wording; swap to "SUCCESS" here or in the Inspector if preferred.
     [SerializeField] private string titleMessage = "LEVEL COMPLETED";
@@ -119,19 +117,18 @@ public class LevelCompletePanel : MonoBehaviour
             star.sprite = i < starsEarned ? starFilledSprite : starEmptySprite;
         }
 
-        // Mock values until real scoring/currency arrive.
-        if (scoreText != null)
+        long earnedReward = 0;
+        GameManager manager = GameManager.Instance;
+        if (manager != null)
         {
-            scoreText.text = "SCORE: 3500";
+            if (manager.IsLevelRewardCommitted)
+                earnedReward = manager.LastCommittedLevelReward;
+            else if (!manager.TryCommitConfiguredLevelReward(out earnedReward))
+                Debug.LogError("LevelCompletePanel: Space Coin reward could not be committed.", this);
         }
-        if (goldText != null)
-        {
-            goldText.text = "500";
-        }
-        if (gemText != null)
-        {
-            gemText.text = "350";
-        }
+
+        if (coinRewardText != null)
+            coinRewardText.text = earnedReward.ToString();
 
         gameObject.SetActive(true);
 

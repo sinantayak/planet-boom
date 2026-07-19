@@ -71,6 +71,7 @@ public class GameManager : MonoBehaviour
     // future Level Complete reward flow explicitly commits the final reward.
     public long LevelEarnedCoins { get; private set; }
     public bool IsLevelRewardCommitted { get; private set; }
+    public long LastCommittedLevelReward { get; private set; }
     public event System.Action<long> LevelEarnedCoinsChanged;
     public event System.Action<IReadOnlyList<LevelObjectiveProgress>> ObjectivesInitialized;
     public event System.Action<LevelObjectiveProgress> ObjectiveProgressChanged;
@@ -685,7 +686,9 @@ public class GameManager : MonoBehaviour
             return false;
 
         IsLevelRewardCommitted = true;
+        LastCommittedLevelReward = total;
         committedTotal = total;
+        LevelEarnedCoinsChanged?.Invoke(LevelEarnedCoins);
         Debug.Log($"GameManager: committed level reward {total} Space Coin " +
                   $"(base={baseLevelReward}, stars={starReward}, drops={LevelEarnedCoins}).", this);
         return true;
@@ -699,6 +702,7 @@ public class GameManager : MonoBehaviour
         bool changed = LevelEarnedCoins != 0;
         LevelEarnedCoins = 0;
         IsLevelRewardCommitted = false;
+        LastCommittedLevelReward = 0;
         if (changed)
             LevelEarnedCoinsChanged?.Invoke(0);
     }

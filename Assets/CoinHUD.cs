@@ -2,8 +2,8 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 
-// Scene-authored HUD for coins earned during the current level run. This
-// deliberately reads GameManager's temporary counter, never PlayerData.
+// Displays the spendable Space Coin balance plus uncommitted coins collected
+// during the current run. The preview becomes persistent only on victory.
 public sealed class CoinHUD : MonoBehaviour
 {
     [Header("Scene Wiring")]
@@ -33,13 +33,18 @@ public sealed class CoinHUD : MonoBehaviour
 
     private void OnEnable()
     {
+        PlayerDataPersistenceManager.DataLoaded += HandlePlayerDataLoaded;
+        PlayerDataPersistenceManager.SpaceCoinChanged += HandleSpaceCoinChanged;
         TryBind();
         if (boundGameManager == null)
             bindRoutine = StartCoroutine(BindWhenGameManagerIsReady());
+        RefreshDisplayedCoins(false);
     }
 
     private void OnDisable()
     {
+        PlayerDataPersistenceManager.DataLoaded -= HandlePlayerDataLoaded;
+        PlayerDataPersistenceManager.SpaceCoinChanged -= HandleSpaceCoinChanged;
         if (bindRoutine != null)
         {
             StopCoroutine(bindRoutine);
@@ -69,7 +74,7 @@ public sealed class CoinHUD : MonoBehaviour
         Unbind();
         boundGameManager = manager;
         boundGameManager.LevelEarnedCoinsChanged += HandleLevelEarnedCoinsChanged;
-        SetDisplayedCoins(boundGameManager.LevelEarnedCoins, false);
+        RefreshDisplayedCoins(false);
     }
 
     private void Unbind()
@@ -81,7 +86,23 @@ public sealed class CoinHUD : MonoBehaviour
 
     private void HandleLevelEarnedCoinsChanged(long amount)
     {
-        SetDisplayedCoins(amount, amount > displayedCoins);
+        RefreshDisplayedCoins(true);
+    }
+
+    private void HandlePlayerDataLoaded(PlayerData data) => RefreshDisplayedCoins(false);
+
+    private void HandleSpaceCoinChanged(long amount) => RefreshDisplayedCoins(false);
+
+    private void RefreshDisplayedCoins(bool pulseIfIncreased)
+    {
+        long persisted = PlayerDataPersistenceManager.Instance != null
+            ? PlayerDataPersistenceManager.Instance.SpaceCoin
+            : 0;
+        long runCoins = boundGameManager != null && !boundGameManager.IsLevelRewardCommitted
+            ? boundGameManager.LevelEarnedCoins
+            : 0;
+        long total = persisted > long.MaxValue - runCoins ? long.MaxValue : persisted + runCoins;
+        SetDisplayedCoins(total, pulseIfIncreased && total > displayedCoins);
     }
 
     private void SetDisplayedCoins(long amount, bool pulse)

@@ -4,62 +4,84 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-// Compact, data-driven objective presentation for the active level. Runtime
-// objective state remains owned by GameManager; this component only mirrors
-// snapshots and never changes completion logic or configuration data.
-public class MissionHUD : MonoBehaviour
+// Presentation-only adapter for GameManager's existing objective snapshots.
+public sealed class MissionHUD : MonoBehaviour
 {
-    [Header("Wiring")]
-    [SerializeField] private TextMeshProUGUI levelTitleText;
-    [SerializeField] private Image[] targetSlots = new Image[GameManager.MaxTargetsPerLevel];
-    [SerializeField] private Planet planetPrefab;
-
-    [Header("Objective Icons")]
-    [Tooltip("Optional. If empty, Merge Count remains fully readable as text.")]
-    [SerializeField] private Sprite mergeCountIcon;
-    [Tooltip("Optional. If empty, Combo Target remains fully readable as text.")]
-    [SerializeField] private Sprite comboTargetIcon;
-    [Tooltip("Uses the existing meteor art in GameScene when assigned.")]
-    [SerializeField] private Sprite meteorObjectiveIcon;
-    [Tooltip("Optional. If empty, Survival remains fully readable as text.")]
-    [SerializeField] private Sprite survivalIcon;
-
-    [Header("Dynamic Layout")]
-    [SerializeField, Min(54f)] private float entryWidth = 92f;
-    [SerializeField, Min(54f)] private float entryHeight = 92f;
-    [SerializeField, Min(0f)] private float entrySpacing = 6f;
-    [SerializeField] private Vector2 objectiveAreaOffset = new Vector2(0f, -128f);
-    [SerializeField, Range(10f, 36f)] private float progressFontSize = 27f;
-
-    [Header("State Look")]
-    [SerializeField] private Color pendingTint = Color.white;
-    [SerializeField] private Color achievedTint = new Color(0.45f, 1f, 0.55f, 1f);
-    [SerializeField] private Color optionalTint = new Color(1f, 1f, 1f, 0.62f);
-    [SerializeField, Min(0f)] private float completionPopDuration = 0.2f;
-    [SerializeField, Range(1f, 1.4f)] private float completionPopScale = 1.12f;
-
-    private sealed class ObjectiveView
+    [System.Serializable]
+    private sealed class MissionCard
     {
-        public RectTransform Root;
-        public Image Icon;
-        public TextMeshProUGUI Progress;
-        public TextMeshProUGUI Checkmark;
-        public bool Completed;
-        public Coroutine PopRoutine;
+        public RectTransform root;
+        public Image background;
+        public TextMeshProUGUI missionTitle;
+        public TextMeshProUGUI missionObjective;
+        public TextMeshProUGUI objectiveSecondary;
+        public Image objectiveVisual;
+        public TextMeshProUGUI completed;
+        [System.NonSerialized] public bool isCompleted;
+        [System.NonSerialized] public Coroutine popRoutine;
     }
 
-    private readonly Dictionary<int, ObjectiveView> views = new Dictionary<int, ObjectiveView>();
-    private RectTransform objectiveArea;
+    [Header("Persistent Mission Cards")]
+    [SerializeField] private List<MissionCard> missionCards = new List<MissionCard>(3);
+    [SerializeField] private Sprite missionCardSprite;
+    [SerializeField] private Planet planetPrefab;
+    [SerializeField] private Sprite[] comboTargetSprites = new Sprite[5];
+
+    [Header("Mission Card Presentation")]
+    [SerializeField] private Vector2 missionCardSize = new Vector2(320f, 190f);
+    [SerializeField, Min(0f)] private float missionCardSpacing = 18f;
+    [SerializeField, Range(20f, 64f)] private float missionTitleFontSize = 48f;
+    [SerializeField, Range(28f, 72f)] private float missionObjectiveFontSize = 48f;
+    [SerializeField, Range(16f, 36f)] private float missionSecondaryFontSize = 22f;
+    [SerializeField] private Vector2 missionVisualSize = new Vector2(190f, 130f);
+    [SerializeField] private float missionGroupYPosition = -190f;
+
+    [Header("Completed Look")]
+    [SerializeField] private Color pendingTint = Color.white;
+    [SerializeField] private Color achievedTint = new Color(.45f, 1f, .55f, 1f);
+    [SerializeField] private Color optionalTint = new Color(1f, 1f, 1f, .62f);
+    [SerializeField, Min(0f)] private float completionPopDuration = .2f;
+    [SerializeField, Range(1f, 1.4f)] private float completionPopScale = 1.12f;
+
+    private readonly Dictionary<int, MissionCard> activeCards = new Dictionary<int, MissionCard>();
     private GameManager subscribedManager;
 
     private void Awake()
     {
-        if (TryGetComponent(out Graphic panelGraphic))
-            panelGraphic.raycastTarget = false;
-        if (levelTitleText != null)
-            levelTitleText.raycastTarget = false;
-        DisableLegacySlots();
-        EnsureObjectiveArea();
+        EnsureObjectiveVisuals();
+        ApplyPresentationOnce();
+        HideAllCards();
+    }
+
+    // Scene authoring normally supplies these persistent Images. Keep a safe
+    // runtime fallback so missing/stale scene references never silently turn
+    // Reach and Combo missions back into plain text.
+    private void EnsureObjectiveVisuals()
+    {
+        foreach (MissionCard card in missionCards)
+        {
+            if (card?.root == null || card.objectiveVisual != null)
+                continue;
+
+            Transform existing = card.root.Find("MissionVisual");
+            Image visual = existing != null ? existing.GetComponent<Image>() : null;
+            if (visual == null)
+            {
+                GameObject visualObject = new GameObject("MissionVisual", typeof(RectTransform),
+                    typeof(CanvasRenderer), typeof(Image));
+                visualObject.transform.SetParent(card.root, false);
+                visual = visualObject.GetComponent<Image>();
+            }
+
+            RectTransform rect = visual.rectTransform;
+            rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(.5f, .5f);
+            rect.anchoredPosition = new Vector2(0f, -14f);
+            rect.sizeDelta = missionVisualSize;
+            visual.preserveAspect = true;
+            visual.raycastTarget = false;
+            visual.gameObject.SetActive(false);
+            card.objectiveVisual = visual;
+        }
     }
 
     private void Start()
@@ -68,314 +90,223 @@ public class MissionHUD : MonoBehaviour
         RefreshFromActiveObjectives();
     }
 
-    private void OnEnable()
-    {
-        BindToGameManager();
-    }
-
-    private void OnDisable()
-    {
-        UnbindFromGameManager();
-    }
+    private void OnEnable() => BindToGameManager();
+    private void OnDisable() => UnbindFromGameManager();
 
     private void LateUpdate()
     {
-        // GameManager may be created or replaced after this HUD is enabled.
-        if (subscribedManager != GameManager.Instance)
-        {
-            BindToGameManager();
-            RefreshFromActiveObjectives();
-        }
+        if (subscribedManager == GameManager.Instance) return;
+        BindToGameManager();
+        RefreshFromActiveObjectives();
+    }
+
+    public void ShowLevel(int levelNumber, IReadOnlyList<PlanetTier> legacyTargets)
+    {
+        BindToGameManager();
+        RefreshFromActiveObjectives();
+    }
+
+    public void MarkAchieved(int legacySlotIndex)
+    {
+        if (activeCards.Count == 0) RefreshFromActiveObjectives();
     }
 
     private void BindToGameManager()
     {
-        GameManager manager = GameManager.Instance;
-        if (subscribedManager == manager)
-            return;
-
+        if (subscribedManager == GameManager.Instance) return;
         UnbindFromGameManager();
-        subscribedManager = manager;
-        if (subscribedManager == null)
-            return;
-
+        subscribedManager = GameManager.Instance;
+        if (subscribedManager == null) return;
         subscribedManager.ObjectivesInitialized += HandleObjectivesInitialized;
         subscribedManager.ObjectiveProgressChanged += HandleObjectiveProgressChanged;
     }
 
     private void UnbindFromGameManager()
     {
-        if (subscribedManager == null)
-            return;
+        if (subscribedManager == null) return;
         subscribedManager.ObjectivesInitialized -= HandleObjectivesInitialized;
         subscribedManager.ObjectiveProgressChanged -= HandleObjectiveProgressChanged;
         subscribedManager = null;
     }
 
-    // Kept as GameManager's existing level-reload entry point. The legacy
-    // target list is intentionally ignored when runtime objectives exist.
-    public void ShowLevel(int levelNumber, IReadOnlyList<PlanetTier> legacyTargets)
-    {
-        if (levelTitleText != null)
-            levelTitleText.text = $"LEVEL {levelNumber}";
-
-        BindToGameManager();
-        RefreshFromActiveObjectives();
-    }
-
-    // Compatibility hook for the old ReachTier HUD calls. Dynamic views are
-    // updated by ObjectiveProgressChanged, which carries the true objective
-    // index and is authoritative for every objective type.
-    public void MarkAchieved(int legacySlotIndex)
-    {
-        if (views.Count == 0)
-            RefreshFromActiveObjectives();
-    }
-
     private void RefreshFromActiveObjectives()
     {
         GameManager manager = GameManager.Instance;
-        if (manager == null || manager.ActiveObjectives == null)
-            return;
-
-        var snapshots = new List<LevelObjectiveProgress>(manager.ActiveObjectives.Count);
+        if (manager?.ActiveObjectives == null) return;
+        var snapshots = new List<LevelObjectiveProgress>();
         foreach (LevelObjective objective in manager.ActiveObjectives)
-            if (objective != null)
-                snapshots.Add(objective.Snapshot);
+            if (objective != null) snapshots.Add(objective.Snapshot);
         HandleObjectivesInitialized(snapshots);
     }
 
     private void HandleObjectivesInitialized(IReadOnlyList<LevelObjectiveProgress> objectives)
     {
-        ClearViews();
-        EnsureObjectiveArea();
-        if (objectives == null)
-            return;
-
-        foreach (LevelObjectiveProgress objective in objectives)
+        HideAllCards();
+        activeCards.Clear();
+        int count = Mathf.Min(objectives?.Count ?? 0, missionCards.Count);
+        for (int i = 0; i < count; i++)
         {
-            ObjectiveView view = CreateView(objective);
-            views[objective.Index] = view;
-            ApplySnapshot(view, objective, false);
+            MissionCard card = missionCards[i];
+            if (card?.root == null) continue;
+            card.root.gameObject.SetActive(true);
+            activeCards[objectives[i].Index] = card;
+            ApplySnapshot(card, objectives[i], false);
         }
     }
 
     private void HandleObjectiveProgressChanged(LevelObjectiveProgress objective)
     {
-        if (!views.TryGetValue(objective.Index, out ObjectiveView view))
+        if (!activeCards.TryGetValue(objective.Index, out MissionCard card))
         {
-            // Handles debug/reload paths that replace objective data without a
-            // preceding initialization event.
             RefreshFromActiveObjectives();
-            views.TryGetValue(objective.Index, out view);
+            activeCards.TryGetValue(objective.Index, out card);
         }
-        if (view != null)
-            ApplySnapshot(view, objective, true);
+        if (card != null) ApplySnapshot(card, objective, true);
     }
 
-    private ObjectiveView CreateView(LevelObjectiveProgress objective)
+    private void ApplySnapshot(MissionCard card, LevelObjectiveProgress objective, bool animate)
     {
-        GameObject rootObject = new GameObject($"Objective {objective.Index + 1} - {objective.Type}",
-            typeof(RectTransform), typeof(CanvasGroup), typeof(LayoutElement));
-        rootObject.layer = gameObject.layer;
-        RectTransform root = rootObject.GetComponent<RectTransform>();
-        root.SetParent(objectiveArea, false);
-        root.sizeDelta = new Vector2(entryWidth, entryHeight);
-        LayoutElement layout = rootObject.GetComponent<LayoutElement>();
-        layout.preferredWidth = entryWidth;
-        layout.preferredHeight = entryHeight;
-        rootObject.GetComponent<CanvasGroup>().blocksRaycasts = false;
-        rootObject.GetComponent<CanvasGroup>().interactable = false;
-
-        Image icon = CreateImage("Icon", root, new Vector2(0.5f, 1f),
-            new Vector2(0f, -27f), new Vector2(48f, 48f));
-        icon.sprite = ResolveIcon(objective);
-        icon.gameObject.SetActive(icon.sprite != null);
-
-        TextMeshProUGUI progress = CreateText("Progress", root, new Vector2(0.5f, 0f),
-            new Vector2(0f, 18f), new Vector2(entryWidth, 38f), progressFontSize);
-        progress.alignment = TextAlignmentOptions.Center;
-        progress.enableAutoSizing = true;
-        progress.fontSizeMin = 16f;
-        progress.fontSizeMax = progressFontSize;
-
-        TextMeshProUGUI checkmark = CreateText("Completed", root, new Vector2(1f, 1f),
-            new Vector2(-10f, -10f), new Vector2(28f, 28f), 24f);
-        checkmark.alignment = TextAlignmentOptions.Center;
-        checkmark.text = "✓";
-        checkmark.color = achievedTint;
-        checkmark.gameObject.SetActive(false);
-
-        return new ObjectiveView { Root = root, Icon = icon, Progress = progress, Checkmark = checkmark };
-    }
-
-    private void ApplySnapshot(ObjectiveView view, LevelObjectiveProgress objective, bool animate)
-    {
-        bool justCompleted = !view.Completed && objective.IsCompleted;
-        view.Completed = objective.IsCompleted;
-        view.Progress.text = FormatProgress(objective);
-
-        Color stateColor = objective.IsCompleted ? achievedTint :
-            objective.IsRequired ? pendingTint : optionalTint;
-        view.Progress.color = stateColor;
-        view.Icon.color = stateColor;
-        view.Checkmark.gameObject.SetActive(objective.IsCompleted);
-
+        bool justCompleted = !card.isCompleted && objective.IsCompleted;
+        card.isCompleted = objective.IsCompleted;
+        FormatObjective(objective, out string title, out string main, out string secondary);
+        Sprite visual = ResolveObjectiveVisual(objective);
+        if (card.missionTitle != null) card.missionTitle.text = title;
+        if (card.missionObjective != null)
+        {
+            card.missionObjective.text = main;
+            card.missionObjective.color = StateColor(objective);
+            card.missionObjective.gameObject.SetActive(visual == null);
+        }
+        if (card.objectiveVisual != null)
+        {
+            card.objectiveVisual.sprite = visual;
+            card.objectiveVisual.gameObject.SetActive(visual != null);
+            card.objectiveVisual.color = Color.white;
+        }
+        if (card.objectiveSecondary != null)
+        {
+            card.objectiveSecondary.text = secondary;
+            card.objectiveSecondary.gameObject.SetActive(!string.IsNullOrEmpty(secondary));
+            card.objectiveSecondary.color = StateColor(objective);
+        }
+        if (card.completed != null)
+        {
+            card.completed.color = achievedTint;
+            card.completed.gameObject.SetActive(objective.IsCompleted);
+        }
         if (animate && justCompleted && completionPopDuration > 0f)
         {
-            if (view.PopRoutine != null)
-                StopCoroutine(view.PopRoutine);
-            view.PopRoutine = StartCoroutine(PopCompleted(view));
+            if (card.popRoutine != null) StopCoroutine(card.popRoutine);
+            card.popRoutine = StartCoroutine(Pop(card));
         }
     }
 
-    private IEnumerator PopCompleted(ObjectiveView view)
+    private Color StateColor(LevelObjectiveProgress objective) => objective.IsCompleted
+        ? achievedTint : objective.IsRequired ? pendingTint : optionalTint;
+
+    private IEnumerator Pop(MissionCard card)
     {
         float elapsed = 0f;
         while (elapsed < completionPopDuration)
         {
             elapsed += Time.unscaledDeltaTime;
-            float normalized = Mathf.Clamp01(elapsed / completionPopDuration);
-            float scale = Mathf.Lerp(completionPopScale, 1f, normalized);
-            view.Root.localScale = Vector3.one * scale;
+            float t = Mathf.Clamp01(elapsed / completionPopDuration);
+            card.root.localScale = Vector3.one * Mathf.Lerp(completionPopScale, 1f, t);
             yield return null;
         }
-        view.Root.localScale = Vector3.one;
-        view.PopRoutine = null;
+        card.root.localScale = Vector3.one;
+        card.popRoutine = null;
     }
 
-    private Sprite ResolveIcon(LevelObjectiveProgress objective)
+    private void ApplyPresentationOnce()
     {
-        switch (objective.Type)
+        RectTransform group = transform as RectTransform;
+        if (group != null)
         {
-            case LevelObjectiveType.ReachTier:
-                return planetPrefab != null ? planetPrefab.GetSpriteForTier(objective.TargetTier) : null;
-            case LevelObjectiveType.MergeCount:
-                return mergeCountIcon;
-            case LevelObjectiveType.ComboTarget:
-                return comboTargetIcon;
-            case LevelObjectiveType.MeteorObjective:
-                return meteorObjectiveIcon;
-            case LevelObjectiveType.Survival:
-                return survivalIcon;
-            default:
-                return null;
+            Vector2 position = group.anchoredPosition;
+            position.y = missionGroupYPosition;
+            group.anchoredPosition = position;
+        }
+        HorizontalLayoutGroup layout = GetComponent<HorizontalLayoutGroup>();
+        if (layout != null) layout.spacing = missionCardSpacing;
+        foreach (MissionCard card in missionCards)
+        {
+            if (card?.root != null) card.root.sizeDelta = missionCardSize;
+            if (card?.background != null)
+            {
+                if (missionCardSprite != null) card.background.sprite = missionCardSprite;
+                card.background.preserveAspect = true;
+                card.background.raycastTarget = false;
+            }
+            ConfigureText(card?.missionTitle, missionTitleFontSize);
+            ConfigureText(card?.missionObjective, missionObjectiveFontSize);
+            ConfigureText(card?.objectiveSecondary, missionSecondaryFontSize);
+            if (card?.objectiveVisual != null)
+            {
+                card.objectiveVisual.rectTransform.sizeDelta = missionVisualSize;
+                card.objectiveVisual.preserveAspect = true;
+                card.objectiveVisual.raycastTarget = false;
+            }
         }
     }
 
-    private static string FormatProgress(LevelObjectiveProgress objective)
+    private static void ConfigureText(TextMeshProUGUI text, float size)
     {
-        string optional = objective.IsRequired ? string.Empty : "  OPTIONAL";
-        switch (objective.Type)
-        {
-            case LevelObjectiveType.ReachTier:
-                return objective.TargetProgress > 1f
-                    ? $"T{(int)objective.TargetTier + 1}  {Whole(objective.CurrentProgress)} / {Whole(objective.TargetProgress)}{optional}"
-                    : $"TIER {(int)objective.TargetTier + 1}{optional}";
-            case LevelObjectiveType.MergeCount:
-                return $"<size=82%>MERGE</size>\n{Whole(objective.CurrentProgress)} / {Whole(objective.TargetProgress)}{optional}";
-            case LevelObjectiveType.ComboTarget:
-                return $"<size=82%>COMBO x{Whole(objective.TargetProgress)}</size>\nBest: x{Whole(objective.CurrentProgress)}{optional}";
-            case LevelObjectiveType.MeteorObjective:
-                return $"<size=82%>METEOR</size>\n{Whole(objective.CurrentProgress)} / {Whole(objective.TargetProgress)}{optional}";
-            case LevelObjectiveType.Survival:
-                return $"<size=82%>SURVIVE</size>\n{Whole(objective.CurrentProgress)} / {Whole(objective.TargetProgress)}s{optional}";
-            default:
-                return $"{Whole(objective.CurrentProgress)} / {Whole(objective.TargetProgress)}{optional}";
-        }
-    }
-
-    private static string Whole(float value) => Mathf.FloorToInt(value + 0.001f).ToString();
-
-    private void EnsureObjectiveArea()
-    {
-        if (objectiveArea != null)
-            return;
-
-        GameObject areaObject = new GameObject("Dynamic Objectives", typeof(RectTransform), typeof(HorizontalLayoutGroup));
-        areaObject.layer = gameObject.layer;
-        objectiveArea = areaObject.GetComponent<RectTransform>();
-        objectiveArea.SetParent(transform, false);
-        objectiveArea.anchorMin = new Vector2(0.5f, 1f);
-        objectiveArea.anchorMax = new Vector2(0.5f, 1f);
-        objectiveArea.pivot = new Vector2(0.5f, 1f);
-        objectiveArea.anchoredPosition = objectiveAreaOffset;
-        objectiveArea.sizeDelta = new Vector2(320f, entryHeight);
-
-        HorizontalLayoutGroup layout = areaObject.GetComponent<HorizontalLayoutGroup>();
-        layout.spacing = entrySpacing;
-        layout.childAlignment = TextAnchor.UpperCenter;
-        layout.childControlWidth = false;
-        layout.childControlHeight = false;
-        layout.childForceExpandWidth = false;
-        layout.childForceExpandHeight = false;
-        layout.padding = new RectOffset(0, 0, 0, 0);
-    }
-
-    private Image CreateImage(string objectName, RectTransform parent, Vector2 anchor,
-        Vector2 anchoredPosition, Vector2 size)
-    {
-        GameObject child = new GameObject(objectName, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-        child.layer = gameObject.layer;
-        RectTransform rect = child.GetComponent<RectTransform>();
-        rect.SetParent(parent, false);
-        rect.anchorMin = rect.anchorMax = anchor;
-        rect.pivot = new Vector2(0.5f, 0.5f);
-        rect.anchoredPosition = anchoredPosition;
-        rect.sizeDelta = size;
-        Image image = child.GetComponent<Image>();
-        image.preserveAspect = true;
-        image.raycastTarget = false;
-        return image;
-    }
-
-    private TextMeshProUGUI CreateText(string objectName, RectTransform parent, Vector2 anchor,
-        Vector2 anchoredPosition, Vector2 size, float fontSize)
-    {
-        GameObject child = new GameObject(objectName, typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
-        child.layer = gameObject.layer;
-        RectTransform rect = child.GetComponent<RectTransform>();
-        rect.SetParent(parent, false);
-        rect.anchorMin = rect.anchorMax = anchor;
-        rect.pivot = new Vector2(0.5f, 0.5f);
-        rect.anchoredPosition = anchoredPosition;
-        rect.sizeDelta = size;
-        TextMeshProUGUI text = child.GetComponent<TextMeshProUGUI>();
-        if (levelTitleText != null)
-        {
-            text.font = levelTitleText.font;
-            text.fontSharedMaterial = levelTitleText.fontSharedMaterial;
-        }
-        text.fontSize = fontSize;
-        text.fontStyle = FontStyles.Bold;
-        text.raycastTarget = false;
+        if (text == null) return;
+        text.fontSize = size;
+        text.enableAutoSizing = false;
         text.textWrappingMode = TextWrappingModes.NoWrap;
-        text.overflowMode = TextOverflowModes.Ellipsis;
-        return text;
+        text.overflowMode = TextOverflowModes.Overflow;
+        text.raycastTarget = false;
     }
 
-    private void DisableLegacySlots()
+    private void HideAllCards()
     {
-        if (targetSlots == null)
-            return;
-        foreach (Image slot in targetSlots)
+        foreach (MissionCard card in missionCards)
         {
-            if (slot == null)
-                continue;
-            slot.raycastTarget = false;
-            slot.gameObject.SetActive(false);
+            if (card?.popRoutine != null) StopCoroutine(card.popRoutine);
+            if (card?.root != null)
+            {
+                card.root.localScale = Vector3.one;
+                card.root.gameObject.SetActive(false);
+            }
+            if (card != null) { card.isCompleted = false; card.popRoutine = null; }
         }
     }
 
-    private void ClearViews()
+    private static void FormatObjective(LevelObjectiveProgress objective, out string title,
+        out string main, out string secondary)
     {
-        foreach (ObjectiveView view in views.Values)
+        secondary = string.Empty;
+        switch (objective.Type)
         {
-            if (view.PopRoutine != null)
-                StopCoroutine(view.PopRoutine);
-            if (view.Root != null)
-                Destroy(view.Root.gameObject);
+            case LevelObjectiveType.ReachTier:
+                title = "REACH"; main = $"TIER {(int)objective.TargetTier + 1}"; return;
+            case LevelObjectiveType.MergeCount:
+                title = "MERGE"; main = $"{Whole(objective.CurrentProgress)}/{Whole(objective.TargetProgress)}"; return;
+            case LevelObjectiveType.ComboTarget:
+                title = "COMBO"; main = $"x{Whole(objective.TargetProgress)}"; return;
+            case LevelObjectiveType.MeteorObjective:
+                title = "METEOR"; main = $"{Whole(objective.CurrentProgress)}/{Whole(objective.TargetProgress)}"; return;
+            case LevelObjectiveType.Survival:
+                title = "SURVIVE"; main = $"{Whole(objective.CurrentProgress)}/{Whole(objective.TargetProgress)}s"; return;
+            default:
+                title = "MISSION"; main = $"{Whole(objective.CurrentProgress)}/{Whole(objective.TargetProgress)}"; return;
         }
-        views.Clear();
     }
+
+    private Sprite ResolveObjectiveVisual(LevelObjectiveProgress objective)
+    {
+        if (objective.Type == LevelObjectiveType.ReachTier)
+            return planetPrefab != null ? planetPrefab.GetSpriteForTier(objective.TargetTier) : null;
+        if (objective.Type == LevelObjectiveType.ComboTarget)
+        {
+            int index = Mathf.Clamp(Mathf.RoundToInt(objective.TargetProgress), 1, 5) - 1;
+            return comboTargetSprites != null && index < comboTargetSprites.Length
+                ? comboTargetSprites[index] : null;
+        }
+        return null;
+    }
+
+    private static string Whole(float value) => Mathf.FloorToInt(value + .001f).ToString();
 }

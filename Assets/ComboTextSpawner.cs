@@ -20,6 +20,11 @@ public class ComboTextSpawner : MonoBehaviour
     // configured default font asset), so this works with zero Inspector setup.
     [SerializeField] private TMP_FontAsset fontAsset;
 
+    [Header("Combo Artwork")]
+    [Tooltip("X1..X5. Gameplay feedback starts at combo 2; values above 5 reuse X5.")]
+    [SerializeField] private Sprite[] comboSprites = new Sprite[5];
+    [SerializeField, Range(.05f, 1f)] private float comboSpriteScale = .18f;
+
     [System.Serializable]
     private struct ComboTier
     {
@@ -95,6 +100,20 @@ public class ComboTextSpawner : MonoBehaviour
         var go = new GameObject("ComboPopup");
         go.transform.position = worldPosition;
 
+        Sprite sprite = ResolveComboSprite(combo);
+        if (sprite != null)
+        {
+            SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
+            renderer.sprite = sprite;
+            renderer.color = Color.white;
+            renderer.sortingOrder = sortingOrder;
+            float spriteLifetime = Random.Range(minLifetime, maxLifetime);
+            var spriteAnimator = go.AddComponent<ComboPopupAnimator>();
+            spriteAnimator.Play(renderer, tier.scale * comboSpriteScale, punchDuration,
+                punchOvershoot, driftDistance, spriteLifetime, tier.flashing);
+            return;
+        }
+
         var tmp = go.AddComponent<TextMeshPro>();
         tmp.text = $"<size=115%>{tier.label}</size>\n<size=65%>COMBO x{combo}</size>";
         tmp.alignment = TextAlignmentOptions.Center;
@@ -117,6 +136,12 @@ public class ComboTextSpawner : MonoBehaviour
         var animator = go.AddComponent<ComboPopupAnimator>();
         animator.Play(tmp, tier.scale, punchDuration, punchOvershoot, driftDistance, lifetime, tier.flashing);
     }
+
+    private Sprite ResolveComboSprite(int combo)
+    {
+        int index = Mathf.Clamp(combo, 1, 5) - 1;
+        return comboSprites != null && index < comboSprites.Length ? comboSprites[index] : null;
+    }
 }
 
 // Self-contained per-popup animation: punch-scale in, then drift upward
@@ -128,6 +153,13 @@ public class ComboPopupAnimator : MonoBehaviour
         float driftDistance, float lifetime, bool flashing)
     {
         StartCoroutine(Animate(tmp, targetScale, punchDuration, punchOvershoot, driftDistance, lifetime, flashing));
+    }
+
+    public void Play(SpriteRenderer renderer, float targetScale, float punchDuration,
+        float punchOvershoot, float driftDistance, float lifetime, bool flashing)
+    {
+        StartCoroutine(AnimateSprite(renderer, targetScale, punchDuration,
+            punchOvershoot, driftDistance, lifetime, flashing));
     }
 
     private IEnumerator Animate(TextMeshPro tmp, float targetScale, float punchDuration, float punchOvershoot,
@@ -164,6 +196,37 @@ public class ComboPopupAnimator : MonoBehaviour
             yield return null;
         }
 
+        Destroy(gameObject);
+    }
+
+    private IEnumerator AnimateSprite(SpriteRenderer renderer, float targetScale,
+        float punchDuration, float punchOvershoot, float driftDistance, float lifetime, bool flashing)
+    {
+        Color baseColor = renderer.color;
+        float elapsed = 0f;
+        while (elapsed < punchDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / punchDuration);
+            float overshoot = Mathf.Sin(t * Mathf.PI) * punchOvershoot;
+            transform.localScale = Vector3.one * (targetScale * (t + overshoot));
+            yield return null;
+        }
+        transform.localScale = Vector3.one * targetScale;
+        elapsed = 0f;
+        Vector3 startPos = transform.position;
+        while (elapsed < lifetime)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / lifetime);
+            transform.position = startPos + Vector3.up * (driftDistance * t);
+            Color color = flashing
+                ? Color.Lerp(baseColor, Color.white, Mathf.PingPong(elapsed * 6f, 1f))
+                : baseColor;
+            color.a = 1f - t;
+            renderer.color = color;
+            yield return null;
+        }
         Destroy(gameObject);
     }
 }
