@@ -44,6 +44,13 @@ public class LevelCompletePanel : MonoBehaviour
     // be art-reviewed with realistic values on screen.
     [SerializeField] private TextMeshProUGUI coinRewardText;
 
+    [Header("Space Coin Balance Count")]
+    [SerializeField] private AudioClip coinCountClip;
+    [SerializeField, Range(0f, 1f)] private float coinCountVolume = 0.8f;
+    [SerializeField, Min(0.005f)] private float secondsPerCoin = 0.04f;
+    [SerializeField, Min(0.1f)] private float maximumCountDuration = 2.5f;
+    [SerializeField, Min(1)] private int soundEveryCoins = 1;
+
     // Banner wording; swap to "SUCCESS" here or in the Inspector if preferred.
     [SerializeField] private string titleMessage = "LEVEL COMPLETED";
 
@@ -60,6 +67,7 @@ public class LevelCompletePanel : MonoBehaviour
     // hole was.
     private Vector2 homeAnchoredPosition;
     private bool homeCaptured;
+    private Coroutine coinCountRoutine;
 
     void Awake()
     {
@@ -117,18 +125,28 @@ public class LevelCompletePanel : MonoBehaviour
             star.sprite = i < starsEarned ? starFilledSprite : starEmptySprite;
         }
 
-        long earnedReward = 0;
+        long startingBalance = PlayerDataPersistenceManager.Instance != null
+            ? PlayerDataPersistenceManager.Instance.SpaceCoin
+            : 0;
+        long endingBalance = startingBalance;
         GameManager manager = GameManager.Instance;
         if (manager != null)
         {
             if (manager.IsLevelRewardCommitted)
-                earnedReward = manager.LastCommittedLevelReward;
-            else if (!manager.TryCommitConfiguredLevelReward(out earnedReward))
+            {
+                endingBalance = PlayerDataPersistenceManager.Instance != null
+                    ? PlayerDataPersistenceManager.Instance.SpaceCoin
+                    : startingBalance;
+                startingBalance = System.Math.Max(0L, endingBalance - manager.LastCommittedLevelReward);
+            }
+            else if (!manager.TryCommitConfiguredLevelReward(out long committedReward))
                 Debug.LogError("LevelCompletePanel: Space Coin reward could not be committed.", this);
+            else
+                endingBalance = PlayerDataPersistenceManager.Instance.SpaceCoin;
         }
 
         if (coinRewardText != null)
-            coinRewardText.text = earnedReward.ToString();
+            coinRewardText.text = startingBalance.ToString();
 
         gameObject.SetActive(true);
 
@@ -142,6 +160,37 @@ public class LevelCompletePanel : MonoBehaviour
             rectTransform.anchoredPosition = homeAnchoredPosition;
             rectTransform.localScale = Vector3.one;
         }
+
+        if (coinCountRoutine != null)
+            StopCoroutine(coinCountRoutine);
+        coinCountRoutine = StartCoroutine(CountBalance(startingBalance, endingBalance));
+    }
+
+    private IEnumerator CountBalance(long from, long to)
+    {
+        if (coinRewardText == null || to <= from)
+        {
+            if (coinRewardText != null) coinRewardText.text = to.ToString();
+            coinCountRoutine = null;
+            yield break;
+        }
+
+        long difference = to - from;
+        float interval = Mathf.Min(secondsPerCoin,
+            maximumCountDuration / Mathf.Max(1f, difference));
+        int soundStep = Mathf.Max(1, soundEveryCoins);
+        long value = from;
+        while (value < to)
+        {
+            value++;
+            coinRewardText.text = value.ToString();
+            if ((value - from) % soundStep == 0 && AudioManager.Instance != null)
+                AudioManager.Instance.PlayUiOneShot(coinCountClip, coinCountVolume);
+            yield return new WaitForSecondsRealtime(interval);
+        }
+
+        coinRewardText.text = to.ToString();
+        coinCountRoutine = null;
     }
 
     // The win-vortex reveal: same content as Show, but the panel blooms out
@@ -206,6 +255,11 @@ public class LevelCompletePanel : MonoBehaviour
     public void Hide()
     {
         gameObject.SetActive(false);
+    }
+
+    private void OnDisable()
+    {
+        coinCountRoutine = null;
     }
 
     // Both handlers just forward to GameManager, which owns every progression

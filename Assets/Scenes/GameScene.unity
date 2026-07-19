@@ -2807,7 +2807,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -107.6, y: -62.3}
+  m_AnchoredPosition: {x: 0, y: 0.0000038146973}
   m_SizeDelta: {x: 137.2642, y: 57.4487}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &396937739
@@ -2857,8 +2857,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 70
-  m_fontSizeBase: 70
+  m_fontSize: 80
+  m_fontSizeBase: 80
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -9214,6 +9214,11 @@ MonoBehaviour:
   starFilledSprite: {fileID: -53665745392586456, guid: 5523f074864fcac47aea87cd82ee772e, type: 3}
   starEmptySprite: {fileID: 5675485582836920095, guid: 67c2a07595d81e54b84e56506fc551d9, type: 3}
   coinRewardText: {fileID: 396937739}
+  coinCountClip: {fileID: 8300000, guid: 11d650d1f73c66b4a97a64551391f159, type: 3}
+  coinCountVolume: 0.8
+  secondsPerCoin: 0.05
+  maximumCountDuration: 2.5
+  soundEveryCoins: 1
   titleMessage: LEVEL DONE!
   popDuration: 0.45
 --- !u!114 &1241141962

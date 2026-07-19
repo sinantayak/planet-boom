@@ -200,6 +200,13 @@ public class AudioManager : MonoBehaviour
         PlayOptionalOneShot(timeDropCollectedClip, rewardDropCollectedVolume);
     }
 
+    // UI presenters can use the central SFX source without creating a second
+    // audio/mute architecture. Missing clips remain a safe no-op.
+    public void PlayUiOneShot(AudioClip clip, float volume = 1f)
+    {
+        PlayOptionalOneShot(clip, volume);
+    }
+
     public void PlaySkillUseFailed()
     {
         PlayOptionalOneShot(skillUseFailedClip, skillFeedbackVolume);
