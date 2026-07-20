@@ -384,24 +384,26 @@ public class SkillInventoryManager : MonoBehaviour
     // Phase 3B UI calls AddSkill/TryAssignQuickSlot/TryUseQuickSlot directly.
     void Update()
     {
-        if (DebugFunctionKeyPressed(1)) DebugAdd(SkillType.GravitySingularity);
-        if (DebugFunctionKeyPressed(2)) DebugAdd(SkillType.MeteorStrike);
-        if (DebugFunctionKeyPressed(3)) DebugAdd(SkillType.TimeWarp);
-        if (DebugFunctionKeyPressed(4)) DebugAdd(SkillType.CosmicMimic);
-        if (DebugPlanetRerollAddPressed()) DebugAdd(SkillType.PlanetReroll);
-        if (DebugCosmicShieldAddPressed()) DebugAdd(SkillType.CosmicShield);
-        if (DebugCosmicAbductionAddPressed()) DebugAdd(SkillType.CosmicAbduction);
-        if (DebugMeteorShowerAddPressed()) DebugAdd(SkillType.MeteorShower);
+        if (DebugAddAllSkillsPressed())
+            DebugAddTenOfEverySkill();
+    }
 
-        if (DebugFunctionKeyPressed(5)) DebugAssignDefaultSlots();
-        if (DebugFunctionKeyPressed(6)) DebugClearSlots();
-        if (DebugFunctionKeyPressed(7)) DebugToggleThirdSlot();
-        if (DebugFunctionKeyPressed(8)) DebugLogSnapshot();
-        if (DebugFunctionKeyPressed(9)) DebugResetInventoryData();
-
-        if (DebugNumberRowPressed(5)) DebugUseSlot(0);
-        if (DebugNumberRowPressed(6)) DebugUseSlot(1);
-        if (DebugNumberRowPressed(7)) DebugUseSlot(2);
+    private void DebugAddTenOfEverySkill()
+    {
+        UnlockManager unlocks = UnlockManager.Instance;
+        foreach (SkillType type in Enum.GetValues(typeof(SkillType)))
+        {
+            unlocks?.Unlock(type);
+            AddSkill(type, 10);
+        }
+        BoosterInventoryManager boosters = BoosterInventoryManager.Instance;
+        if (boosters != null)
+            foreach (BoosterType type in Enum.GetValues(typeof(BoosterType)))
+            {
+                unlocks?.Unlock(type);
+                boosters.AddBooster(type, 10);
+            }
+        Debug.Log("DEBUG INVENTORY: Ctrl+Shift+K unlocked and added 10 of every skill and passive booster.", this);
     }
 
     private void DebugAdd(SkillType type)
@@ -482,75 +484,7 @@ public class SkillInventoryManager : MonoBehaviour
         Debug.Log("TEMP INVENTORY: all Phase-3A inventory data reset.", this);
     }
 
-    private static bool DebugNumberRowPressed(int number)
-    {
-#if ENABLE_INPUT_SYSTEM
-        Keyboard keyboard = Keyboard.current;
-        if (keyboard != null)
-        {
-            if (number == 5 && keyboard.digit5Key.wasPressedThisFrame) return true;
-            if (number == 6 && keyboard.digit6Key.wasPressedThisFrame) return true;
-            if (number == 7 && keyboard.digit7Key.wasPressedThisFrame) return true;
-        }
-#endif
-#if ENABLE_LEGACY_INPUT_MANAGER
-        if (number == 5 && UnityEngine.Input.GetKeyDown(KeyCode.Alpha5)) return true;
-        if (number == 6 && UnityEngine.Input.GetKeyDown(KeyCode.Alpha6)) return true;
-        if (number == 7 && UnityEngine.Input.GetKeyDown(KeyCode.Alpha7)) return true;
-#endif
-        return false;
-    }
-
-    private static bool DebugFunctionKeyPressed(int number)
-    {
-#if ENABLE_INPUT_SYSTEM
-        Keyboard keyboard = Keyboard.current;
-        if (keyboard != null)
-        {
-            if (number == 1 && keyboard.f1Key.wasPressedThisFrame) return true;
-            if (number == 2 && keyboard.f2Key.wasPressedThisFrame) return true;
-            if (number == 3 && keyboard.f3Key.wasPressedThisFrame) return true;
-            if (number == 4 && keyboard.f4Key.wasPressedThisFrame) return true;
-            if (number == 5 && keyboard.f5Key.wasPressedThisFrame) return true;
-            if (number == 6 && keyboard.f6Key.wasPressedThisFrame) return true;
-            if (number == 7 && keyboard.f7Key.wasPressedThisFrame) return true;
-            if (number == 8 && keyboard.f8Key.wasPressedThisFrame) return true;
-            if (number == 9 && keyboard.f9Key.wasPressedThisFrame) return true;
-        }
-#endif
-#if ENABLE_LEGACY_INPUT_MANAGER
-        if (number == 1 && UnityEngine.Input.GetKeyDown(KeyCode.F1)) return true;
-        if (number == 2 && UnityEngine.Input.GetKeyDown(KeyCode.F2)) return true;
-        if (number == 3 && UnityEngine.Input.GetKeyDown(KeyCode.F3)) return true;
-        if (number == 4 && UnityEngine.Input.GetKeyDown(KeyCode.F4)) return true;
-        if (number == 5 && UnityEngine.Input.GetKeyDown(KeyCode.F5)) return true;
-        if (number == 6 && UnityEngine.Input.GetKeyDown(KeyCode.F6)) return true;
-        if (number == 7 && UnityEngine.Input.GetKeyDown(KeyCode.F7)) return true;
-        if (number == 8 && UnityEngine.Input.GetKeyDown(KeyCode.F8)) return true;
-        if (number == 9 && UnityEngine.Input.GetKeyDown(KeyCode.F9)) return true;
-#endif
-        return false;
-    }
-
-    private static bool DebugPlanetRerollAddPressed()
-    {
-#if ENABLE_INPUT_SYSTEM
-        Keyboard keyboard = Keyboard.current;
-        if (keyboard != null && keyboard.rKey.wasPressedThisFrame &&
-            (keyboard.leftCtrlKey.isPressed || keyboard.rightCtrlKey.isPressed) &&
-            (keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed))
-            return true;
-#endif
-#if ENABLE_LEGACY_INPUT_MANAGER
-        if (UnityEngine.Input.GetKeyDown(KeyCode.R) &&
-            (UnityEngine.Input.GetKey(KeyCode.LeftControl) || UnityEngine.Input.GetKey(KeyCode.RightControl)) &&
-            (UnityEngine.Input.GetKey(KeyCode.LeftShift) || UnityEngine.Input.GetKey(KeyCode.RightShift)))
-            return true;
-#endif
-        return false;
-    }
-
-    private static bool DebugCosmicShieldAddPressed()
+    private static bool DebugAddAllSkillsPressed()
     {
 #if ENABLE_INPUT_SYSTEM
         Keyboard keyboard = Keyboard.current;
@@ -568,40 +502,5 @@ public class SkillInventoryManager : MonoBehaviour
         return false;
     }
 
-    private static bool DebugCosmicAbductionAddPressed()
-    {
-#if ENABLE_INPUT_SYSTEM
-        Keyboard keyboard = Keyboard.current;
-        if (keyboard != null && keyboard.jKey.wasPressedThisFrame &&
-            (keyboard.leftCtrlKey.isPressed || keyboard.rightCtrlKey.isPressed) &&
-            (keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed))
-            return true;
-#endif
-#if ENABLE_LEGACY_INPUT_MANAGER
-        if (UnityEngine.Input.GetKeyDown(KeyCode.J) &&
-            (UnityEngine.Input.GetKey(KeyCode.LeftControl) || UnityEngine.Input.GetKey(KeyCode.RightControl)) &&
-            (UnityEngine.Input.GetKey(KeyCode.LeftShift) || UnityEngine.Input.GetKey(KeyCode.RightShift)))
-            return true;
-#endif
-        return false;
-    }
-
-    private static bool DebugMeteorShowerAddPressed()
-    {
-#if ENABLE_INPUT_SYSTEM
-        Keyboard keyboard = Keyboard.current;
-        if (keyboard != null && keyboard.mKey.wasPressedThisFrame &&
-            (keyboard.leftCtrlKey.isPressed || keyboard.rightCtrlKey.isPressed) &&
-            (keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed))
-            return true;
-#endif
-#if ENABLE_LEGACY_INPUT_MANAGER
-        if (UnityEngine.Input.GetKeyDown(KeyCode.M) &&
-            (UnityEngine.Input.GetKey(KeyCode.LeftControl) || UnityEngine.Input.GetKey(KeyCode.RightControl)) &&
-            (UnityEngine.Input.GetKey(KeyCode.LeftShift) || UnityEngine.Input.GetKey(KeyCode.RightShift)))
-            return true;
-#endif
-        return false;
-    }
 #endif
 }

@@ -13,7 +13,6 @@ public static class GameplayHudAuthoring
     private const string MissionValueLayoutOfferKey = "PlanetBoom.MissionValueLayoutOffered.v2";
     private const string MissionVisualOfferKey = "PlanetBoom.MissionObjectiveVisualsOffered.v3";
 
-    [InitializeOnLoadMethod]
     private static void OfferMigrationWhenScriptsReload()
     {
         EditorApplication.delayCall += () =>
@@ -29,7 +28,6 @@ public static class GameplayHudAuthoring
         };
     }
 
-    [InitializeOnLoadMethod]
     private static void OfferTopHudSyncWhenScriptsReload()
     {
         EditorApplication.delayCall += () =>
@@ -47,7 +45,6 @@ public static class GameplayHudAuthoring
         };
     }
 
-    [InitializeOnLoadMethod]
     private static void OfferMissionValueLayoutWhenScriptsReload()
     {
         EditorApplication.delayCall += () =>
@@ -64,7 +61,6 @@ public static class GameplayHudAuthoring
         };
     }
 
-    [InitializeOnLoadMethod]
     private static void OfferMissionVisualsWhenScriptsReload()
     {
         EditorApplication.delayCall += () =>

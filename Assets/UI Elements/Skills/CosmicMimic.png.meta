@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 99ea842d9783d25489f166f71a278751
+guid: e93b864f71c5c76419530aeb8c49a349
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -587030136245671435
-    second: CosmicShield_0
+      213: 4473551675245651988
+    second: CosmicMimic_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -75,7 +75,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 2
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -126,23 +126,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: CosmicShield_0
+      name: CosmicMimic_0
       rect:
         serializedVersion: 2
-        x: 1
-        y: 2
-        width: 123
-        height: 120
+        x: 0
+        y: 0
+        width: 512
+        height: 512
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5f9a0a883337ad7f0800000000000000
-      internalID: -587030136245671435
+      spriteID: 418ee57fb8f351e30800000000000000
+      internalID: 4473551675245651988
       vertices: []
       indices: 
       edges: []
@@ -151,7 +151,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: f038979bbb897b74c98ac7d032a71160
     internalID: 0
     vertices: []
     indices: 
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      CosmicShield_0: -587030136245671435
+      CosmicMimic_0: 4473551675245651988
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -57,11 +57,14 @@ public class GameManager : MonoBehaviour
     // popup — the black hole spins up and swallows the board while all input
     // and lose checks are frozen (every gameplay system already gates on
     // State == Playing, so the new state disables them for free).
-    public enum GameState { Playing, LevelComplete, GameOver, CinematicVortex, InventoryPaused, GamePaused }
+    public enum GameState { LevelPreparing, Playing, LevelComplete, GameOver, CinematicVortex, InventoryPaused, GamePaused }
 
     public static GameManager Instance { get; private set; }
 
     public GameState State { get; private set; } = GameState.Playing;
+    // A Phase 2 presenter may return true to defer Playing, then call
+    // CompletePreparedLevelStart after its entrance sequence finishes.
+    public event System.Func<bool> PreparedLevelStarting;
     public int CurrentLevelNumber { get; private set; } = 1;
 
     // Seconds left on the current level's clock. Public for the timer text
@@ -161,6 +164,7 @@ public class GameManager : MonoBehaviour
     // icons that dim live as targets are met. Never hidden during play.
     [FormerlySerializedAs("missionPanel")]
     public MissionHUD missionHUD;
+    [SerializeField] private PreLevelPanel preLevelPanel;
 
     // Centered win popup, hidden during normal play. Its NEXT button wires
     // itself to AdvanceToNextLevel in code; nothing to hook up beyond the
@@ -235,6 +239,7 @@ public class GameManager : MonoBehaviour
     private int lastEarnedStars;
     private float timeScaleBeforeInventoryPause = 1f;
     private float timeScaleBeforeGamePause = 1f;
+    private float timeScaleBeforeLevelPreparing = 1f;
     private Vector3 gameplayTimerBaseScale = Vector3.one;
     private Coroutine timeWarpFeedbackRoutine;
     private TextMeshProUGUI activeTimeWarpPopup;
@@ -520,6 +525,7 @@ public class GameManager : MonoBehaviour
             Time.timeScale = timeScaleBeforeInventoryPause;
         }
         else if (State == GameState.GamePaused) Time.timeScale = timeScaleBeforeGamePause;
+        else if (State == GameState.LevelPreparing) Time.timeScale = timeScaleBeforeLevelPreparing;
         if (Instance == this)
         {
             Instance = null;
@@ -620,6 +626,17 @@ public class GameManager : MonoBehaviour
         DiscardLevelEarnedCoins();
         State = GameState.GameOver;
         SceneManager.LoadScene("MainMenu");
+    }
+
+    public void AbandonPreparedRunToLevelMap()
+    {
+        if (State != GameState.LevelPreparing)
+            return;
+        Time.timeScale = Mathf.Max(0.0001f, timeScaleBeforeLevelPreparing);
+        BoosterInventoryManager.Instance?.EndCurrentRun();
+        DiscardLevelEarnedCoins();
+        State = GameState.GameOver;
+        SceneManager.LoadScene("LevelMap");
     }
 
     public bool TryAddBonusTime(float seconds)
@@ -1382,6 +1399,9 @@ public class GameManager : MonoBehaviour
         // reset this value so a future Continue can keep the same run alive.
         BoosterInventoryManager.Instance?.EndCurrentRun();
         DiscardLevelEarnedCoins();
+        timeScaleBeforeLevelPreparing = Time.timeScale > 0f ? Time.timeScale : 1f;
+        State = GameState.LevelPreparing;
+        Time.timeScale = 0f;
         CurrentLevelNumber = levelNumber;
         activeTargets.Clear();
         achievedTargets.Clear();
@@ -1440,6 +1460,7 @@ public class GameManager : MonoBehaviour
         if (missionHUD != null)
         {
             missionHUD.ShowLevel(levelNumber, activeTargets);
+            missionHUD.SetRunPresentationVisible(false);
         }
 
         var initialProgress = new List<LevelObjectiveProgress>(activeObjectives.Count);
@@ -1447,7 +1468,40 @@ public class GameManager : MonoBehaviour
             initialProgress.Add(objective.Snapshot);
         ObjectivesInitialized?.Invoke(initialProgress);
 
-        Debug.Log($"GameManager: Level {levelNumber} started. Mission: {DescribeTargets()}");
+        if (preLevelPanel == null)
+            preLevelPanel = FindFirstObjectByType<PreLevelPanel>(FindObjectsInactive.Include);
+        if (preLevelPanel != null)
+            preLevelPanel.ShowPreparedLevel(this);
+        else
+            Debug.LogError("GameManager: PreLevelPanel is missing; prepared level cannot begin.", this);
+
+        Debug.Log($"GameManager: Level {levelNumber} prepared. Mission: {DescribeTargets()}");
+    }
+
+    // Phase 2 owns this seam: its mission-card entrance can run after the
+    // event and call/replace CompletePreparedLevelStart when presentation is
+    // finished. Phase 1 completes immediately.
+    public bool BeginPreparedLevel()
+    {
+        if (State != GameState.LevelPreparing)
+            return false;
+        bool deferredByPresentation = false;
+        if (PreparedLevelStarting != null)
+            foreach (System.Func<bool> presenter in PreparedLevelStarting.GetInvocationList())
+                deferredByPresentation |= presenter();
+        if (!deferredByPresentation)
+            CompletePreparedLevelStart();
+        return true;
+    }
+
+    public void CompletePreparedLevelStart()
+    {
+        if (State != GameState.LevelPreparing)
+            return;
+        Time.timeScale = Mathf.Max(0.0001f, timeScaleBeforeLevelPreparing);
+        State = GameState.Playing;
+        missionHUD?.SetRunPresentationVisible(true);
+        Debug.Log($"GameManager: Level {CurrentLevelNumber} began from prepared state.", this);
     }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD

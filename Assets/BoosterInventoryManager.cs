@@ -102,7 +102,9 @@ public sealed class BoosterInventoryManager : MonoBehaviour
     {
         if (!Enum.IsDefined(typeof(BoosterType), type) || IsActive(type) || GetCount(type) <= 0 ||
             (!bypassUnlock && (UnlockManager.Instance == null || !UnlockManager.Instance.IsUnlocked(type))) ||
-            GameManager.Instance == null || GameManager.Instance.State != GameManager.GameState.Playing)
+            GameManager.Instance == null ||
+            (GameManager.Instance.State != GameManager.GameState.Playing &&
+             GameManager.Instance.State != GameManager.GameState.LevelPreparing))
             return false;
 
         int next = GetCount(type) - 1;
@@ -111,6 +113,34 @@ public sealed class BoosterInventoryManager : MonoBehaviour
         InventoryCountChanged?.Invoke(type, next);
         PlayerDataPersistenceManager.NotifyBoosterInventoryChanged(this);
         SetActive(type, true);
+        return true;
+    }
+
+    public bool CanActivateForCurrentRun(BoosterType type, bool bypassUnlock = false)
+    {
+        return Enum.IsDefined(typeof(BoosterType), type) && !IsActive(type) && GetCount(type) > 0 &&
+            (bypassUnlock || (UnlockManager.Instance != null && UnlockManager.Instance.IsUnlocked(type))) &&
+            GameManager.Instance != null &&
+            (GameManager.Instance.State == GameManager.GameState.Playing ||
+             GameManager.Instance.State == GameManager.GameState.LevelPreparing);
+    }
+
+    // READY uses one all-or-nothing validation pass before any inventory is
+    // changed. Unity gameplay runs on one thread, so the following consumes
+    // cannot race after successful validation.
+    public bool TryActivatePreparedRun(IReadOnlyCollection<BoosterType> selected)
+    {
+        if (selected == null || GameManager.Instance == null ||
+            GameManager.Instance.State != GameManager.GameState.LevelPreparing)
+            return false;
+        // Activation raises inventory events synchronously. UI listeners may
+        // refresh their pending-selection collection during those callbacks,
+        // so never enumerate the caller-owned collection while consuming.
+        var snapshot = new List<BoosterType>(selected);
+        foreach (BoosterType type in snapshot)
+            if (!CanActivateForCurrentRun(type)) return false;
+        foreach (BoosterType type in snapshot)
+            if (!TryActivateForCurrentRun(type)) return false;
         return true;
     }
 

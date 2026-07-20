@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 351bf76d569831446a32b0b8687e8155
+guid: bb82b80cb29cdbb4b9803e19a9a07958
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 299032018922990535
-    second: GravitySingularity_0
+      213: -6835351550035680761
+    second: EmptyBacground2_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -71,11 +71,11 @@ TextureImporter:
   cookieLightType: 0
   platformSettings:
   - serializedVersion: 4
-    buildTarget: DefaultTexturePlatform
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
+      buildTarget: DefaultTexturePlatform
+      maxTextureSize: 2048
+      resizeAlgorithm: 0
+      textureFormat: -1
+      textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -84,11 +84,11 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
-    buildTarget: Standalone
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
+      buildTarget: Standalone
+      maxTextureSize: 2048
+      resizeAlgorithm: 0
+      textureFormat: -1
+      textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -97,11 +97,11 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
-    buildTarget: Android
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
+      buildTarget: Android
+      maxTextureSize: 2048
+      resizeAlgorithm: 0
+      textureFormat: -1
+      textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -110,11 +110,11 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
-    buildTarget: WebGL
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
+      buildTarget: WebGL
+      maxTextureSize: 2048
+      resizeAlgorithm: 0
+      textureFormat: -1
+      textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -126,23 +126,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: GravitySingularity_0
+      name: EmptyBacground2_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 0
-        width: 125
-        height: 125
+        y: 4
+        width: 512
+        height: 138
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7cb6f507900662400800000000000000
-      internalID: 299032018922990535
+      spriteID: 70225310bf3f321a0800000000000000
+      internalID: -6835351550035680761
       vertices: []
       indices: 
       edges: []
@@ -151,7 +151,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 76eff40e29f18da47ad08829f6a4cbd5
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      GravitySingularity_0: 299032018922990535
+      EmptyBacground2_0: -6835351550035680761
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

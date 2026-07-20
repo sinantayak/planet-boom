@@ -1,9 +1,6 @@
 using System;
 using System.Collections;
 using UnityEngine;
-#if ENABLE_INPUT_SYSTEM
-using UnityEngine.InputSystem;
-#endif
 
 // Executes collected skills without owning inventory counts. A future inventory
 // UI should consume an item only when TryExecuteSkill returns true.
@@ -170,77 +167,4 @@ public class SkillManager : MonoBehaviour
             cosmicAbductionVisualController = FindFirstObjectByType<CosmicAbductionVisualController>();
     }
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-    // TEMPORARY PHASE-2 TEST CONTROLS: remove this Update method after the
-    // inventory UI calls TryExecuteSkill. Compiled out of non-development builds.
-    // The project currently enables BOTH input backends. Prefer the new Input
-    // System when a keyboard is available, then fall back to the legacy Input
-    // Manager so this remains usable if Player Settings changes later.
-    private bool hasLoggedDebugUpdate;
-
-    void OnEnable()
-    {
-        Debug.Log($"TEMP DEBUG SKILLS: SkillManager enabled " +
-                  $"(activeInHierarchy={gameObject.activeInHierarchy}, enabled={enabled}).", this);
-    }
-
-    void Update()
-    {
-        if (!hasLoggedDebugUpdate)
-        {
-            hasLoggedDebugUpdate = true;
-            Debug.Log("TEMP DEBUG SKILLS: SkillManager.Update is running.", this);
-        }
-
-        if (DebugNumberRowPressed(1)) ExecuteDebugSkill(SkillType.GravitySingularity);
-        if (DebugNumberRowPressed(2)) ExecuteDebugSkill(SkillType.MeteorStrike);
-        if (DebugNumberRowPressed(3)) ExecuteDebugSkill(SkillType.TimeWarp);
-        if (DebugNumberRowPressed(4)) ExecuteDebugSkill(SkillType.CosmicMimic);
-        if (DebugNumberRowPressed(5)) ExecuteDebugSkill(SkillType.PlanetReroll);
-    }
-
-    private void ExecuteDebugSkill(SkillType type)
-    {
-        Debug.Log($"DEBUG SKILL KEY: {type}", this);
-        bool succeeded = TryExecuteSkill(type);
-        Debug.Log($"DEBUG SKILL RESULT: {type} = {succeeded}", this);
-    }
-
-    [ContextMenu("DEBUG Execute Cosmic Abduction")]
-    private void DebugExecuteCosmicAbduction() => ExecuteDebugSkill(SkillType.CosmicAbduction);
-
-    [ContextMenu("DEBUG Execute Meteor Shower")]
-    private void DebugExecuteMeteorShower() => ExecuteDebugSkill(SkillType.MeteorShower);
-
-    private static bool DebugNumberRowPressed(int number)
-    {
-#if ENABLE_INPUT_SYSTEM
-        Keyboard keyboard = Keyboard.current;
-        if (keyboard != null)
-        {
-            switch (number)
-            {
-                case 1: if (keyboard.digit1Key.wasPressedThisFrame) return true; break;
-                case 2: if (keyboard.digit2Key.wasPressedThisFrame) return true; break;
-                case 3: if (keyboard.digit3Key.wasPressedThisFrame) return true; break;
-                case 4: if (keyboard.digit4Key.wasPressedThisFrame) return true; break;
-                case 5: if (keyboard.digit5Key.wasPressedThisFrame) return true; break;
-            }
-        }
-#endif
-
-#if ENABLE_LEGACY_INPUT_MANAGER
-        switch (number)
-        {
-            case 1: return UnityEngine.Input.GetKeyDown(KeyCode.Alpha1);
-            case 2: return UnityEngine.Input.GetKeyDown(KeyCode.Alpha2);
-            case 3: return UnityEngine.Input.GetKeyDown(KeyCode.Alpha3);
-            case 4: return UnityEngine.Input.GetKeyDown(KeyCode.Alpha4);
-            case 5: return UnityEngine.Input.GetKeyDown(KeyCode.Alpha5);
-        }
-#endif
-
-        return false;
-    }
-#endif
 }
