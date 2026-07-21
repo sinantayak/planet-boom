@@ -170,7 +170,7 @@ public class SkillInventoryUI : MonoBehaviour
 
         popupOpen = true;
         selectedSlotIndex = Mathf.Clamp(selectedSlotIndex, 0, SkillInventoryManager.QuickSlotCount - 1);
-        popupRoot.SetActive(true);
+        PopupTransition.Open(popupRoot);
         popupRoot.transform.SetAsLastSibling();
         RefreshAll();
     }
@@ -181,10 +181,10 @@ public class SkillInventoryUI : MonoBehaviour
             return;
 
         popupOpen = false;
-        if (popupRoot != null)
-            popupRoot.SetActive(false);
-        if (GameManager.Instance != null)
-            GameManager.Instance.TryResumeFromInventory();
+        // The game stays InventoryPaused (timeScale 0) through the unscaled
+        // close animation and only resumes once the popup is visually gone.
+        PopupTransition.Close(popupRoot,
+            () => GameManager.Instance?.TryResumeFromInventory());
     }
 
     private void BindInventory()
@@ -299,6 +299,9 @@ public class SkillInventoryUI : MonoBehaviour
         bool succeeded = inventory != null && inventory.TryAssignQuickSlot(selectedSlotIndex, type);
         if (!succeeded)
         {
+            // Existing failure report (locked/empty assignment rejected by the
+            // inventory) — the denied sound rides on it, never on success.
+            UiSounds.PlayError();
             QuickSlotAssignmentFailed?.Invoke(selectedSlotIndex, type);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             Debug.Log($"INVENTORY UI: assigning {type} to slot {selectedSlotIndex + 1} failed.", this);

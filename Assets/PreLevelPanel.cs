@@ -32,6 +32,9 @@ public sealed class PreLevelPanel : MonoBehaviour
 
     [Header("Scene Wiring")]
     [SerializeField] private TextMeshProUGUI levelTitle;
+    // Presentation-only starting-time readout. Runtime writes its string;
+    // position/font/size/color stay whatever was authored in the Inspector.
+    [SerializeField] private TextMeshProUGUI levelTimeText;
     [SerializeField] private RectTransform objectivesSection;
     [SerializeField] private ObjectivePreview[] objectivePreviews = new ObjectivePreview[3];
     [SerializeField] private BoosterEntry[] boosterEntries = new BoosterEntry[3];
@@ -45,9 +48,13 @@ public sealed class PreLevelPanel : MonoBehaviour
     private readonly HashSet<BoosterType> pendingBoosters = new HashSet<BoosterType>();
     private GameManager preparedManager;
     private bool readyTransitionStarted;
+    // Optional presentation layer on this same root; every path falls back
+    // to the original instant SetActive behavior when it is absent.
+    private PopupTransition transition;
 
     private void Awake()
     {
+        transition = GetComponent<PopupTransition>();
         RevealAssignedArtwork();
         foreach (BoosterEntry entry in boosterEntries)
         {
@@ -108,6 +115,8 @@ public sealed class PreLevelPanel : MonoBehaviour
         readyTransitionStarted = false;
         pendingBoosters.Clear();
         gameObject.SetActive(true);
+        if (transition != null)
+            transition.OpenAnimated();
 
         if (levelTitle != null)
         {
@@ -116,6 +125,9 @@ public sealed class PreLevelPanel : MonoBehaviour
                 : manager != null ? manager.CurrentLevelNumber : 1;
             levelTitle.text = $"LEVEL {number}";
         }
+
+        if (levelTimeText != null)
+            levelTimeText.text = FormatLevelTime(manager);
 
         BindObjectivePreviews(manager);
         RefreshAllBoosters();
@@ -161,6 +173,22 @@ public sealed class PreLevelPanel : MonoBehaviour
     }
 
     private static string Whole(float value) => Mathf.FloorToInt(value + .001f).ToString();
+
+    // The displayed value is the same authored starting time LoadLevel feeds
+    // the authoritative clock — no second timer, just its configured origin.
+    private static string FormatLevelTime(GameManager manager)
+    {
+        LevelConfiguration config = manager != null ? manager.ActiveLevelConfiguration : null;
+        if (config != null && config.timeMode == LevelTimeMode.MergeTimeRush)
+            return $"TIME RUSH: {Mathf.CeilToInt(config.timeRushStartingTime)} SEC";
+        if (config != null)
+            return $"TIME: {Mathf.CeilToInt(config.timeLimit)} SEC";
+
+        // Legacy list-driven levels carry no LevelConfiguration; RemainingTime
+        // was already reset to their full clock by LoadLevel before this panel
+        // is shown, so it still reads the true starting value here.
+        return $"TIME: {Mathf.CeilToInt(manager != null ? manager.RemainingTime : 0f)} SEC";
+    }
 
     private void ToggleBooster(BoosterType type)
     {
@@ -261,6 +289,7 @@ public sealed class PreLevelPanel : MonoBehaviour
             {
                 pendingBoosters.Remove(type);
                 RefreshAllBoosters();
+                UiSounds.PlayError();
                 Debug.LogWarning($"[PreLevel] {type} is no longer available; selection removed.", this);
                 return;
             }
@@ -275,15 +304,34 @@ public sealed class PreLevelPanel : MonoBehaviour
             readyTransitionStarted = false;
             RefreshAllBoosters();
             if (readyButton != null) readyButton.interactable = true;
+            UiSounds.PlayError();
             Debug.LogWarning("[PreLevel] Booster activation was rejected; run remains prepared.", this);
             return;
         }
 
         LogActivated(inventory);
-        gameObject.SetActive(false);
+        // The mission-card intro must not start under a still-visible panel:
+        // BeginPreparedLevel only runs once the close transition has finished
+        // and the panel is deactivated.
+        if (transition != null)
+            transition.CloseAnimated(HandOffToPreparedLevel);
+        else
+        {
+            gameObject.SetActive(false);
+            HandOffToPreparedLevel();
+        }
+    }
+
+    private void HandOffToPreparedLevel()
+    {
+        if (preparedManager == null)
+            return;
         if (!preparedManager.BeginPreparedLevel())
         {
-            gameObject.SetActive(true);
+            if (transition != null)
+                transition.OpenAnimated();
+            else
+                gameObject.SetActive(true);
             readyTransitionStarted = false;
             RefreshAllBoosters();
         }
@@ -295,7 +343,10 @@ public sealed class PreLevelPanel : MonoBehaviour
             preparedManager.State != GameManager.GameState.LevelPreparing)
             return;
         pendingBoosters.Clear();
-        preparedManager.AbandonPreparedRunToLevelMap();
+        if (transition != null)
+            transition.CloseAnimated(() => preparedManager?.AbandonPreparedRunToLevelMap());
+        else
+            preparedManager.AbandonPreparedRunToLevelMap();
     }
 
     [System.Diagnostics.Conditional("UNITY_EDITOR")]

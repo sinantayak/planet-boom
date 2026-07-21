@@ -35,27 +35,33 @@ public sealed class BreakMenuUI : MonoBehaviour
     {
         if (popupRoot == null || popupRoot.activeSelf || GameManager.Instance == null) return;
         if (!GameManager.Instance.TryPauseForBreakMenu()) return;
-        popupRoot.SetActive(true);
+        PopupTransition.Open(popupRoot);
         popupRoot.transform.SetAsLastSibling();
         RefreshToggleVisuals();
     }
 
+    // The game stays GamePaused (timeScale 0) for the whole unscaled close
+    // animation; gameplay only resumes once the popup has visually finished
+    // closing. Repeated taps are safe: PopupTransition ignores a second close
+    // and the popup's buttons are non-interactable while it transitions.
     public void Continue()
     {
-        if (GameManager.Instance == null || !GameManager.Instance.TryResumeFromBreakMenu()) return;
-        popupRoot?.SetActive(false);
+        if (GameManager.Instance == null ||
+            GameManager.Instance.State != GameManager.GameState.GamePaused) return;
+        PopupTransition.Close(popupRoot,
+            () => GameManager.Instance?.TryResumeFromBreakMenu());
     }
 
     public void Restart()
     {
-        popupRoot?.SetActive(false);
-        GameManager.Instance?.RestartCurrentLevel();
+        PopupTransition.Close(popupRoot,
+            () => GameManager.Instance?.RestartCurrentLevel());
     }
 
     public void Home()
     {
-        popupRoot?.SetActive(false);
-        GameManager.Instance?.AbandonRunToMainMenu();
+        PopupTransition.Close(popupRoot,
+            () => GameManager.Instance?.AbandonRunToMainMenu());
     }
 
     private void ToggleSound() { GameSettings.SfxEnabled = !GameSettings.SfxEnabled; ApplyPreferences(); }

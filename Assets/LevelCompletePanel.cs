@@ -68,9 +68,13 @@ public class LevelCompletePanel : MonoBehaviour
     private Vector2 homeAnchoredPosition;
     private bool homeCaptured;
     private Coroutine coinCountRoutine;
+    // Optional presentation layer on this same root; absent, the panel keeps
+    // its original instant show/hide behavior.
+    private PopupTransition transition;
 
     void Awake()
     {
+        transition = GetComponent<PopupTransition>();
         rectTransform = transform as RectTransform;
         if (rectTransform != null && !homeCaptured)
         {
@@ -109,7 +113,11 @@ public class LevelCompletePanel : MonoBehaviour
     // Opens the popup showing starsEarned (1..3) filled stars. Star sprites
     // are assigned every time, so a 3-star win after a 1-star win can't
     // inherit stale gray sprites from the previous showing.
-    public void Show(int starsEarned)
+    public void Show(int starsEarned) => Show(starsEarned, true);
+
+    // animateTransition false = the caller owns the entrance (the win-vortex
+    // bloom); the popup is still marked open so its close stays animated.
+    private void Show(int starsEarned, bool animateTransition)
     {
         if (titleText != null)
         {
@@ -161,6 +169,14 @@ public class LevelCompletePanel : MonoBehaviour
             rectTransform.localScale = Vector3.one;
         }
 
+        if (transition != null)
+        {
+            if (animateTransition)
+                transition.OpenAnimated();
+            else
+                transition.SetOpenInstant();
+        }
+
         if (coinCountRoutine != null)
             StopCoroutine(coinCountRoutine);
         coinCountRoutine = StartCoroutine(CountBalance(startingBalance, endingBalance));
@@ -198,7 +214,7 @@ public class LevelCompletePanel : MonoBehaviour
     // scale on top of it and easing up/over to its authored spot.
     public void ShowFromWorldPoint(int starsEarned, Vector3 worldPoint)
     {
-        Show(starsEarned);
+        Show(starsEarned, false);
 
         if (rectTransform == null)
             return;
@@ -254,7 +270,11 @@ public class LevelCompletePanel : MonoBehaviour
 
     public void Hide()
     {
-        gameObject.SetActive(false);
+        // Animated only when the panel was actually shown this session;
+        // defensive startup hides still snap instantly (PopupTransition
+        // tracks that itself), and a missing component falls back to the
+        // original SetActive(false).
+        PopupTransition.Close(gameObject);
     }
 
     private void OnDisable()

@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 558b8521d46a0594684fdb2c3c710e4b, type: 3}
+  m_Name: UiSoundLibrary
+  m_EditorClassIdentifier: Assembly-CSharp::UiSoundLibrary
+  defaultClickClip: {fileID: 8300000, guid: 8858e2dc23dcf0e48ad8652c60f067ae, type: 3}
+  confirmClip: {fileID: 8300000, guid: 955d234325f73ce4b9e032c826b03823, type: 3}
+  backClip: {fileID: 8300000, guid: a42c2295abcbc9a43ab1fc7d1a9502ac, type: 3}
+  toggleClip: {fileID: 8300000, guid: 29c780ea569238a47a089bfab7f569bf, type: 3}
+  errorClip: {fileID: 8300000, guid: 9c6209071bb1a7f459bcda1ff23dfd89, type: 3}
+  volume: 0.9

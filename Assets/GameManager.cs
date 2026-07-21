@@ -1635,7 +1635,7 @@ public class GameManager : MonoBehaviour
 
         if (gameOverPanel != null)
         {
-            gameOverPanel.SetActive(true);
+            PopupTransition.Open(gameOverPanel);
         }
 
         Debug.Log($"GameManager: GAME OVER on level {CurrentLevelNumber} — {reason}");
@@ -1671,7 +1671,7 @@ public class GameManager : MonoBehaviour
 
         if (gameOverPanel != null)
         {
-            gameOverPanel.SetActive(false);
+            PopupTransition.Close(gameOverPanel);
         }
         if (levelCompletePanel != null)
         {
