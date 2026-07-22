@@ -58,7 +58,7 @@ public class MainMenuController : MonoBehaviour
     // replaces SampleScene later.
     public void PlayGame()
     {
-        SceneManager.LoadScene(gameplaySceneName);
+        SceneTransition.LoadScene(gameplaySceneName);
     }
 
     // Wired to the Exit button. Application.Quit() is a no-op in the Editor,

@@ -94,6 +94,12 @@ public class GameManager : MonoBehaviour
     [SerializeField] private LevelConfiguration debugLevelConfiguration;
     private LevelConfiguration debugLevelOverride;
 #endif
+    // Carries the ACTIVE configuration across a same-level reload (Game Over
+    // Try Again, pause-menu Restart, win-popup Replay) so the retried run is
+    // rebuilt from the exact asset that was just played — never a Level 1
+    // fallback, never dependent on catalog numbering. Consumed (and cleared)
+    // by the next LoadLevel in every build flavor.
+    private LevelConfiguration pendingConfigurationOverride;
     public LevelConfiguration ActiveLevelConfiguration { get; private set; }
     public string ActiveBackgroundId => ActiveLevelConfiguration != null ? ActiveLevelConfiguration.backgroundId : "default";
     public string ActiveOrbitId => ActiveLevelConfiguration != null ? ActiveLevelConfiguration.orbitId : "default";
@@ -615,7 +621,7 @@ public class GameManager : MonoBehaviour
         ClearBoard(clearMeteorites: true);
         launcher?.ResetQueue();
         State = GameState.Playing;
-        LoadLevel(CurrentLevelNumber);
+        ReloadActiveLevel();
     }
 
     public void AbandonRunToMainMenu()
@@ -625,7 +631,7 @@ public class GameManager : MonoBehaviour
         BoosterInventoryManager.Instance?.EndCurrentRun();
         DiscardLevelEarnedCoins();
         State = GameState.GameOver;
-        SceneManager.LoadScene("MainMenu");
+        SceneTransition.LoadScene("MainMenu");
     }
 
     public void AbandonPreparedRunToLevelMap()
@@ -636,7 +642,7 @@ public class GameManager : MonoBehaviour
         BoosterInventoryManager.Instance?.EndCurrentRun();
         DiscardLevelEarnedCoins();
         State = GameState.GameOver;
-        SceneManager.LoadScene("LevelMap");
+        SceneTransition.LoadScene("LevelMap");
     }
 
     public bool TryAddBonusTime(float seconds)
@@ -1389,7 +1395,7 @@ public class GameManager : MonoBehaviour
         }
 
         State = GameState.Playing;
-        LoadLevel(CurrentLevelNumber);
+        ReloadActiveLevel();
     }
 
     private void LoadLevel(int levelNumber)
@@ -1410,11 +1416,14 @@ public class GameManager : MonoBehaviour
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         ActiveLevelConfiguration = debugLevelOverride != null ? debugLevelOverride :
+            pendingConfigurationOverride != null ? pendingConfigurationOverride :
             (levelCatalog != null ? levelCatalog.FindByNumber(levelNumber) : null);
         debugLevelOverride = null;
 #else
-        ActiveLevelConfiguration = levelCatalog != null ? levelCatalog.FindByNumber(levelNumber) : null;
+        ActiveLevelConfiguration = pendingConfigurationOverride != null ? pendingConfigurationOverride :
+            (levelCatalog != null ? levelCatalog.FindByNumber(levelNumber) : null);
 #endif
+        pendingConfigurationOverride = null;
         if (ActiveLevelConfiguration == null && levels.Count == 0)
         {
             Debug.LogWarning("GameManager: no levels defined — mission progression disabled.");
@@ -1641,11 +1650,15 @@ public class GameManager : MonoBehaviour
         Debug.Log($"GameManager: GAME OVER on level {CurrentLevelNumber} — {reason}");
     }
 
-    // Full reset back to level 1. Public so a Game Over panel button can call
-    // it straight from an OnClick event; safe to call in any state.
+    // Game Over TRY AGAIN: replay the level that was just failed, from a
+    // fresh run, using the same active LevelConfiguration. Public so the
+    // Game Over panel button can call it straight from an OnClick event;
+    // safe to call in any state. (Historically this reset back to level 1 —
+    // that fallback is gone: CurrentLevelNumber survives a game over
+    // untouched, so the retry always targets the failed level.)
     public void RestartGame()
     {
-        Debug.Log("GameManager: restarting game.");
+        Debug.Log($"GameManager: retrying level {CurrentLevelNumber} after game over.");
 
         // RestartGame is intentionally callable from any state. If a future
         // menu invokes it while the inventory popup owns the pause, release
@@ -1683,9 +1696,8 @@ public class GameManager : MonoBehaviour
             countdownText.gameObject.SetActive(false);
         }
 
-        // Full restart wipes meteorites too — a hard reset back to level 1
-        // should hand back a genuinely blank board, not a hazard the player
-        // accumulated in a run that's over.
+        // A retry is a genuinely fresh run: meteorites from the failed
+        // attempt are wiped too, exactly like the pause-menu Restart.
         ClearBoard(clearMeteorites: true);
 
         if (launcher != null)
@@ -1695,9 +1707,21 @@ public class GameManager : MonoBehaviour
 
         // Order matters: LoadLevel refreshes the mission UI, and the launcher
         // only re-arms once State is Playing again — set state first so the
-        // first frame after restart is fully playable.
+        // first frame after restart is fully playable. ReloadActiveLevel then
+        // funnels into the normal prepared flow (Pre-Level → READY → intro).
         State = GameState.Playing;
-        LoadLevel(1);
+        ReloadActiveLevel();
+    }
+
+    // The one shared "play this level again" path: Game Over Try Again, the
+    // pause-menu Restart, and the win-popup Replay all funnel through here.
+    // The active LevelConfiguration is pinned as the source of truth for the
+    // reload; LoadLevel itself owns the full run reset (booster run ended,
+    // temporary coins discarded, fresh clock, fresh objectives, Pre-Level).
+    private void ReloadActiveLevel()
+    {
+        pendingConfigurationOverride = ActiveLevelConfiguration;
+        LoadLevel(CurrentLevelNumber);
     }
 
     // The designed 15-level ramp, Tier5 debut through the Tier8 ultimate

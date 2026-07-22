@@ -118,7 +118,7 @@ public sealed class LevelMapScreen : MonoBehaviour
     {
         if (selected == null || !IsLevelUnlocked(selected.levelNumber)) return;
         CampaignLevelSelection.Select(selected);
-        SceneManager.LoadScene(gameplaySceneName);
+        SceneTransition.LoadScene(gameplaySceneName);
     }
 
     private void Refresh()
