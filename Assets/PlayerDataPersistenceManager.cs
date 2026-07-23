@@ -43,6 +43,11 @@ public sealed class PlayerData
     public int highestUnlockedLevel = 1;
     public List<LevelStarsData> bestStarsByLevel = new List<LevelStarsData>();
     public List<string> unlockedContentIds = new List<string>();
+    // OBSOLETE — retained only so documents already saved with this field
+    // keep round-tripping unchanged. The Evolution Popup's NEW status is now
+    // derived live from sector progression data and no longer reads or
+    // writes this list. Safe to ignore; do not repurpose the name.
+    public List<string> seenEvolutionPlanetIds = new List<string>();
 
     // Reserved for upcoming phases. They are part of the versioned document
     // now, but no gameplay system reads or mutates them yet.
@@ -688,6 +693,7 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
         data.quickSlots ??= new List<string>();
         data.bestStarsByLevel ??= new List<LevelStarsData>();
         data.unlockedContentIds ??= new List<string>();
+        data.seenEvolutionPlanetIds ??= new List<string>();
         NormalizeProgression(data);
         while (data.quickSlots.Count < SkillInventoryManager.QuickSlotCount)
             data.quickSlots.Add(string.Empty);

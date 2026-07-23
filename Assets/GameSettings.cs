@@ -6,6 +6,7 @@ public static class GameSettings
     private const string MusicKey = "Settings.MusicEnabled";
     private const string VibrationKey = "Settings.VibrationEnabled";
     private const string MusicVolumeKey = "Settings.MusicVolume";
+    private const string LanguageKey = "Settings.Language";
     private const float DefaultMusicVolume = 0.8f;
 
     public static bool SfxEnabled { get => Get(SfxKey, "MuteState"); set => Set(SfxKey, value); }
@@ -32,6 +33,22 @@ public static class GameSettings
         }
     }
 
+    // Persisted UI language preference. Only the VALUE lives here for now —
+    // the settings popup's language button toggles and displays it; the
+    // future localization system reads it to pick its string table. Nothing
+    // is translated yet.
+    public static GameLanguage Language
+    {
+        get => PlayerPrefs.GetInt(LanguageKey, (int)GameLanguage.English) == (int)GameLanguage.Turkish
+            ? GameLanguage.Turkish
+            : GameLanguage.English;
+        set
+        {
+            PlayerPrefs.SetInt(LanguageKey, (int)value);
+            PlayerPrefs.Save();
+        }
+    }
+
     private static bool Get(string key, string legacyKey = null)
     {
         if (PlayerPrefs.HasKey(key)) return PlayerPrefs.GetInt(key, 1) != 0;
@@ -42,6 +59,14 @@ public static class GameSettings
         PlayerPrefs.SetInt(key, value ? 1 : 0);
         PlayerPrefs.Save();
     }
+}
+
+// Supported UI languages. Stored by int value in PlayerPrefs, so keep the
+// explicit numbers stable when extending.
+public enum GameLanguage
+{
+    English = 0,
+    Turkish = 1,
 }
 
 public static class Haptics

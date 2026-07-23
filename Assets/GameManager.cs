@@ -101,6 +101,9 @@ public class GameManager : MonoBehaviour
     // by the next LoadLevel in every build flavor.
     private LevelConfiguration pendingConfigurationOverride;
     public LevelConfiguration ActiveLevelConfiguration { get; private set; }
+    // Read-only catalog access for presentation code (e.g. EvolutionPopupUI
+    // deriving the current sector's reachable tier range).
+    public LevelConfigurationCatalog LevelCatalog => levelCatalog;
     public string ActiveBackgroundId => ActiveLevelConfiguration != null ? ActiveLevelConfiguration.backgroundId : "default";
     public string ActiveOrbitId => ActiveLevelConfiguration != null ? ActiveLevelConfiguration.orbitId : "default";
     public long ActiveBaseSpaceCoinReward => ActiveLevelConfiguration != null ? ActiveLevelConfiguration.baseSpaceCoinReward : 0;
@@ -626,12 +629,26 @@ public class GameManager : MonoBehaviour
 
     public void AbandonRunToMainMenu()
     {
+        AbandonRun("MainMenu");
+    }
+
+    // Settings-popup Exit: identical abandon semantics, but returns to the
+    // level map the run was launched from instead of the main menu.
+    public void AbandonRunToLevelMap()
+    {
+        AbandonRun("LevelMap");
+    }
+
+    // Shared abandon path — nothing temporary survives (booster run ends,
+    // uncommitted coins are discarded) and no progression is granted.
+    private void AbandonRun(string sceneName)
+    {
         if (State == GameState.GamePaused) Time.timeScale = timeScaleBeforeGamePause;
         else if (State == GameState.InventoryPaused) Time.timeScale = timeScaleBeforeInventoryPause;
         BoosterInventoryManager.Instance?.EndCurrentRun();
         DiscardLevelEarnedCoins();
         State = GameState.GameOver;
-        SceneTransition.LoadScene("MainMenu");
+        SceneTransition.LoadScene(sceneName);
     }
 
     public void AbandonPreparedRunToLevelMap()
