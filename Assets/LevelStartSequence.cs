@@ -80,9 +80,9 @@ public sealed class LevelStartSequence : MonoBehaviour
     private bool rushEdgeRunning;
     private float rushEdgeElapsed;
 
-    // Extension seam for a future first-time demonstration. No tutorial
-    // state, objects or persistence are introduced by this implementation.
+    // Extension seam used by optional presentation-only mode tutorials.
     public event System.Func<GameManager, IEnumerator> AfterTimeRushModeIntro;
+    public int PreparationToken => generation;
 
     private void Awake()
     {

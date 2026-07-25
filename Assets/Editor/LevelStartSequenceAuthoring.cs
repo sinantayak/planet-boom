@@ -83,6 +83,70 @@ public static class LevelStartSequenceAuthoring
         time.fontSize = Mathf.Max(time.fontSize, 86f);
         countdown.fontSize = Mathf.Max(countdown.fontSize, 160f);
 
+        RectTransform tutorialRoot = EnsureRect(root, "TimeRushTutorial");
+        InitializeRectOnce(tutorialRoot, Vector2.zero, new Vector2(1050f, 650f));
+        CanvasGroup tutorialGroup = EnsureCanvasGroup(tutorialRoot.gameObject);
+        Image tutorialLeft = EnsureTutorialImage(tutorialRoot, "PlanetLeft",
+            new Vector2(-250f, 75f), new Vector2(145f, 145f));
+        Image tutorialRight = EnsureTutorialImage(tutorialRoot, "PlanetRight",
+            new Vector2(250f, 75f), new Vector2(145f, 145f));
+        Image tutorialResult = EnsureTutorialImage(tutorialRoot, "ResultPlanet",
+            new Vector2(0f, 75f), new Vector2(175f, 175f));
+        TextMeshProUGUI tutorialBonus = EnsureText(tutorialRoot, "TimeBonusText",
+            template, "+1 SEC");
+        TextMeshProUGUI tutorialDescription = EnsureText(tutorialRoot,
+            "DescriptionText", template, "MERGE PLANETS TO<br>GAIN TIME");
+        TextMeshProUGUI tutorialContinue = EnsureText(tutorialRoot,
+            "TapToContinueText", template, "TAP TO CONTINUE");
+        InitializeRectOnce(tutorialBonus.rectTransform, new Vector2(0f, -65f),
+            new Vector2(650f, 100f));
+        InitializeRectOnce(tutorialDescription.rectTransform, new Vector2(0f, -210f),
+            new Vector2(1000f, 150f));
+        InitializeRectOnce(tutorialContinue.rectTransform, new Vector2(0f, -355f),
+            new Vector2(800f, 70f));
+        tutorialBonus.fontSize = Mathf.Max(tutorialBonus.fontSize, 62f);
+        tutorialDescription.fontSize = Mathf.Max(tutorialDescription.fontSize, 42f);
+        tutorialDescription.richText = true;
+        tutorialContinue.fontSize = Mathf.Max(tutorialContinue.fontSize, 34f);
+        Color continueColor = tutorialContinue.color;
+        continueColor.a = Mathf.Min(continueColor.a, .82f);
+        tutorialContinue.color = continueColor;
+
+        RectTransform tapCatcherRect = EnsureRect(root, "TimeRushTutorialTapCatcher");
+        Stretch(tapCatcherRect);
+        Image tapCatcherImage = tapCatcherRect.GetComponent<Image>() ??
+            Undo.AddComponent<Image>(tapCatcherRect.gameObject);
+        tapCatcherImage.color = new Color(1f, 1f, 1f, 0f);
+        tapCatcherImage.raycastTarget = true;
+        Button tapCatcher = tapCatcherRect.GetComponent<Button>() ??
+            Undo.AddComponent<Button>(tapCatcherRect.gameObject);
+        tapCatcher.transition = Selectable.Transition.None;
+        tapCatcher.targetGraphic = tapCatcherImage;
+        tapCatcherRect.SetSiblingIndex(tutorialRoot.GetSiblingIndex());
+        tutorialRoot.SetAsLastSibling();
+
+        TimeRushFirstPlayTutorial tutorial =
+            root.GetComponent<TimeRushFirstPlayTutorial>() ??
+            Undo.AddComponent<TimeRushFirstPlayTutorial>(root.gameObject);
+        SerializedObject missionSerialized = new SerializedObject(missions);
+        Planet planetSpriteSource = missionSerialized.FindProperty("planetPrefab")
+            .objectReferenceValue as Planet;
+        SerializedObject tutorialSerialized = new SerializedObject(tutorial);
+        Set(tutorialSerialized, "levelStartSequence", sequence);
+        Set(tutorialSerialized, "planetSpriteSource", planetSpriteSource);
+        Set(tutorialSerialized, "tutorialRoot", tutorialRoot);
+        Set(tutorialSerialized, "tutorialGroup", tutorialGroup);
+        Set(tutorialSerialized, "planetLeft", tutorialLeft);
+        Set(tutorialSerialized, "planetRight", tutorialRight);
+        Set(tutorialSerialized, "resultPlanet", tutorialResult);
+        Set(tutorialSerialized, "timeBonusText", tutorialBonus);
+        Set(tutorialSerialized, "descriptionText", tutorialDescription);
+        Set(tutorialSerialized, "tapCatcher", tapCatcher);
+        Set(tutorialSerialized, "tapToContinueText", tutorialContinue);
+        tutorialSerialized.ApplyModifiedPropertiesWithoutUndo();
+        tutorialRoot.gameObject.SetActive(false);
+        tapCatcherRect.gameObject.SetActive(false);
+
         SerializedObject serialized = new SerializedObject(sequence);
         Set(serialized, "missionHud", missions);
         Set(serialized, "activeEffectsHud", effects);
@@ -114,6 +178,7 @@ public static class LevelStartSequenceAuthoring
         EditorUtility.SetDirty(sequence);
         EditorUtility.SetDirty(effects);
         EditorUtility.SetDirty(lowTimePanic);
+        EditorUtility.SetDirty(tutorial);
         EditorSceneManager.MarkSceneDirty(scene);
         Selection.activeGameObject = root.gameObject;
         Debug.Log("Level-start cinematic created/wired. Adjust authored TMP RectTransforms and LevelStartSequence timing fields, then save GameScene.");
@@ -162,6 +227,23 @@ public static class LevelStartSequenceAuthoring
     }
 
     private enum Edge { Left, Right, Top, Bottom }
+
+    private static Image EnsureTutorialImage(RectTransform parent, string name,
+        Vector2 position, Vector2 size)
+    {
+        Transform found = parent.Find(name);
+        bool created = found == null;
+        RectTransform rect = created ? EnsureRect(parent, name) : (RectTransform)found;
+        Image image = rect.GetComponent<Image>() ?? Undo.AddComponent<Image>(rect.gameObject);
+        if (created)
+        {
+            InitializeRectOnce(rect, position, size);
+            image.preserveAspect = true;
+            image.color = Color.white;
+        }
+        image.raycastTarget = false;
+        return image;
+    }
 
     private static Image EnsureEdge(RectTransform parent, string name, Edge edge)
     {

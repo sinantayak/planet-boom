@@ -1,0 +1,35 @@
+Font: Wheaton  Style: Capitals
+Point Size: 68   Padding: 6   SP/PD Ratio: 8,8%
+
+Characters included: 296/319
+Missing characters: 23
+Excluded characters: 0
+
+Characters missing from font file:
+----------------------------------------
+ID: 173	Hex: AD	Char [­]
+ID: 181	Hex: B5	Char [µ]
+ID: 264	Hex: 108	Char [Ĉ]
+ID: 265	Hex: 109	Char [ĉ]
+ID: 276	Hex: 114	Char [Ĕ]
+ID: 277	Hex: 115	Char [ĕ]
+ID: 284	Hex: 11C	Char [Ĝ]
+ID: 285	Hex: 11D	Char [ĝ]
+ID: 292	Hex: 124	Char [Ĥ]
+ID: 293	Hex: 125	Char [ĥ]
+ID: 308	Hex: 134	Char [Ĵ]
+ID: 309	Hex: 135	Char [ĵ]
+ID: 312	Hex: 138	Char [ĸ]
+ID: 319	Hex: 13F	Char [Ŀ]
+ID: 320	Hex: 140	Char [ŀ]
+ID: 329	Hex: 149	Char [ŉ]
+ID: 334	Hex: 14E	Char [Ŏ]
+ID: 335	Hex: 14F	Char [ŏ]
+ID: 348	Hex: 15C	Char [Ŝ]
+ID: 349	Hex: 15D	Char [ŝ]
+ID: 354	Hex: 162	Char [Ţ]
+ID: 355	Hex: 163	Char [ţ]
+ID: 383	Hex: 17F	Char [ſ]
+
+Characters excluded from packing:
+----------------------------------------

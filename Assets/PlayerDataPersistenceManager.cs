@@ -43,6 +43,9 @@ public sealed class PlayerData
     public int highestUnlockedLevel = 1;
     public List<LevelStarsData> bestStarsByLevel = new List<LevelStarsData>();
     public List<string> unlockedContentIds = new List<string>();
+    // Stable content IDs for one-time tutorials. Kept in the same versioned
+    // document so Cloud Save and the per-player local fallback stay aligned.
+    public List<string> completedTutorialIds = new List<string>();
     // OBSOLETE — retained only so documents already saved with this field
     // keep round-tripping unchanged. The Evolution Popup's NEW status is now
     // derived live from sector progression data and no longer reads or
@@ -353,6 +356,29 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
             return 0;
         LevelStarsData entry = currentData.bestStarsByLevel.Find(item => item.level == levelNumber);
         return entry != null ? Mathf.Clamp(entry.bestStars, 0, 3) : 0;
+    }
+
+    public bool IsTutorialCompleted(string tutorialId)
+    {
+        if (currentData == null || string.IsNullOrWhiteSpace(tutorialId) ||
+            currentData.completedTutorialIds == null)
+            return false;
+        return currentData.completedTutorialIds.Contains(tutorialId.Trim());
+    }
+
+    public bool CompleteTutorial(string tutorialId)
+    {
+        if (!IsLoaded || currentData == null || string.IsNullOrWhiteSpace(tutorialId))
+            return false;
+
+        string stableId = tutorialId.Trim();
+        currentData.completedTutorialIds ??= new List<string>();
+        if (currentData.completedTutorialIds.Contains(stableId))
+            return true;
+
+        currentData.completedTutorialIds.Add(stableId);
+        MarkChangedAndScheduleSave();
+        return true;
     }
 
     private void NotifyProgressionChanged(int levelNumber, int previousBest, int previousHighest)
@@ -693,7 +719,9 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
         data.quickSlots ??= new List<string>();
         data.bestStarsByLevel ??= new List<LevelStarsData>();
         data.unlockedContentIds ??= new List<string>();
+        data.completedTutorialIds ??= new List<string>();
         data.seenEvolutionPlanetIds ??= new List<string>();
+        NormalizeStableIds(data.completedTutorialIds);
         NormalizeProgression(data);
         while (data.quickSlots.Count < SkillInventoryManager.QuickSlotCount)
             data.quickSlots.Add(string.Empty);
@@ -701,6 +729,19 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
             data.quickSlots.RemoveRange(SkillInventoryManager.QuickSlotCount,
                 data.quickSlots.Count - SkillInventoryManager.QuickSlotCount);
         return data;
+    }
+
+    private static void NormalizeStableIds(List<string> ids)
+    {
+        var unique = new HashSet<string>(StringComparer.Ordinal);
+        for (int i = ids.Count - 1; i >= 0; i--)
+        {
+            string id = ids[i]?.Trim();
+            if (string.IsNullOrEmpty(id) || !unique.Add(id))
+                ids.RemoveAt(i);
+            else
+                ids[i] = id;
+        }
     }
 
     private static void NormalizeProgression(PlayerData data)
@@ -743,6 +784,31 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
         new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
+    [ContextMenu("DEBUG Reset Merge Time Rush Tutorial")]
+    private void DebugResetMergeTimeRushTutorial()
+    {
+        const string tutorialId = "tutorial:merge_time_rush";
+        if (!IsLoaded || currentData == null)
+        {
+            Debug.LogWarning(
+                "PlayerData: tutorial reset skipped because player data is not loaded.", this);
+            return;
+        }
+
+        if (currentData.completedTutorialIds == null ||
+            !currentData.completedTutorialIds.Remove(tutorialId))
+        {
+            Debug.Log(
+                "PlayerData: Merge Time Rush tutorial was already reset.", this);
+            return;
+        }
+
+        MarkChangedAndScheduleSave();
+        Debug.Log(
+            "PlayerData: reset only tutorial:merge_time_rush. " +
+            "All other profile data was preserved and save was scheduled.", this);
+    }
+
     [ContextMenu("DEBUG Log PlayerData Snapshot")]
     private void DebugLogSnapshot()
     {

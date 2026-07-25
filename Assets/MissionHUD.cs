@@ -414,7 +414,7 @@ public sealed class MissionHUD : MonoBehaviour
                 card.background.preserveAspect = true;
                 card.background.raycastTarget = false;
             }
-            ConfigureText(card?.missionTitle, missionTitleFontSize);
+            PreserveAuthoredText(card?.missionTitle);
             ConfigureText(card?.missionObjective, missionObjectiveFontSize);
             ConfigureText(card?.objectiveSecondary, missionSecondaryFontSize);
             if (card?.objectiveVisual != null)
@@ -433,6 +433,15 @@ public sealed class MissionHUD : MonoBehaviour
         text.enableAutoSizing = false;
         text.textWrappingMode = TextWrappingModes.NoWrap;
         text.overflowMode = TextOverflowModes.Overflow;
+        text.raycastTarget = false;
+    }
+
+    private static void PreserveAuthoredText(TextMeshProUGUI text)
+    {
+        if (text == null) return;
+        // Mission titles are hand-authored in the scene. Do not stamp font
+        // size, Auto Size, wrapping, overflow, alignment or spacing at
+        // runtime; only keep this decorative label non-interactive.
         text.raycastTarget = false;
     }
 
