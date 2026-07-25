@@ -55,9 +55,6 @@ public sealed class MissionHUD : MonoBehaviour
     [SerializeField] private AudioClip missionCardRevealClip;
     [SerializeField, Range(0f, 1f)] private float missionCardRevealVolume = 0.9f;
 
-    // Future Active Effects HUD can append its own unscaled sequence here.
-    public event System.Func<IEnumerator> AfterMissionIntroSequence;
-
     private readonly Dictionary<int, MissionCard> activeCards = new Dictionary<int, MissionCard>();
     private GameManager subscribedManager;
     private bool runPresentationVisible = true;
@@ -108,9 +105,17 @@ public sealed class MissionHUD : MonoBehaviour
         RefreshFromActiveObjectives();
     }
 
-    private void OnEnable() => BindToGameManager();
+    private void OnEnable()
+    {
+        BindToGameManager();
+        // Live language switch (Settings popup) re-stamps the visible cards
+        // without waiting for the next progress event.
+        Localization.LanguageChanged += RefreshFromActiveObjectives;
+    }
+
     private void OnDisable()
     {
+        Localization.LanguageChanged -= RefreshFromActiveObjectives;
         StopMissionIntro(true);
         UnbindFromGameManager();
     }
@@ -141,7 +146,6 @@ public sealed class MissionHUD : MonoBehaviour
         if (subscribedManager == null) return;
         subscribedManager.ObjectivesInitialized += HandleObjectivesInitialized;
         subscribedManager.ObjectiveProgressChanged += HandleObjectiveProgressChanged;
-        subscribedManager.PreparedLevelStarting += HandlePreparedLevelStarting;
     }
 
     private void UnbindFromGameManager()
@@ -149,7 +153,6 @@ public sealed class MissionHUD : MonoBehaviour
         if (subscribedManager == null) return;
         subscribedManager.ObjectivesInitialized -= HandleObjectivesInitialized;
         subscribedManager.ObjectiveProgressChanged -= HandleObjectiveProgressChanged;
-        subscribedManager.PreparedLevelStarting -= HandlePreparedLevelStarting;
         subscribedManager = null;
     }
 
@@ -194,19 +197,10 @@ public sealed class MissionHUD : MonoBehaviour
         }
     }
 
-    private bool HandlePreparedLevelStarting()
+    public IEnumerator PlayPreparedIntro(GameManager manager)
     {
-        if (subscribedManager == null ||
-            subscribedManager.State != GameManager.GameState.LevelPreparing ||
-            missionIntroRoutine != null)
-            return false;
-
-        missionIntroRoutine = StartCoroutine(PlayMissionIntro(subscribedManager));
-        return true;
-    }
-
-    private IEnumerator PlayMissionIntro(GameManager manager)
-    {
+        if (manager == null || manager.State != GameManager.GameState.LevelPreparing)
+            yield break;
         runPresentationVisible = true;
         RefreshFromActiveObjectives();
         Canvas.ForceUpdateCanvases();
@@ -269,19 +263,12 @@ public sealed class MissionHUD : MonoBehaviour
         if (missionIntroFinalDelay > 0f)
             yield return WaitUnscaled(missionIntroFinalDelay);
 
-        if (AfterMissionIntroSequence != null)
-            foreach (System.Func<IEnumerator> extension in AfterMissionIntroSequence.GetInvocationList())
-            {
-                IEnumerator sequence = extension();
-                if (sequence != null) yield return sequence;
-            }
-
         RestoreIntroLayout(cards, finalPositions, finalScales, groups);
         missionIntroRoutine = null;
         DebugIntro("Intro complete → Playing");
-        if (manager != null && manager.State == GameManager.GameState.LevelPreparing)
-            manager.CompletePreparedLevelStart();
     }
+
+    public void ResetPreparedIntro() => StopMissionIntro(true);
 
     private static IEnumerator WaitUnscaled(float duration)
     {
@@ -455,6 +442,8 @@ public sealed class MissionHUD : MonoBehaviour
         }
     }
 
+    // Card wording goes through Localization; pure progress fractions
+    // ("3/15", "x4") stay literal — digits need no translation.
     private static void FormatObjective(LevelObjectiveProgress objective, out string title,
         out string main, out string secondary)
     {
@@ -462,17 +451,24 @@ public sealed class MissionHUD : MonoBehaviour
         switch (objective.Type)
         {
             case LevelObjectiveType.ReachTier:
-                title = "REACH"; main = $"TIER {(int)objective.TargetTier + 1}"; return;
+                title = Localization.Get("mission.reach");
+                main = Localization.Get("mission.tier", (int)objective.TargetTier + 1); return;
             case LevelObjectiveType.MergeCount:
-                title = "MERGE"; main = $"{Whole(objective.CurrentProgress)}/{Whole(objective.TargetProgress)}"; return;
+                title = Localization.Get("mission.merge");
+                main = $"{Whole(objective.CurrentProgress)}/{Whole(objective.TargetProgress)}"; return;
             case LevelObjectiveType.ComboTarget:
-                title = "COMBO"; main = $"x{Whole(objective.TargetProgress)}"; return;
+                title = Localization.Get("mission.combo");
+                main = $"x{Whole(objective.TargetProgress)}"; return;
             case LevelObjectiveType.MeteorObjective:
-                title = "METEOR"; main = $"{Whole(objective.CurrentProgress)}/{Whole(objective.TargetProgress)}"; return;
+                title = Localization.Get("mission.meteor");
+                main = $"{Whole(objective.CurrentProgress)}/{Whole(objective.TargetProgress)}"; return;
             case LevelObjectiveType.Survival:
-                title = "SURVIVE"; main = $"{Whole(objective.CurrentProgress)}/{Whole(objective.TargetProgress)}s"; return;
+                title = Localization.Get("mission.survive");
+                main = Localization.Get("mission.survive_progress",
+                    Whole(objective.CurrentProgress), Whole(objective.TargetProgress)); return;
             default:
-                title = "MISSION"; main = $"{Whole(objective.CurrentProgress)}/{Whole(objective.TargetProgress)}"; return;
+                title = Localization.Get("mission.generic");
+                main = $"{Whole(objective.CurrentProgress)}/{Whole(objective.TargetProgress)}"; return;
         }
     }
 

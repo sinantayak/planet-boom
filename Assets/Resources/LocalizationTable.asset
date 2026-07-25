@@ -1,0 +1,180 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 526d8a53490c6ed4fa59882543a5a9bf, type: 3}
+  m_Name: LocalizationTable
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizationTable
+  entries:
+  - key: ui.continue
+    english: CONTINUE
+    turkish: DEVAM ET
+  - key: ui.restart
+    english: Restart
+    turkish: "Yeniden Ba\u015Flat"
+  - key: ui.exit
+    english: Exit
+    turkish: "\xC7\u0131k\u0131\u015F"
+  - key: ui.support
+    english: Support
+    turkish: Destek
+  - key: ui.remove_ads
+    english: REMOVE ADS
+    turkish: REKLAMLARI KALDIR
+  - key: ui.settings
+    english: SETTINGS
+    turkish: AYARLAR
+  - key: ui.sound
+    english: Sound
+    turkish: Ses
+  - key: ui.music
+    english: Music
+    turkish: "M\xFCzik"
+  - key: ui.haptic
+    english: Haptic
+    turkish: "Titre\u015Fim"
+  - key: ui.use
+    english: USE
+    turkish: KULLAN
+  - key: ui.used
+    english: USED
+    turkish: KULLANILDI
+  - key: language.english
+    english: ENGLISH
+    turkish: ENGLISH
+  - key: language.turkish
+    english: TURKISH
+    turkish: "T\xDCRK\xC7E"
+  - key: menu.start
+    english: Start
+    turkish: "Ba\u015Fla"
+  - key: menu.shop
+    english: Shop
+    turkish: "Ma\u011Faza"
+  - key: menu.options
+    english: Options
+    turkish: "Se\xE7enekler"
+  - key: prelevel.level
+    english: LEVEL {0}
+    turkish: "B\xD6L\xDCM {0}"
+  - key: prelevel.time
+    english: 'TIME: {0} SEC'
+    turkish: "S\xDCRE: {0} SN"
+  - key: prelevel.time_rush
+    english: 'TIME RUSH: {0} SEC'
+    turkish: "ZAMAN YARI\u015EI: {0} SN"
+  - key: level_start.go
+    english: GO!
+    turkish: "BA\u015ELA!"
+  - key: mode.time_rush.title
+    english: TIME RUSH
+    turkish: "ZAMAN YARI\u015EI"
+  - key: mode.time_rush.description
+    english: MERGE TO GAIN TIME
+    turkish: "B\u0130RLE\u015ET\u0130R, S\xDCRE KAZAN"
+  - key: level_start.effect.lucky_drop
+    english: LUCKY DROP
+    turkish: "\u015EANS DAMLASI"
+  - key: level_start.effect.double_time_drop
+    english: DOUBLE TIME DROP
+    turkish: "\xC7\u0130FT S\xDCRE DAMLASI"
+  - key: level_start.effect.star_booster
+    english: STAR BOOSTER
+    turkish: "YILDIZ TAKV\u0130YES\u0130"
+  - key: prelevel.ready
+    english: READY
+    turkish: HAZIR
+  - key: prelevel.reach
+    english: 'REACH: TIER {0}'
+    turkish: "{0}. KADEMEYE ULA\u015E"
+  - key: prelevel.merge
+    english: 'MERGE: {0}/{1}'
+    turkish: "B\u0130RLE\u015ET\u0130R: {0}/{1}"
+  - key: prelevel.combo
+    english: 'COMBO: X{0}'
+    turkish: 'KOMBO: X{0}'
+  - key: prelevel.meteor
+    english: 'DESTROY: {0} METEOR'
+    turkish: '{0} METEOR YOK ET'
+  - key: prelevel.survive
+    english: 'SURVIVE: {0} SEC'
+    turkish: '{0} SN HAYATTA KAL'
+  - key: prelevel.generic
+    english: MISSION {0}
+    turkish: "G\xD6REV {0}"
+  - key: booster.lucky_drop
+    english: Lucky Drop
+    turkish: "\u015Eans Damlas\u0131"
+  - key: booster.double_time_drop
+    english: 2X Time Drop
+    turkish: "2X S\xFCre Damlas\u0131"
+  - key: booster.star_booster
+    english: Star Booster
+    turkish: "Y\u0131ld\u0131z Takviyesi"
+  - key: mission.reach
+    english: REACH
+    turkish: "ULA\u015E"
+  - key: mission.merge
+    english: MERGE
+    turkish: "B\u0130RLE\u015ET\u0130R"
+  - key: mission.combo
+    english: COMBO
+    turkish: KOMBO
+  - key: mission.meteor
+    english: METEOR
+    turkish: METEOR
+  - key: mission.survive
+    english: SURVIVE
+    turkish: DAYAN
+  - key: mission.generic
+    english: MISSION
+    turkish: "G\xD6REV"
+  - key: mission.tier
+    english: TIER {0}
+    turkish: KADEME {0}
+  - key: mission.survive_progress
+    english: '{0}/{1}s'
+    turkish: '{0}/{1}sn'
+  - key: evolution.title
+    english: EVOLUTION
+    turkish: "EVR\u0130M"
+  - key: evolution.upcoming
+    english: UPCOMING
+    turkish: YAKINDA
+  - key: evolution.new
+    english: NEW
+    turkish: "YEN\u0130"
+  - key: gameover.title
+    english: PLANET BOOM!
+    turkish: GEZEGEN PATLADI!
+  - key: gameover.try_again
+    english: TRY AGAIN
+    turkish: TEKRAR DENE
+  - key: levelcomplete.title
+    english: LEVEL COMPLETED
+    turkish: "B\xD6L\xDCM TAMAMLANDI"
+  - key: levelmap.sector
+    english: SECTOR {0}
+    turkish: "SEKT\xD6R {0}"
+  - key: levelmap.select_level
+    english: Select a level
+    turkish: "Bir seviye se\xE7"
+  - key: levelmap.start
+    english: START
+    turkish: "BA\u015ELAT"
+  - key: hud.critical
+    english: 'CRITICAL: {0:F1}s!'
+    turkish: "KR\u0130T\u0130K: {0:F1}sn!"
+  - key: hud.combo
+    english: COMBO x{0}
+    turkish: KOMBO x{0}
+  - key: inventory.clear_slot
+    english: CLEAR SLOT
+    turkish: "SLOTU TEM\u0130ZLE"

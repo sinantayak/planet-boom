@@ -41,8 +41,9 @@ public class SkillDropManager : MonoBehaviour
     [SerializeField] [Range(0f, 1f)] private float timeDropChancePerMerge = 0.08f;
     [SerializeField] [Min(0.1f)] private float timeBonusSeconds = 3f;
     [SerializeField] private Sprite timeDropSprite;
-    [Tooltip("Timer HUD local UI offset used by the +time collection feedback text.")]
-    [SerializeField] private Vector2 timeDropFeedbackOffset = new Vector2(0f, -55f);
+    // Serialization compatibility only. GameManager now owns the shared
+    // position/style for every +time popup.
+    [SerializeField, HideInInspector] private Vector2 timeDropFeedbackOffset = new Vector2(0f, 95f);
 
     [Header("Space Coin Drop")]
     [SerializeField] [Range(0f, 1f)] private float coinDropChancePerMerge = 0.03f;

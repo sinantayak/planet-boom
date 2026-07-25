@@ -34,7 +34,7 @@ public sealed class PreLevelPanel : MonoBehaviour
     [SerializeField] private TextMeshProUGUI levelTitle;
     // Presentation-only starting-time readout. Runtime writes its string;
     // position/font/size/color stay whatever was authored in the Inspector.
-    [SerializeField] private TextMeshProUGUI levelTimeText;
+    [SerializeField, HideInInspector] private TextMeshProUGUI levelTimeText;
     [SerializeField] private RectTransform objectivesSection;
     [SerializeField] private ObjectivePreview[] objectivePreviews = new ObjectivePreview[3];
     [SerializeField] private BoosterEntry[] boosterEntries = new BoosterEntry[3];
@@ -123,11 +123,11 @@ public sealed class PreLevelPanel : MonoBehaviour
             int number = manager != null && manager.ActiveLevelConfiguration != null
                 ? manager.ActiveLevelConfiguration.levelNumber
                 : manager != null ? manager.CurrentLevelNumber : 1;
-            levelTitle.text = $"LEVEL {number}";
+            levelTitle.text = Localization.Get("prelevel.level", number);
         }
 
         if (levelTimeText != null)
-            levelTimeText.text = FormatLevelTime(manager);
+            levelTimeText.gameObject.SetActive(false);
 
         BindObjectivePreviews(manager);
         RefreshAllBoosters();
@@ -158,17 +158,17 @@ public sealed class PreLevelPanel : MonoBehaviour
         switch (objective.Type)
         {
             case LevelObjectiveType.ReachTier:
-                return $"REACH: TIER {(int)objective.TargetTier + 1}";
+                return Localization.Get("prelevel.reach", (int)objective.TargetTier + 1);
             case LevelObjectiveType.MergeCount:
-                return $"MERGE: 0/{Whole(objective.TargetProgress)}";
+                return Localization.Get("prelevel.merge", 0, Whole(objective.TargetProgress));
             case LevelObjectiveType.ComboTarget:
-                return $"COMBO: X{Whole(objective.TargetProgress)}";
+                return Localization.Get("prelevel.combo", Whole(objective.TargetProgress));
             case LevelObjectiveType.MeteorObjective:
-                return $"DESTROY: {Whole(objective.TargetProgress)} METEOR";
+                return Localization.Get("prelevel.meteor", Whole(objective.TargetProgress));
             case LevelObjectiveType.Survival:
-                return $"SURVIVE: {Whole(objective.TargetProgress)} SEC";
+                return Localization.Get("prelevel.survive", Whole(objective.TargetProgress));
             default:
-                return $"MISSION {Whole(objective.TargetProgress)}";
+                return Localization.Get("prelevel.generic", Whole(objective.TargetProgress));
         }
     }
 
@@ -180,14 +180,14 @@ public sealed class PreLevelPanel : MonoBehaviour
     {
         LevelConfiguration config = manager != null ? manager.ActiveLevelConfiguration : null;
         if (config != null && config.timeMode == LevelTimeMode.MergeTimeRush)
-            return $"TIME RUSH: {Mathf.CeilToInt(config.timeRushStartingTime)} SEC";
+            return Localization.Get("prelevel.time_rush", Mathf.CeilToInt(config.timeRushStartingTime));
         if (config != null)
-            return $"TIME: {Mathf.CeilToInt(config.timeLimit)} SEC";
+            return Localization.Get("prelevel.time", Mathf.CeilToInt(config.timeLimit));
 
         // Legacy list-driven levels carry no LevelConfiguration; RemainingTime
         // was already reset to their full clock by LoadLevel before this panel
         // is shown, so it still reads the true starting value here.
-        return $"TIME: {Mathf.CeilToInt(manager != null ? manager.RemainingTime : 0f)} SEC";
+        return Localization.Get("prelevel.time", Mathf.CeilToInt(manager != null ? manager.RemainingTime : 0f));
     }
 
     private void ToggleBooster(BoosterType type)
@@ -233,7 +233,7 @@ public sealed class PreLevelPanel : MonoBehaviour
             }
             if (entry.selectText != null)
             {
-                entry.selectText.text = selected ? "USED" : "USE";
+                entry.selectText.text = Localization.Get(selected ? "ui.used" : "ui.use");
                 entry.selectText.gameObject.SetActive(stateSprite == null);
             }
             if (entry.selectedIndicator != null) entry.selectedIndicator.SetActive(false);
@@ -253,9 +253,9 @@ public sealed class PreLevelPanel : MonoBehaviour
     {
         switch (type)
         {
-            case BoosterType.LuckyDrop: return "Lucky Drop";
-            case BoosterType.DoubleTimeDrop: return "2X Time Drop";
-            case BoosterType.StarBooster: return "Star Booster";
+            case BoosterType.LuckyDrop: return Localization.Get("booster.lucky_drop");
+            case BoosterType.DoubleTimeDrop: return Localization.Get("booster.double_time_drop");
+            case BoosterType.StarBooster: return Localization.Get("booster.star_booster");
             default: return type.ToString().ToUpperInvariant();
         }
     }

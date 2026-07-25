@@ -30,10 +30,9 @@ public sealed class BreakMenuUI : MonoBehaviour
     [SerializeField] private Button exitButton;
     [SerializeField] private Button restartButton;
     [SerializeField] private Button languageButton;
-    // The language button's own label — always shows the CURRENT selection.
+    // The language button's own label — always shows the CURRENT selection,
+    // worded by the localization table ("language.english"/"language.turkish").
     [SerializeField] private TMP_Text languageLabel;
-    [SerializeField] private string englishLabel = "ENGLISH";
-    [SerializeField] private string turkishLabel = "TURKISH";
     [SerializeField] private Button supportButton;
     // Future support destination (https:// or mailto:). While empty the
     // button is a safe no-op placeholder — nothing opens, nothing throws.
@@ -102,7 +101,14 @@ public sealed class BreakMenuUI : MonoBehaviour
 
     private void ToggleSound() { GameSettings.SfxEnabled = !GameSettings.SfxEnabled; ApplyPreferences(); }
     private void ToggleMusic() { GameSettings.MusicEnabled = !GameSettings.MusicEnabled; ApplyPreferences(); }
-    private void ToggleVibration() { GameSettings.VibrationEnabled = !GameSettings.VibrationEnabled; RefreshToggleVisuals(); }
+    // Turning haptics ON gives one tiny confirmation pulse; turning them OFF
+    // stays silent because HapticFeedback checks the (now disabled) setting.
+    private void ToggleVibration()
+    {
+        GameSettings.VibrationEnabled = !GameSettings.VibrationEnabled;
+        RefreshToggleVisuals();
+        HapticFeedback.Play(HapticType.Light);
+    }
 
     // Only the persisted preference and this button's label change — actual
     // translation is the future localization system's job.
@@ -145,7 +151,8 @@ public sealed class BreakMenuUI : MonoBehaviour
     private void RefreshLanguageLabel()
     {
         if (languageLabel != null)
-            languageLabel.text = GameSettings.Language == GameLanguage.Turkish ? turkishLabel : englishLabel;
+            languageLabel.text = Localization.Get(GameSettings.Language == GameLanguage.Turkish
+                ? "language.turkish" : "language.english");
     }
 
     private void SetToggle(Image image, bool on)

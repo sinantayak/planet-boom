@@ -153,7 +153,8 @@ public class GameManager : MonoBehaviour
 
     [Header("Time Warp Feedback")]
     [FormerlySerializedAs("timeWarpPopupOffset")]
-    [SerializeField] private Vector2 timeWarpFeedbackOffset = new Vector2(0f, -55f);
+    [Tooltip("Horizontal offset and vertical distance ABOVE the Timer HUD for +time feedback.")]
+    [SerializeField] private Vector2 timeWarpFeedbackOffset = new Vector2(0f, 95f);
     [SerializeField] [Min(1f)] private float timeWarpFeedbackWidth = 220f;
     [SerializeField] [Min(1f)] private float timeWarpFeedbackHeight = 80f;
     [SerializeField] [Min(1f)] private float timeWarpFeedbackFontSize = 80f;
@@ -669,7 +670,10 @@ public class GameManager : MonoBehaviour
 
     public bool TryAddBonusTime(float seconds, Vector2 feedbackOffset)
     {
-        return TryAddBonusTimeInternal(seconds, feedbackOffset, false);
+        // Legacy overload retained for callers. All +time sources now share
+        // the same Timer HUD presentation controls so merge bonuses and Time
+        // Drops cannot drift into different positions/styles.
+        return TryAddBonusTimeInternal(seconds, timeWarpFeedbackOffset, true);
     }
 
     private bool TryAddBonusTimeInternal(float seconds, Vector2 feedbackOffset,
@@ -776,8 +780,14 @@ public class GameManager : MonoBehaviour
         Vector2 timerCenterInParent = popupParent != null
             ? (Vector2)popupParent.InverseTransformPoint(timerRect.TransformPoint(timerRect.rect.center))
             : timerRect.anchoredPosition;
+        // Both merge bonuses and collected Time Drops must read above the
+        // timer, clear of the mission cards below it. Older scenes authored
+        // negative Y offsets; Abs preserves their tuned distance while
+        // migrating the presentation above the HUD.
+        Vector2 aboveTimerOffset = new Vector2(feedbackOffset.x, Mathf.Abs(feedbackOffset.y));
         popupRect.anchoredPosition = timerCenterInParent -
-            (popupParent != null ? (Vector2)popupParent.rect.center : Vector2.zero) + feedbackOffset;
+            (popupParent != null ? (Vector2)popupParent.rect.center : Vector2.zero) +
+            aboveTimerOffset;
         Vector3 feedbackBaseScale = useTimeWarpPresentation ? timeWarpFeedbackScale : Vector3.one;
         popupRect.localScale = feedbackBaseScale * Mathf.Max(0.01f, timeWarpPopupStartScale);
         popupRect.SetSiblingIndex(timerRect.GetSiblingIndex() + 1);
@@ -950,7 +960,7 @@ public class GameManager : MonoBehaviour
 
         float remaining = Mathf.Max(0f, outsideTimeLimit - worstTimer);
         countdownText.gameObject.SetActive(true);
-        countdownText.text = $"CRITICAL: {remaining:F1}s!";
+        countdownText.text = Localization.Get("hud.critical", remaining);
     }
 
     // Swaps the whole screen from "playing" to "level complete" in one call:
@@ -1279,6 +1289,8 @@ public class GameManager : MonoBehaviour
 
         vortexRoutine = null;
         State = GameState.LevelComplete;
+        // The single win moment — one success pulse as the popup arrives.
+        HapticFeedback.Play(HapticType.Success);
         ShowLevelCompleteScreen();
 
         if (levelCompletePanel != null)
@@ -1652,6 +1664,9 @@ public class GameManager : MonoBehaviour
     private void TriggerGameOver(string reason)
     {
         State = GameState.GameOver;
+        // One strong double pulse at the actual fail moment (this funnel
+        // covers both lose conditions); abandoning via Settings stays silent.
+        HapticFeedback.Play(HapticType.Warning);
 
         // The countdown has done its job — don't leave a stale "0.0s" on screen.
         if (countdownText != null)

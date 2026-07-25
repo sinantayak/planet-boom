@@ -62,11 +62,10 @@ public sealed class EvolutionPopupUI : MonoBehaviour
     [SerializeField] private Color silhouetteColor = new Color(0.07f, 0.09f, 0.16f, 1f);
 
     [Header("Status Labels")]
-    // Central wording/state colors for every node's StatusText. Everything
-    // else about the labels (font, size, position, scale) is authored on the
-    // StatusText objects themselves and never overwritten.
-    [SerializeField] private string upcomingLabel = "UPCOMING";
-    [SerializeField] private string newLabel = "NEW";
+    // State colors for every node's StatusText. The wording comes from the
+    // localization table ("evolution.upcoming" / "evolution.new"); font,
+    // size, position and scale stay authored on the StatusText objects and
+    // are never overwritten.
     [SerializeField] private Color upcomingLabelColor = new Color(0.62f, 0.82f, 1f, 1f);
     [SerializeField] private Color newLabelColor = new Color(1f, 0.84f, 0.25f, 1f);
 
@@ -123,8 +122,8 @@ public sealed class EvolutionPopupUI : MonoBehaviour
             if (node.newBadge != null && node.newBadge.activeSelf)
                 node.newBadge.SetActive(false);
 
-            if (newlyUnlocked) ShowStatus(node, newLabel, newLabelColor);
-            else if (upcoming) ShowStatus(node, upcomingLabel, upcomingLabelColor);
+            if (newlyUnlocked) ShowStatus(node, Localization.Get("evolution.new"), newLabelColor);
+            else if (upcoming) ShowStatus(node, Localization.Get("evolution.upcoming"), upcomingLabelColor);
             else HideStatus(node);
         }
     }

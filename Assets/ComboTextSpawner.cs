@@ -95,6 +95,14 @@ public class ComboTextSpawner : MonoBehaviour
         if (combo < 2 || tiers.Length == 0)
             return;
 
+        // Combo milestone haptics. Spawn is the one shared funnel both
+        // planet and meteorite merges feed, and it fires once per merge
+        // event (never per frame), so each reached milestone pulses exactly
+        // once. x5+ is the achievement the player must clearly feel.
+        if (combo == 3) HapticFeedback.Play(HapticType.Light);
+        else if (combo == 4) HapticFeedback.Play(HapticType.Medium);
+        else if (combo >= 5) HapticFeedback.Play(HapticType.Success);
+
         ComboTier tier = tiers[Mathf.Min(combo - 2, tiers.Length - 1)];
 
         var go = new GameObject("ComboPopup");
@@ -115,7 +123,7 @@ public class ComboTextSpawner : MonoBehaviour
         }
 
         var tmp = go.AddComponent<TextMeshPro>();
-        tmp.text = $"<size=115%>{tier.label}</size>\n<size=65%>COMBO x{combo}</size>";
+        tmp.text = $"<size=115%>{tier.label}</size>\n<size=65%>{Localization.Get("hud.combo", combo)}</size>";
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.fontSize = baseFontSize;
         tmp.lineSpacing = lineSpacing;

@@ -107,7 +107,7 @@ public sealed class LevelMapScreen : MonoBehaviour
         autoSelectRequested = true;
         foreach (LevelMapNodeUI node in nodes) node?.SetSelected(false);
         if (playButton != null) { playButton.gameObject.SetActive(true); playButton.interactable = false; }
-        if (selectionText != null) selectionText.text = "Bir seviye seç";
+        if (selectionText != null) selectionText.text = Localization.Get("levelmap.select_level");
         Refresh();
     }
 
@@ -124,7 +124,9 @@ public sealed class LevelMapScreen : MonoBehaviour
     private void Refresh()
     {
         LevelMapSectorVisual visual = sectors?.Find(item => item != null && item.sectorNumber == currentSector);
-        if (sectorTitle != null) sectorTitle.text = visual != null ? visual.title : $"SECTOR {currentSector}";
+        // Authored per-sector titles (LevelMapSectorVisual.title) stay
+        // data-driven; only the numeric fallback is localized.
+        if (sectorTitle != null) sectorTitle.text = visual != null ? visual.title : Localization.Get("levelmap.sector", currentSector);
         if (sectorBackground != null)
         {
             sectorBackground.sprite = visual?.background;

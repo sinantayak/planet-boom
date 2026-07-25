@@ -33,10 +33,10 @@ public static class GameSettings
         }
     }
 
-    // Persisted UI language preference. Only the VALUE lives here for now —
-    // the settings popup's language button toggles and displays it; the
-    // future localization system reads it to pick its string table. Nothing
-    // is translated yet.
+    // Persisted UI language preference — the single source of truth the
+    // Localization runtime reads. Missing key (old installs) defaults to
+    // English. Setting a NEW value notifies Localization so every active
+    // LocalizedText / subscribed system refreshes on the same frame.
     public static GameLanguage Language
     {
         get => PlayerPrefs.GetInt(LanguageKey, (int)GameLanguage.English) == (int)GameLanguage.Turkish
@@ -44,8 +44,10 @@ public static class GameSettings
             : GameLanguage.English;
         set
         {
+            if (Language == value) return;
             PlayerPrefs.SetInt(LanguageKey, (int)value);
             PlayerPrefs.Save();
+            Localization.NotifyLanguageChanged();
         }
     }
 

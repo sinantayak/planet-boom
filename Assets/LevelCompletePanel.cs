@@ -51,8 +51,6 @@ public class LevelCompletePanel : MonoBehaviour
     [SerializeField, Min(0.1f)] private float maximumCountDuration = 2.5f;
     [SerializeField, Min(1)] private int soundEveryCoins = 1;
 
-    // Banner wording; swap to "SUCCESS" here or in the Inspector if preferred.
-    [SerializeField] private string titleMessage = "LEVEL COMPLETED";
 
     [Header("Vortex Reveal")]
     // Seconds for the popup to fly/scale out of the black hole core when
@@ -119,9 +117,12 @@ public class LevelCompletePanel : MonoBehaviour
     // bloom); the popup is still marked open so its close stays animated.
     private void Show(int starsEarned, bool animateTransition)
     {
+        // Banner wording comes from the localization table
+        // ("levelcomplete.title"); stamped on every open so a language
+        // switched mid-session shows correctly next win.
         if (titleText != null)
         {
-            titleText.text = titleMessage;
+            titleText.text = Localization.Get("levelcomplete.title");
         }
 
         for (int i = 0; i < starSlots.Length; i++)

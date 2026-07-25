@@ -12,6 +12,14 @@ public static class SkillInventoryLockUIAuthoring
     [MenuItem("Tools/Planet Boom/Author Skill Inventory Lock UI")]
     public static void Author()
     {
+        if (EditorApplication.isPlayingOrWillChangePlaymode)
+        {
+            Debug.LogWarning(
+                "Skill Inventory Lock UI authoring is unavailable in Play Mode. " +
+                "Exit Play Mode before running this Tools command.");
+            return;
+        }
+
         Scene scene = EditorSceneManager.OpenScene(GameScenePath, OpenSceneMode.Single);
         Transform popup = FindTransform(scene, "SkillInventoryPopup");
         Transform content = popup != null
@@ -45,6 +53,9 @@ public static class SkillInventoryLockUIAuthoring
         EditorSceneManager.SaveScene(scene);
         Debug.Log("Skill Inventory Lock UI authored in GameScene: all skill entries are persistent and contain LockOverlay children.");
     }
+
+    [MenuItem("Tools/Planet Boom/Author Skill Inventory Lock UI", true)]
+    private static bool CanAuthor() => !EditorApplication.isPlayingOrWillChangePlaymode;
 
     private static void EnsureLockOverlay(Transform entry)
     {

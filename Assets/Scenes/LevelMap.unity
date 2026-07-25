@@ -9610,6 +9610,7 @@ GameObject:
   - component: {fileID: 1901138130}
   - component: {fileID: 1901138132}
   - component: {fileID: 1901138131}
+  - component: {fileID: 1901138133}
   m_Layer: 0
   m_Name: StartText
   m_TagString: Untagged
@@ -9736,6 +9737,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1901138129}
   m_CullTransparentMesh: 1
+--- !u!114 &1901138133
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1901138129}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50933c5012b07cc41a3253a6ba4f2f47, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  key: levelmap.start
+  target: {fileID: 1901138131}
 --- !u!1 &1907220956
 GameObject:
   m_ObjectHideFlags: 0

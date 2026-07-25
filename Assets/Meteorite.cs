@@ -448,6 +448,9 @@ public class Meteorite : MonoBehaviour
             AudioManager.Instance.PlayExplosion();
         }
 
+        // One medium thump at the actual detonation — never during flight.
+        HapticFeedback.Play(HapticType.Medium);
+
         MeteorExplosionVFX.Spawn(center, transform.localScale.x);
 
         // Take both detonators out of the merge/physics system first, so
@@ -521,6 +524,11 @@ public class Meteorite : MonoBehaviour
         {
             AudioManager.Instance.PlayExplosion();
         }
+
+        // Same medium impact thump as the natural Big Pop; the global
+        // haptic cooldown keeps a Meteor Shower chain from buzzing
+        // continuously when several rocks detonate back to back.
+        HapticFeedback.Play(HapticType.Medium);
 
         MeteorExplosionVFX.Spawn(transform.position, transform.localScale.x);
         Vector2 explosionCenter = transform.position;

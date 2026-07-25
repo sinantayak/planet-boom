@@ -94,6 +94,12 @@ public class SkillManager : MonoBehaviour
                 break;
         }
 
+        // Every skill activates through this one funnel, so the activation
+        // pulse can never duplicate — individual skill systems add none.
+        // Failures stay silent.
+        if (succeeded)
+            HapticFeedback.Play(HapticType.Light);
+
         Debug.Log($"SkillManager: {type} execution {(succeeded ? "succeeded" : "failed")}.");
         return succeeded;
     }
