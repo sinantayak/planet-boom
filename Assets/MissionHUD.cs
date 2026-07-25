@@ -19,6 +19,8 @@ public sealed class MissionHUD : MonoBehaviour
         public TextMeshProUGUI completed;
         [System.NonSerialized] public bool isCompleted;
         [System.NonSerialized] public Coroutine popRoutine;
+        [System.NonSerialized] public Color authoredBackgroundColor;
+        [System.NonSerialized] public bool backgroundColorCaptured;
         [System.NonSerialized] public Vector2 introFinalPosition;
         [System.NonSerialized] public Vector3 introFinalScale;
         [System.NonSerialized] public bool introTransformCaptured;
@@ -44,6 +46,8 @@ public sealed class MissionHUD : MonoBehaviour
     [SerializeField] private Color optionalTint = new Color(1f, 1f, 1f, .62f);
     [SerializeField, Min(0f)] private float completionPopDuration = .2f;
     [SerializeField, Range(1f, 1.4f)] private float completionPopScale = 1.12f;
+    [SerializeField] private Color completedBackgroundColor =
+        new Color(100f / 255f, 1f, 127f / 255f, 1f);
 
     [Header("Pre-Level Mission Intro")]
     [SerializeField, Min(0.05f)] private float missionIntroCardDuration = 0.22f;
@@ -365,9 +369,12 @@ public sealed class MissionHUD : MonoBehaviour
             card.objectiveSecondary.color = StateColor(objective);
         }
         if (card.completed != null)
+            card.completed.gameObject.SetActive(false);
+        if (card.background != null)
         {
-            card.completed.color = achievedTint;
-            card.completed.gameObject.SetActive(objective.IsCompleted);
+            CaptureBackgroundColor(card);
+            card.background.color = objective.IsCompleted
+                ? completedBackgroundColor : card.authoredBackgroundColor;
         }
         if (animate && justCompleted && completionPopDuration > 0f)
         {
@@ -402,6 +409,7 @@ public sealed class MissionHUD : MonoBehaviour
             if (card?.root != null) card.root.sizeDelta = missionCardSize;
             if (card?.background != null)
             {
+                CaptureBackgroundColor(card);
                 if (missionCardSprite != null) card.background.sprite = missionCardSprite;
                 card.background.preserveAspect = true;
                 card.background.raycastTarget = false;
@@ -438,8 +446,22 @@ public sealed class MissionHUD : MonoBehaviour
                 card.root.localScale = Vector3.one;
                 card.root.gameObject.SetActive(false);
             }
-            if (card != null) { card.isCompleted = false; card.popRoutine = null; }
+            if (card?.background != null && card.backgroundColorCaptured)
+                card.background.color = card.authoredBackgroundColor;
+            if (card != null)
+            {
+                card.isCompleted = false;
+                card.popRoutine = null;
+            }
         }
+    }
+
+    private static void CaptureBackgroundColor(MissionCard card)
+    {
+        if (card == null || card.background == null || card.backgroundColorCaptured)
+            return;
+        card.authoredBackgroundColor = card.background.color;
+        card.backgroundColorCaptured = true;
     }
 
     // Card wording goes through Localization; pure progress fractions
