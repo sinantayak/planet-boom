@@ -40,6 +40,12 @@ public static class LevelStartSequenceAuthoring
             throw new System.InvalidOperationException("TimerHUD was not found above the gameplay timer.");
         CanvasGroup timerGroup = EnsureCanvasGroup(timerHud.gameObject);
         CanvasGroup timerTextGroup = EnsureCanvasGroup(timerText.gameObject);
+        LowTimePanic lowTimePanic = timerHud.GetComponent<LowTimePanic>() ??
+            Undo.AddComponent<LowTimePanic>(timerHud.gameObject);
+        SerializedObject panicSerialized = new SerializedObject(lowTimePanic);
+        Set(panicSerialized, "timerText", timerText.GetComponent<TextMeshProUGUI>());
+        Set(panicSerialized, "centeredPulseTarget", timerText);
+        panicSerialized.ApplyModifiedPropertiesWithoutUndo();
 
         RectTransform root = EnsureRect(canvas.transform, "LevelStartCinematic");
         Stretch(root);
@@ -107,6 +113,7 @@ public static class LevelStartSequenceAuthoring
 
         EditorUtility.SetDirty(sequence);
         EditorUtility.SetDirty(effects);
+        EditorUtility.SetDirty(lowTimePanic);
         EditorSceneManager.MarkSceneDirty(scene);
         Selection.activeGameObject = root.gameObject;
         Debug.Log("Level-start cinematic created/wired. Adjust authored TMP RectTransforms and LevelStartSequence timing fields, then save GameScene.");

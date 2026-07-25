@@ -19801,6 +19801,7 @@ MonoBehaviour:
   activeEffectsHud: {fileID: 2068544201}
   timerHudTarget: {fileID: 2134406811}
   timerHudGroup: {fileID: 1900000107}
+  timerHudTextGroup: {fileID: 2134406814}
   levelIntroText: {fileID: 534494545}
   timeRushModeRoot: {fileID: 765244405}
   timeRushModeGroup: {fileID: 765244406}
@@ -28703,6 +28704,7 @@ GameObject:
   - component: {fileID: 1900000101}
   - component: {fileID: 1900000106}
   - component: {fileID: 1900000107}
+  - component: {fileID: 1900000108}
   m_Layer: 5
   m_Name: TimerHUD
   m_TagString: Untagged
@@ -28838,6 +28840,32 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &1900000108
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1900000100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d494ffb9f8246945a7711b81913cded, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LowTimePanic
+  timerText: {fileID: 2134406812}
+  centeredPulseTarget: {fileID: 0}
+  warningThreshold: 10
+  criticalThreshold: 5
+  warningColor: {r: 1, g: 0.28, b: 0.22, a: 1}
+  warningPulseScale: 1.06
+  warningPulseSpeed: 1.5
+  criticalColor: {r: 1, g: 0.08, b: 0.04, a: 1}
+  criticalPulseScale: 1.13
+  criticalPulseSpeed: 2.5
+  lowTimeTickClip: {fileID: 8300000, guid: 6be3882e62f9bed4eb15683144f59fcf, type: 3}
+  criticalTimeTickClip: {fileID: 8300000, guid: aa775f5fa242ca04db1dc08d9be559ee, type: 3}
+  tickVolume: 0.9
+  warningHapticOnEntry: 1
 --- !u!114 &1900000200
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -31430,6 +31458,7 @@ GameObject:
   - component: {fileID: 2134406811}
   - component: {fileID: 2134406813}
   - component: {fileID: 2134406812}
+  - component: {fileID: 2134406814}
   m_Layer: 5
   m_Name: TimerText
   m_TagString: Untagged
@@ -31556,6 +31585,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2134406810}
   m_CullTransparentMesh: 1
+--- !u!225 &2134406814
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2134406810}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &2137465995
 GameObject:
   m_ObjectHideFlags: 0
