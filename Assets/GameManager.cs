@@ -58,10 +58,20 @@ public class GameManager : MonoBehaviour
     // and lose checks are frozen (every gameplay system already gates on
     // State == Playing, so the new state disables them for free).
     public enum GameState { LevelPreparing, Playing, LevelComplete, GameOver, CinematicVortex, InventoryPaused, GamePaused }
+    public enum GameOverReason { None, TimeExpired, BoundaryFailure }
 
     public static GameManager Instance { get; private set; }
 
     public GameState State { get; private set; } = GameState.Playing;
+    public GameOverReason LastGameOverReason { get; private set; }
+    public bool RewardedContinueUsedThisRun => rewardedContinueUsedThisRun;
+    public bool CanUseRewardedContinue =>
+        State == GameState.GameOver &&
+        LastGameOverReason == GameOverReason.TimeExpired &&
+        !rewardedContinueUsedThisRun;
+    public float ActiveRewardedContinueSeconds =>
+        ActiveLevelConfiguration != null
+            ? ActiveLevelConfiguration.RewardedContinueSeconds : 30f;
     // A Phase 2 presenter may return true to defer Playing, then call
     // CompletePreparedLevelStart after its entrance sequence finishes.
     public event System.Func<bool> PreparedLevelStarting;
@@ -250,6 +260,8 @@ public class GameManager : MonoBehaviour
     private float timeScaleBeforeInventoryPause = 1f;
     private float timeScaleBeforeGamePause = 1f;
     private float timeScaleBeforeLevelPreparing = 1f;
+    private float timeScaleBeforeGameOver = 1f;
+    private bool rewardedContinueUsedThisRun;
     private Vector3 gameplayTimerBaseScale = Vector3.one;
     private Coroutine timeWarpFeedbackRoutine;
     private TextMeshProUGUI activeTimeWarpPopup;
@@ -497,6 +509,7 @@ public class GameManager : MonoBehaviour
 
         if (gameOverPanel != null)
         {
+            EnsurePopupAncestorsActive(gameOverPanel);
             gameOverPanel.SetActive(false);
         }
 
@@ -536,6 +549,7 @@ public class GameManager : MonoBehaviour
         }
         else if (State == GameState.GamePaused) Time.timeScale = timeScaleBeforeGamePause;
         else if (State == GameState.LevelPreparing) Time.timeScale = timeScaleBeforeLevelPreparing;
+        else if (State == GameState.GameOver) Time.timeScale = timeScaleBeforeGameOver;
         if (Instance == this)
         {
             Instance = null;
@@ -556,7 +570,8 @@ public class GameManager : MonoBehaviour
             RemainingTime = Mathf.Max(0f, RemainingTime - Time.deltaTime);
             if (RemainingTime <= 0f)
             {
-                TriggerGameOver($"time limit reached ({currentTimeLimit:F0}s) with mission unfinished: {DescribeTargets()}.");
+                TriggerGameOver(GameOverReason.TimeExpired,
+                    $"time limit reached ({currentTimeLimit:F0}s) with mission unfinished: {DescribeTargets()}.");
             }
         }
 
@@ -646,8 +661,10 @@ public class GameManager : MonoBehaviour
     {
         if (State == GameState.GamePaused) Time.timeScale = timeScaleBeforeGamePause;
         else if (State == GameState.InventoryPaused) Time.timeScale = timeScaleBeforeInventoryPause;
+        else if (State == GameState.GameOver) Time.timeScale = timeScaleBeforeGameOver;
         BoosterInventoryManager.Instance?.EndCurrentRun();
         DiscardLevelEarnedCoins();
+        rewardedContinueUsedThisRun = false;
         State = GameState.GameOver;
         SceneTransition.LoadScene(sceneName);
     }
@@ -659,6 +676,7 @@ public class GameManager : MonoBehaviour
         Time.timeScale = Mathf.Max(0.0001f, timeScaleBeforeLevelPreparing);
         BoosterInventoryManager.Instance?.EndCurrentRun();
         DiscardLevelEarnedCoins();
+        rewardedContinueUsedThisRun = false;
         State = GameState.GameOver;
         SceneTransition.LoadScene("LevelMap");
     }
@@ -936,7 +954,8 @@ public class GameManager : MonoBehaviour
 
             if (timer >= outsideTimeLimit)
             {
-                TriggerGameOver($"a {planet.CurrentTier} planet stayed {outsideTimeLimit:F1}s outside " +
+                TriggerGameOver(GameOverReason.BoundaryFailure,
+                    $"a {planet.CurrentTier} planet stayed {outsideTimeLimit:F1}s outside " +
                                 $"the boundary (distance {distance:F2} > radius {maxBoundaryRadius:F2}).");
                 return;
             }
@@ -1230,6 +1249,7 @@ public class GameManager : MonoBehaviour
     // behavior is gone by design: the vortex IS the board clear now.
     private void CompleteLevel()
     {
+        rewardedContinueUsedThisRun = false;
         State = GameState.CinematicVortex;
 
         // Rate before anything else can touch the clock: Update stops ticking
@@ -1434,6 +1454,8 @@ public class GameManager : MonoBehaviour
         // reset this value so a future Continue can keep the same run alive.
         BoosterInventoryManager.Instance?.EndCurrentRun();
         DiscardLevelEarnedCoins();
+        rewardedContinueUsedThisRun = false;
+        LastGameOverReason = GameOverReason.None;
         timeScaleBeforeLevelPreparing = Time.timeScale > 0f ? Time.timeScale : 1f;
         State = GameState.LevelPreparing;
         Time.timeScale = 0f;
@@ -1659,11 +1681,16 @@ public class GameManager : MonoBehaviour
                   $"{(clearMeteorites ? meteoritesCleared.ToString() : "0 (persisted)")} meteorites removed).");
     }
 
-    // Shared fail path for both lose conditions (boundary breach and the
-    // level clock running out); the reason string only feeds the log.
-    private void TriggerGameOver(string reason)
+    // Shared fail path for both lose conditions. The typed reason controls
+    // whether preserving and resuming this board is actually safe.
+    private void TriggerGameOver(GameOverReason gameOverReason, string reason)
     {
+        if (State != GameState.Playing)
+            return;
+        timeScaleBeforeGameOver = Time.timeScale > 0f ? Time.timeScale : 1f;
+        LastGameOverReason = gameOverReason;
         State = GameState.GameOver;
+        Time.timeScale = 0f;
         // One strong double pulse at the actual fail moment (this funnel
         // covers both lose conditions); abandoning via Settings stays silent.
         HapticFeedback.Play(HapticType.Warning);
@@ -1676,10 +1703,69 @@ public class GameManager : MonoBehaviour
 
         if (gameOverPanel != null)
         {
+            EnsurePopupAncestorsActive(gameOverPanel);
             PopupTransition.Open(gameOverPanel);
         }
 
         Debug.Log($"GameManager: GAME OVER on level {CurrentLevelNumber} — {reason}");
+    }
+
+    // PopupRoot is the object that opens and closes. Its authoring container
+    // must remain active, but the scene can accidentally be saved with that
+    // parent disabled while arranging the UI. Heal that state defensively so
+    // PopupRoot is never hidden beneath an inactive GameOverPanel ancestor.
+    private static void EnsurePopupAncestorsActive(GameObject popupRoot)
+    {
+        if (popupRoot == null)
+            return;
+
+        Transform ancestor = popupRoot.transform.parent;
+        if (ancestor != null &&
+            string.Equals(ancestor.name, "GameOverPanel",
+                System.StringComparison.Ordinal))
+        {
+            // The migrated legacy root used to be the popup itself and may
+            // still carry a full-screen Image. It is now only a hierarchy
+            // container; leaving that old Graphic enabled would cover the
+            // screen as soon as the container is activated.
+            UnityEngine.UI.Graphic legacyGraphic =
+                ancestor.GetComponent<UnityEngine.UI.Graphic>();
+            if (legacyGraphic != null)
+            {
+                legacyGraphic.raycastTarget = false;
+                legacyGraphic.enabled = false;
+            }
+        }
+
+        while (ancestor != null)
+        {
+            if (!ancestor.gameObject.activeSelf)
+                ancestor.gameObject.SetActive(true);
+            ancestor = ancestor.parent;
+        }
+    }
+
+    public bool TryResumeRewardedContinue(float seconds)
+    {
+        if (!CanUseRewardedContinue || seconds <= 0f ||
+            float.IsNaN(seconds) || float.IsInfinity(seconds))
+            return false;
+
+        rewardedContinueUsedThisRun = true;
+        RemainingTime = Mathf.Max(0f, RemainingTime) + seconds;
+        currentTimeLimit += seconds;
+        lastDisplayedTimerSeconds = -1;
+        UpdateTimerUI();
+        LastGameOverReason = GameOverReason.None;
+        State = GameState.Playing;
+        Time.timeScale = Mathf.Max(.0001f, timeScaleBeforeGameOver);
+        IsAnyPlanetBeyondBoundary = false;
+        outsideTimers.Clear();
+        ResetTimeWarpFeedback();
+        PlayTimeWarpFeedback(seconds, timeWarpFeedbackOffset, true);
+        Debug.Log($"GameManager: rewarded Continue resumed level " +
+                  $"{CurrentLevelNumber} with +{seconds:0.#}s.", this);
+        return true;
     }
 
     // Game Over TRY AGAIN: replay the level that was just failed, from a
@@ -1700,6 +1786,7 @@ public class GameManager : MonoBehaviour
             Time.timeScale = timeScaleBeforeInventoryPause;
         }
         else if (State == GameState.GamePaused) Time.timeScale = timeScaleBeforeGamePause;
+        else if (State == GameState.GameOver) Time.timeScale = timeScaleBeforeGameOver;
 
         // RestartGame is public and unguarded by design; if it fires while
         // the win cinematic is mid-swallow, shut the vortex down cleanly so

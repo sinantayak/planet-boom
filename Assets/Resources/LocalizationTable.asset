@@ -161,11 +161,26 @@ MonoBehaviour:
     english: NEW
     turkish: "YEN\u0130"
   - key: gameover.title
-    english: PLANET BOOM!
-    turkish: GEZEGEN PATLADI!
+    english: GAME OVER
+    turkish: "OYUN B\u0130TT\u0130"
+  - key: gameover.restart_description
+    english: RESTART THE LEVEL
+    turkish: "B\xD6L\xDCM\xDC YEN\u0130DEN BA\u015ELAT"
   - key: gameover.try_again
     english: TRY AGAIN
     turkish: TEKRAR DENE
+  - key: gameover.continue_description
+    english: KEEP YOUR PROGRESS
+    turkish: "\u0130LERLEMEN\u0130 KORU"
+  - key: gameover.or
+    english: OR
+    turkish: VEYA
+  - key: gameover.continue
+    english: CONTINUE
+    turkish: DEVAM ET
+  - key: gameover.continue_bonus
+    english: '+{0} SEC'
+    turkish: '+{0} SN'
   - key: levelcomplete.title
     english: LEVEL COMPLETED
     turkish: "B\xD6L\xDCM TAMAMLANDI"

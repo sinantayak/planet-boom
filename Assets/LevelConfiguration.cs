@@ -155,6 +155,15 @@ public sealed class LevelConfiguration : ScriptableObject
     public LevelTimeMode timeMode = LevelTimeMode.Normal;
     [Min(0.1f)] public float timeRushStartingTime = 10f;
     public List<MergeTimeRewardEntry> mergeTimeRewards = new List<MergeTimeRewardEntry>();
+    [Tooltip("Seconds granted after a successful rewarded Continue. " +
+             "Legacy/invalid zero values safely fall back to 30 seconds.")]
+    [Min(1f)] public float rewardedContinueSeconds = 30f;
+
+    public float RewardedContinueSeconds =>
+        rewardedContinueSeconds > 0f &&
+        !float.IsNaN(rewardedContinueSeconds) &&
+        !float.IsInfinity(rewardedContinueSeconds)
+            ? rewardedContinueSeconds : 30f;
 
     [Header("Meteor Guarantee")]
     [Tooltip("When enabled, the queue forces a meteor no later than this launch number unless one appeared naturally first.")]

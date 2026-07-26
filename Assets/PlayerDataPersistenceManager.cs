@@ -318,6 +318,18 @@ public sealed class PlayerDataPersistenceManager : MonoBehaviour
         return true;
     }
 
+    public bool TrySpendLives(int amount)
+    {
+        if (amount <= 0 || !IsLoaded || currentData == null ||
+            currentData.lives < amount)
+            return false;
+
+        currentData.lives -= amount;
+        MarkChangedAndScheduleSave();
+        LivesChanged?.Invoke(currentData.lives);
+        return true;
+    }
+
     public void RecordLevelCompleted(int levelNumber, int starsEarned)
     {
         levelNumber = Mathf.Max(1, levelNumber);
